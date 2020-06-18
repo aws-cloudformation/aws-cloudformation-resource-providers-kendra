@@ -4,12 +4,20 @@ package software.amazon.kendra.index;
 // import software.amazon.awssdk.services.yourservice.YourServiceAsyncClient;
 
 import java.util.Objects;
-import software.amazon.awssdk.awscore.AwsRequest;
-import software.amazon.awssdk.awscore.AwsResponse;
+
+import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
-import software.amazon.awssdk.core.SdkClient;
+import software.amazon.awssdk.services.kendra.model.CreateIndexRequest;
+import software.amazon.awssdk.services.kendra.model.CreateIndexResponse;
+import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
+import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
+import software.amazon.awssdk.services.kendra.model.IndexStatus;
+import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
+import software.amazon.awssdk.services.kendra.model.UpdateIndexResponse;
+import software.amazon.awssdk.services.kendra.model.ValidationException;
 import software.amazon.cloudformation.exceptions.CfnAlreadyExistsException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
+import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
@@ -24,7 +32,7 @@ public class CreateHandler extends BaseHandlerStd {
         final AmazonWebServicesClientProxy proxy,
         final ResourceHandlerRequest<ResourceModel> request,
         final CallbackContext callbackContext,
-        final ProxyClient<SdkClient> proxyClient,
+        final ProxyClient<KendraClient> proxyClient,
         final Logger logger) {
 
         this.logger = logger;
@@ -103,18 +111,18 @@ public class CreateHandler extends BaseHandlerStd {
     /**
      * Implement client invocation of the create request through the proxyClient, which is already initialised with
      * caller credentials, correct region and retry settings
-     * @param awsRequest the aws service request to create a resource
+     * @param createIndexRequest the aws service request to create a resource
      * @param proxyClient the aws service client to make the call
-     * @return awsResponse create resource response
+     * @return createIndexResponse create resource response
      */
-    private AwsResponse createResource(
-        final AwsRequest awsRequest,
-        final ProxyClient<SdkClient> proxyClient) {
-        AwsResponse awsResponse = null;
+    private CreateIndexResponse createResource(
+            final CreateIndexRequest createIndexRequest,
+            final ProxyClient<KendraClient> proxyClient) {
+        CreateIndexResponse createIndexResponse;
         try {
-
-            // TODO: put your create resource code here
-
+            createIndexResponse = proxyClient.injectCredentialsAndInvokeV2(createIndexRequest, proxyClient.client()::createIndex);
+        } catch (ValidationException e) {
+            throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME, e);
         } catch (final AwsServiceException e) {
             /*
              * While the handler contract states that the handler must always return a progress event,
@@ -126,30 +134,46 @@ public class CreateHandler extends BaseHandlerStd {
         }
 
         logger.log(String.format("%s successfully created.", ResourceModel.TYPE_NAME));
-        return awsResponse;
+        return createIndexResponse;
     }
 
     /**
      * If your resource requires some form of stabilization (e.g. service does not provide strong consistency), you will need to ensure that your code
      * accounts for any potential issues, so that a subsequent read/update requests will not cause any conflicts (e.g. NotFoundException/InvalidRequestException)
      * for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
-     * @param awsRequest the aws service request to create a resource
-     * @param awsResponse the aws service response to create a resource
+     * @param createIndexRequest the aws service request to create a resource
+     * @param createIndexResponse the aws service response to create a resource
      * @param proxyClient the aws service client to make the call
      * @param model resource model
      * @param callbackContext callback context
      * @return boolean state of stabilized or not
      */
     private boolean stabilizedOnCreate(
-        final AwsRequest awsRequest,
-        final AwsResponse awsResponse,
-        final ProxyClient<SdkClient> proxyClient,
+        final CreateIndexRequest createIndexRequest,
+        final CreateIndexResponse createIndexResponse,
+        final ProxyClient<KendraClient> proxyClient,
         final ResourceModel model,
         final CallbackContext callbackContext) {
 
-        // TODO: put your stabilization code here
+        if (callbackContext.getIndexId() == null) {
+            callbackContext.setIndexId(createIndexResponse.id());
+        } else if (createIndexResponse.id() == null) {
+            throw new RuntimeException("Neither CreateIndexResponse nor CallbackContext contains Index ID");
+        }
 
-        final boolean stabilized = true;
+        if (model.getId() == null) {
+            model.setId(createIndexResponse.id());
+        } else if (createIndexResponse.id() == null) {
+            throw new RuntimeException("Neither CreateIndexResponse nor ResourceModel contains Index ID");
+        }
+
+        DescribeIndexRequest describeIndexRequest = DescribeIndexRequest.builder()
+                .id(callbackContext.getIndexId())
+                .build();
+        DescribeIndexResponse describeIndexResponse = proxyClient.injectCredentialsAndInvokeV2(describeIndexRequest,
+                proxyClient.client()::describeIndex);
+
+        final boolean stabilized = describeIndexResponse.status().equals(IndexStatus.ACTIVE);
         logger.log(String.format("%s [%s] creation has stabilized: %s", ResourceModel.TYPE_NAME, model.getPrimaryIdentifier(), stabilized));
         return stabilized;
     }
@@ -157,18 +181,17 @@ public class CreateHandler extends BaseHandlerStd {
     /**
      * If your resource is provisioned through multiple API calls, you will need to apply each subsequent update
      * step in a discrete call/stabilize chain to ensure the entire resource is provisioned as intended.
-     * @param awsRequest the aws service request to create a resource
+     * @param updateIndexRequest the aws service request to create a resource
      * @param proxyClient the aws service client to make the call
-     * @return awsResponse create resource response
+     * @return updateIndexResponse create resource response
      */
-    private AwsResponse postCreate(
-        final AwsRequest awsRequest,
-        final ProxyClient<SdkClient> proxyClient) {
-        AwsResponse awsResponse = null;
+    private UpdateIndexResponse postCreate(
+        final UpdateIndexRequest updateIndexRequest,
+        final ProxyClient<KendraClient> proxyClient) {
+        UpdateIndexResponse updateIndexResponse;
         try {
-
-            // TODO: put your post creation resource update code here
-
+            updateIndexResponse = proxyClient.injectCredentialsAndInvokeV2(updateIndexRequest,
+                    proxyClient.client()::updateIndex);
         } catch (final AwsServiceException e) {
             /*
              * While the handler contract states that the handler must always return a progress event,
@@ -180,6 +203,6 @@ public class CreateHandler extends BaseHandlerStd {
         }
 
         logger.log(String.format("%s successfully updated.", ResourceModel.TYPE_NAME));
-        return awsResponse;
+        return updateIndexResponse;
     }
 }

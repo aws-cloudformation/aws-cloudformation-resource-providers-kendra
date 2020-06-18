@@ -1,6 +1,6 @@
 package software.amazon.kendra.index;
 
-import software.amazon.awssdk.core.SdkClient;
+import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -29,6 +29,6 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
     final AmazonWebServicesClientProxy proxy,
     final ResourceHandlerRequest<ResourceModel> request,
     final CallbackContext callbackContext,
-    final ProxyClient<SdkClient> proxyClient,
+    final ProxyClient<KendraClient> proxyClient,
     final Logger logger);
 }
