@@ -85,21 +85,6 @@
       "permissions": [
         "initech:DescribeReport"
       ]
-    },
-    "update": {
-      "permissions": [
-        "initech:UpdateReport"
-      ]
-    },
-    "delete": {
-      "permissions": [
-        "initech:DeleteReport"
-      ]
-    },
-    "list": {
-      "permissions": [
-        "initech:ListReports"
-      ]
     }
   }
 }
