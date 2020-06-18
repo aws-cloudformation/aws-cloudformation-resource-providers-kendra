@@ -1,9 +1,10 @@
 # AWS::Kendra::Index
 
-Congratulations on starting development! Next steps:
+This package contains the handlers that CloudFormation invokes when provisioning Kendra Indexes.
 
-1. Write the JSON schema describing your resource, `aws-kendra-index.json`
-1. Implement your resource handlers.
+This package has two main components:
+1. The JSON schema describing a Kendra Index, `aws-kendra-index.json`
+1. The resource handlers that actually create, delete, update, read and list Kendra Indexes.
 
 The RPDK will automatically generate the correct resource model from the schema whenever the project is built via Maven. You can also do this manually with the following command: `cfn generate`.
 
