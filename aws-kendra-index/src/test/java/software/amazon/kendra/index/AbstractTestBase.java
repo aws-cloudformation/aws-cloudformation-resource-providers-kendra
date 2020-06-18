@@ -2,12 +2,13 @@ package software.amazon.kendra.index;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+
 import software.amazon.awssdk.awscore.AwsRequest;
 import software.amazon.awssdk.awscore.AwsResponse;
-import software.amazon.awssdk.core.SdkClient;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.pagination.sync.SdkIterable;
+import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Credentials;
 import software.amazon.cloudformation.proxy.LoggerProxy;
@@ -21,10 +22,10 @@ public class AbstractTestBase {
     MOCK_CREDENTIALS = new Credentials("accessKey", "secretKey", "token");
     logger = new LoggerProxy();
   }
-  static ProxyClient<SdkClient> MOCK_PROXY(
+  static ProxyClient<KendraClient> MOCK_PROXY(
     final AmazonWebServicesClientProxy proxy,
-    final SdkClient sdkClient) {
-    return new ProxyClient<SdkClient>() {
+    final KendraClient sdkClient) {
+    return new ProxyClient<KendraClient>() {
       @Override
       public <RequestT extends AwsRequest, ResponseT extends AwsResponse> ResponseT
       injectCredentialsAndInvokeV2(RequestT request, Function<RequestT, ResponseT> requestFunction) {
@@ -58,7 +59,7 @@ public class AbstractTestBase {
       }
 
       @Override
-      public SdkClient client() {
+      public KendraClient client() {
         return sdkClient;
       }
     };

@@ -3,6 +3,10 @@ package software.amazon.kendra.index;
 import com.google.common.collect.Lists;
 import software.amazon.awssdk.awscore.AwsRequest;
 import software.amazon.awssdk.awscore.AwsResponse;
+import software.amazon.awssdk.services.kendra.model.CreateIndexRequest;
+import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
+import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
+import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 
 import java.util.Collection;
 import java.util.List;
@@ -22,37 +26,43 @@ public class Translator {
   /**
    * Request to create a resource
    * @param model resource model
-   * @return awsRequest the aws service request to create a resource
+   * @return createIndexRequest the aws service request to create a resource
    */
-  static AwsRequest translateToCreateRequest(final ResourceModel model) {
-    final AwsRequest awsRequest = null;
-    // TODO: construct a request
-    // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/2077c92299aeb9a68ae8f4418b5e932b12a8b186/aws-logs-loggroup/src/main/java/com/aws/logs/loggroup/Translator.java#L39-L43
-    return awsRequest;
+  static CreateIndexRequest translateToCreateRequest(final ResourceModel model) {
+    final CreateIndexRequest createIndexRequest = CreateIndexRequest
+            .builder()
+            .name(model.getName())
+            .roleArn(model.getRoleArn())
+            .edition(model.getEdition())
+            .build();
+    return createIndexRequest;
   }
 
   /**
    * Request to read a resource
    * @param model resource model
-   * @return awsRequest the aws service request to describe a resource
+   * @return describeIndexRequest the aws service request to describe a resource
    */
-  static AwsRequest translateToReadRequest(final ResourceModel model) {
-    final AwsRequest awsRequest = null;
-    // TODO: construct a request
-    // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/2077c92299aeb9a68ae8f4418b5e932b12a8b186/aws-logs-loggroup/src/main/java/com/aws/logs/loggroup/Translator.java#L20-L24
-    return awsRequest;
+  static DescribeIndexRequest translateToReadRequest(final ResourceModel model) {
+    final DescribeIndexRequest describeIndexRequest = DescribeIndexRequest.builder()
+            .id(model.getId())
+            .build();
+    return describeIndexRequest;
   }
 
   /**
    * Translates resource object from sdk into a resource model
-   * @param awsResponse the aws service describe resource response
+   * @param describeIndexResponse the aws service describe resource response
    * @return model resource model
    */
-  static ResourceModel translateFromReadResponse(final AwsResponse awsResponse) {
+  static ResourceModel translateFromReadResponse(final DescribeIndexResponse describeIndexResponse) {
     // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/2077c92299aeb9a68ae8f4418b5e932b12a8b186/aws-logs-loggroup/src/main/java/com/aws/logs/loggroup/Translator.java#L58-L73
     return ResourceModel.builder()
-        //.someProperty(response.property())
-        .build();
+            .id(describeIndexResponse.id())
+            .name(describeIndexResponse.name())
+            .roleArn(describeIndexResponse.roleArn())
+            .edition(describeIndexResponse.edition().toString())
+            .build();
   }
 
   /**
@@ -82,12 +92,15 @@ public class Translator {
   /**
    * Request to update some other properties that could not be provisioned through first update request
    * @param model resource model
-   * @return awsRequest the aws service request to modify a resource
+   * @return updateIndexRequest the aws service request to modify a resource
    */
-  static AwsRequest translateToSecondUpdateRequest(final ResourceModel model) {
-    final AwsRequest awsRequest = null;
-    // TODO: construct a request
-    return awsRequest;
+  static UpdateIndexRequest translateToSecondUpdateRequest(final ResourceModel model) {
+    final UpdateIndexRequest updateIndexRequest = UpdateIndexRequest.builder()
+            .id(model.getId())
+            .name(model.getName())
+            .roleArn(model.getRoleArn())
+            .build();
+    return updateIndexRequest;
   }
 
   /**

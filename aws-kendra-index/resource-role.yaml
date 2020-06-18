@@ -23,8 +23,9 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                - "initech:CreateReport"
-                - "initech:DescribeReport"
+                - "iam:PassRole"
+                - "kendra:CreateIndex"
+                - "kendra:DescribeIndex"
                 Resource: "*"
 Outputs:
   ExecutionRoleArn:
