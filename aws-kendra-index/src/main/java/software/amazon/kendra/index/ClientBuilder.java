@@ -1,6 +1,7 @@
 package software.amazon.kendra.index;
 
-import software.amazon.awssdk.core.SdkClient;
+import software.amazon.awssdk.services.kendra.KendraClient;
+import software.amazon.cloudformation.LambdaWrapper;
 // TODO: replace all usage of SdkClient with your service client type, e.g; YourServiceClient
 // import software.amazon.awssdk.services.yourservice.YourServiceClient;
 // import software.amazon.cloudformation.LambdaWrapper;
@@ -19,7 +20,7 @@ public class ClientBuilder {
   */
 
   // TODO: remove this implementation once you have uncommented the above
-  public static SdkClient getClient() {
-    return null;
+  public static KendraClient getClient() {
+    return KendraClient.builder().httpClient(LambdaWrapper.HTTP_CLIENT).build();
   }
 }
