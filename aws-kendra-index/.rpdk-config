@@ -1,0 +1,16 @@
+{
+    "typeName": "AWS::Kendra::Index",
+    "language": "java",
+    "runtime": "java8",
+    "entrypoint": "software.amazon.kendra.index.HandlerWrapper::handleRequest",
+    "testEntrypoint": "software.amazon.kendra.index.HandlerWrapper::testEntrypoint",
+    "settings": {
+        "namespace": [
+            "software",
+            "amazon",
+            "kendra",
+            "index"
+        ],
+        "codegen_template_path": "guided_aws"
+    }
+}
