@@ -57,7 +57,8 @@ public class ReadHandler extends BaseHandlerStd {
         final ResourceModel model) {
         DescribeIndexResponse describeIndexResponse;
         try {
-            describeIndexResponse = proxyClient.client().describeIndex(describeIndexRequest);
+            describeIndexResponse = proxyClient.injectCredentialsAndInvokeV2(
+                    describeIndexRequest, proxyClient.client()::describeIndex);
         } catch (final AwsServiceException e) { // ResourceNotFoundException
             /*
              * While the handler contract states that the handler must always return a progress event,
