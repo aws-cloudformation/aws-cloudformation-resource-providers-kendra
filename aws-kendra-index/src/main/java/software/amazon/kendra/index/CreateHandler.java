@@ -156,7 +156,7 @@ public class CreateHandler extends BaseHandlerStd {
         final CallbackContext callbackContext) {
 
         DescribeIndexRequest describeIndexRequest = DescribeIndexRequest.builder()
-                .id(callbackContext.getIndexId())
+                .id(createIndexResponse.id())
                 .build();
         DescribeIndexResponse describeIndexResponse = proxyClient.injectCredentialsAndInvokeV2(describeIndexRequest,
                 proxyClient.client()::describeIndex);
@@ -164,7 +164,6 @@ public class CreateHandler extends BaseHandlerStd {
         final boolean stabilized = describeIndexResponse.status().equals(IndexStatus.ACTIVE);
         logger.log(String.format("%s [%s] creation has stabilized: %s", ResourceModel.TYPE_NAME, model.getPrimaryIdentifier(), stabilized));
         if (stabilized) {
-            callbackContext.setIndexId(createIndexResponse.id());
             model.setId(createIndexResponse.id());
         }
         return stabilized;
