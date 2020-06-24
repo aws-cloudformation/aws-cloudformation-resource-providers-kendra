@@ -155,18 +155,6 @@ public class CreateHandler extends BaseHandlerStd {
         final ResourceModel model,
         final CallbackContext callbackContext) {
 
-        if (callbackContext.getIndexId() == null) {
-            callbackContext.setIndexId(createIndexResponse.id());
-        } else if (createIndexResponse.id() == null) {
-            throw new RuntimeException("Neither CreateIndexResponse nor CallbackContext contains Index ID");
-        }
-
-        if (model.getId() == null) {
-            model.setId(createIndexResponse.id());
-        } else if (createIndexResponse.id() == null) {
-            throw new RuntimeException("Neither CreateIndexResponse nor ResourceModel contains Index ID");
-        }
-
         DescribeIndexRequest describeIndexRequest = DescribeIndexRequest.builder()
                 .id(callbackContext.getIndexId())
                 .build();
@@ -175,6 +163,10 @@ public class CreateHandler extends BaseHandlerStd {
 
         final boolean stabilized = describeIndexResponse.status().equals(IndexStatus.ACTIVE);
         logger.log(String.format("%s [%s] creation has stabilized: %s", ResourceModel.TYPE_NAME, model.getPrimaryIdentifier(), stabilized));
+        if (stabilized) {
+            callbackContext.setIndexId(createIndexResponse.id());
+            model.setId(createIndexResponse.id());
+        }
         return stabilized;
     }
 
