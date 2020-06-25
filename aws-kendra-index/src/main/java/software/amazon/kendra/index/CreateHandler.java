@@ -49,37 +49,31 @@ public class CreateHandler extends BaseHandlerStd {
             // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
             //.then(progress -> checkForPreCreateResourceExistence(proxy, request, progress))
 
-            // STEP 2 [create/stabilize progress chain - required for resource creation]
+            // STEP 2 [create progress chain - required for resource creation]
             .then(progress ->
                 // If your service API throws 'ResourceAlreadyExistsException' for create requests then CreateHandler can return just proxy.initiate construction
                 // STEP 2.0 [initialize a proxy context]
                 proxy.initiate("AWS-Kendra-Index::Create", proxyClient, model, callbackContext)
-
-                    // STEP 2.1 [TODO: construct a body of a request]
                     .translateToServiceRequest(Translator::translateToCreateRequest)
-
-                    // STEP 2.2 [TODO: make an api call]
                     .makeServiceCall(this::createResource)
-
-                    // STEP 2.3 [TODO: stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]
-                    // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
-                    .stabilize(this::stabilizedOnCreate)
-                    .progress())
-
-            // STEP 3 [TODO: post create/stabilize update]
+                    .done((createIndexRequest1, createIndexResponse1, proxyInvocation1, model1, context1) -> {
+                        model1.setId(createIndexResponse1.id());
+                        return ProgressEvent.defaultInProgressHandler(context1, 0, model);
+                    })
+            )
+             // stabilize
+            .then(progress -> waitForIndexToBeStable(proxy, proxyClient, progress))
+             // STEP 3 [TODO: post create and stabilize update]
             .then(progress ->
                 // If your resource is provisioned through multiple API calls, you will need to apply each subsequent update
                 // STEP 3.0 [initialize a proxy context]
                 proxy.initiate("AWS-Kendra-Index::postCreate", proxyClient, model, callbackContext)
-
                     // STEP 3.1 [TODO: construct a body of a request]
                     .translateToServiceRequest(Translator::translateToSecondUpdateRequest)
-
                     // STEP 3.2 [TODO: make an api call]
                     .makeServiceCall(this::postCreate)
                     .progress()
                 )
-
             // STEP 4 [TODO: describe call/chain to return the resource model]
             .then(progress -> new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, logger));
     }
@@ -93,6 +87,7 @@ public class CreateHandler extends BaseHandlerStd {
      * @param progressEvent event of the previous state indicating success, in progress with delay callback or failed state
      * @return progressEvent indicating success, in progress with delay callback or failed state
      */
+    /*
     private ProgressEvent<ResourceModel, CallbackContext> checkForPreCreateResourceExistence(
         final AmazonWebServicesClientProxy proxy,
         final ResourceHandlerRequest<ResourceModel> request,
@@ -107,6 +102,7 @@ public class CreateHandler extends BaseHandlerStd {
             return ProgressEvent.progress(model, callbackContext);
         }
     }
+     */
 
     /**
      * Implement client invocation of the create request through the proxyClient, which is already initialised with
@@ -135,38 +131,6 @@ public class CreateHandler extends BaseHandlerStd {
 
         logger.log(String.format("%s successfully created.", ResourceModel.TYPE_NAME));
         return createIndexResponse;
-    }
-
-    /**
-     * If your resource requires some form of stabilization (e.g. service does not provide strong consistency), you will need to ensure that your code
-     * accounts for any potential issues, so that a subsequent read/update requests will not cause any conflicts (e.g. NotFoundException/InvalidRequestException)
-     * for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
-     * @param createIndexRequest the aws service request to create a resource
-     * @param createIndexResponse the aws service response to create a resource
-     * @param proxyClient the aws service client to make the call
-     * @param model resource model
-     * @param callbackContext callback context
-     * @return boolean state of stabilized or not
-     */
-    private boolean stabilizedOnCreate(
-        final CreateIndexRequest createIndexRequest,
-        final CreateIndexResponse createIndexResponse,
-        final ProxyClient<KendraClient> proxyClient,
-        final ResourceModel model,
-        final CallbackContext callbackContext) {
-
-        DescribeIndexRequest describeIndexRequest = DescribeIndexRequest.builder()
-                .id(createIndexResponse.id())
-                .build();
-        DescribeIndexResponse describeIndexResponse = proxyClient.injectCredentialsAndInvokeV2(describeIndexRequest,
-                proxyClient.client()::describeIndex);
-
-        final boolean stabilized = describeIndexResponse.status().equals(IndexStatus.ACTIVE);
-        logger.log(String.format("%s [%s] creation has stabilized: %s", ResourceModel.TYPE_NAME, model.getPrimaryIdentifier(), stabilized));
-        if (stabilized) {
-            model.setId(createIndexResponse.id());
-        }
-        return stabilized;
     }
 
     /**
