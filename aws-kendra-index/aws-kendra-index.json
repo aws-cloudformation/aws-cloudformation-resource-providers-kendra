@@ -1,105 +1,65 @@
 {
   "typeName": "AWS::Kendra::Index",
-  "description": "An example resource schema demonstrating some basic constructs and validation rules.",
-  "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-rpdk.git",
-  "definitions": {
-    "InitechDateFormat": {
-      "$comment": "Use the `definitions` block to provide shared resource property schemas",
-      "type": "string",
-      "format": "date-time"
-    },
-    "Memo": {
-      "type": "object",
-      "properties": {
-        "Heading": {
-          "type": "string"
-        },
-        "Body": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false
-    }
-  },
+  "description": "A Kendra Index",
+  "sourceUrl": "https://docs.aws.amazon.com/kendra/latest/dg/hiw-index.html",
   "properties": {
-    "TPSCode": {
-      "description": "A TPS Code is automatically generated on creation and assigned as the unique identifier.",
+    "Id": {
+      "description": "Unique ID of Index",
       "type": "string",
-      "pattern": "^[A-Z]{3,5}[0-9]{8}-[0-9]{4}$"
+      "minLength": 36,
+      "maxLength": 36,
+      "pattern": "[a-zA-Z0-9][a-zA-Z0-9-]*"
     },
-    "Title": {
-      "description": "The title of the TPS report is a mandatory element.",
+    "Name": {
+      "description": "Name of Index",
       "type": "string",
-      "minLength": 20,
-      "maxLength": 250
+      "minLength": 1,
+      "maxLength": 1000,
+      "pattern": "[a-zA-Z0-9][a-zA-Z0-9_-]*"
     },
-    "CoverSheetIncluded": {
-      "description": "Required for all TPS Reports submitted after 2/19/1999",
-      "type": "boolean"
+    "RoleArn": {
+      "description": "Role Arn",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1284,
+      "pattern": "arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}"
     },
-    "DueDate": {
-      "$ref": "#/definitions/InitechDateFormat"
-    },
-    "ApprovalDate": {
-      "$ref": "#/definitions/InitechDateFormat"
-    },
-    "Memo": {
-      "$ref": "#/definitions/Memo"
-    },
-    "SecondCopyOfMemo": {
-      "description": "In case you didn't get the first one.",
-      "$ref": "#/definitions/Memo"
-    },
-    "TestCode": {
+    "Edition": {
+      "description": "Edition of Index",
       "type": "string",
       "enum": [
-        "NOT_STARTED",
-        "CANCELLED"
+        "DEVELOPER_EDITION",
+        "ENTERPRISE_EDITION"
       ]
-    },
-    "Authors": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
     }
   },
-  "additionalProperties": false,
   "required": [
-    "TestCode",
-    "Title"
-  ],
-  "readOnlyProperties": [
-    "/properties/TPSCode"
-  ],
-  "primaryIdentifier": [
-    "/properties/TPSCode"
+    "Name",
+    "RoleArn",
+    "Edition"
   ],
   "handlers": {
     "create": {
       "permissions": [
-        "initech:CreateReport"
+        "kendra:CreateIndex",
+        "kendra:DescribeIndex",
+        "iam:PassRole"
       ]
     },
     "read": {
       "permissions": [
-        "initech:DescribeReport"
-      ]
-    },
-    "update": {
-      "permissions": [
-        "initech:UpdateReport"
-      ]
-    },
-    "delete": {
-      "permissions": [
-        "initech:DeleteReport"
-      ]
-    },
-    "list": {
-      "permissions": [
-        "initech:ListReports"
+        "kendra:DescribeIndex"
       ]
     }
-  }
+  },
+  "additionalProperties": false,
+  "primaryIdentifier": [
+    "/properties/Id"
+  ],
+  "readOnlyProperties": [
+    "/properties/Id"
+  ],
+  "createOnlyProperties": [
+    "/properties/Edition"
+  ]
 }

@@ -1,12 +1,9 @@
 package software.amazon.kendra.index;
 
-// TODO: replace all usage of SdkClient with your service client type, e.g; YourServiceAsyncClient
-// import software.amazon.awssdk.services.yourservice.YourServiceAsyncClient;
-
-import software.amazon.awssdk.awscore.AwsRequest;
-import software.amazon.awssdk.awscore.AwsResponse;
+import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
-import software.amazon.awssdk.core.SdkClient;
+import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
+import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
@@ -21,7 +18,7 @@ public class ReadHandler extends BaseHandlerStd {
         final AmazonWebServicesClientProxy proxy,
         final ResourceHandlerRequest<ResourceModel> request,
         final CallbackContext callbackContext,
-        final ProxyClient<SdkClient> proxyClient,
+        final ProxyClient<KendraClient> proxyClient,
         final Logger logger) {
 
         this.logger = logger;
@@ -51,15 +48,14 @@ public class ReadHandler extends BaseHandlerStd {
      * @param proxyClient the aws service client to make the call
      * @return describe resource response
      */
-    private AwsResponse readResource(
-        final AwsRequest awsRequest,
-        final ProxyClient<SdkClient> proxyClient,
+    private DescribeIndexResponse readResource(
+        final DescribeIndexRequest describeIndexRequest,
+        final ProxyClient<KendraClient> proxyClient,
         final ResourceModel model) {
-        AwsResponse awsResponse = null;
+        DescribeIndexResponse describeIndexResponse;
         try {
-
-            // TODO: add custom read resource logic
-
+            describeIndexResponse = proxyClient.injectCredentialsAndInvokeV2(
+                    describeIndexRequest, proxyClient.client()::describeIndex);
         } catch (final AwsServiceException e) { // ResourceNotFoundException
             /*
              * While the handler contract states that the handler must always return a progress event,
@@ -71,17 +67,17 @@ public class ReadHandler extends BaseHandlerStd {
         }
 
         logger.log(String.format("%s has successfully been read.", ResourceModel.TYPE_NAME));
-        return awsResponse;
+        return describeIndexResponse;
     }
 
     /**
      * Implement client invocation of the read request through the proxyClient, which is already initialised with
      * caller credentials, correct region and retry settings
-     * @param awsResponse the aws service describe resource response
+     * @param describeIndexResponse the aws service describe resource response
      * @return progressEvent indicating success, in progress with delay callback or failed state
      */
     private ProgressEvent<ResourceModel, CallbackContext> constructResourceModelFromResponse(
-        final AwsResponse awsResponse) {
-        return ProgressEvent.defaultSuccessHandler(Translator.translateFromReadResponse(awsResponse));
+            final DescribeIndexResponse describeIndexResponse) {
+        return ProgressEvent.defaultSuccessHandler(Translator.translateFromReadResponse(describeIndexResponse));
     }
 }
