@@ -41,7 +41,7 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
     final ProxyClient<KendraClient> proxyClient,
     final Logger logger);
 
-  protected ProgressEvent<ResourceModel, CallbackContext> waitForIndexToBeStable(
+  protected ProgressEvent<ResourceModel, CallbackContext> stabilize(
           final AmazonWebServicesClientProxy proxy,
           final ProxyClient<KendraClient> proxyClient,
           final ProgressEvent<ResourceModel, CallbackContext> progress) {

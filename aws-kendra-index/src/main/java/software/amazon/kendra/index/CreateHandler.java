@@ -1,24 +1,14 @@
 package software.amazon.kendra.index;
 
-// TODO: replace all usage of SdkClient with your service client type, e.g; YourServiceAsyncClient
-// import software.amazon.awssdk.services.yourservice.YourServiceAsyncClient;
-
-import java.util.Objects;
-
 import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.model.CreateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.CreateIndexResponse;
-import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
-import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
-import software.amazon.awssdk.services.kendra.model.IndexStatus;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
-import software.amazon.cloudformation.exceptions.CfnAlreadyExistsException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
-import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -62,7 +52,7 @@ public class CreateHandler extends BaseHandlerStd {
                     })
             )
              // stabilize
-            .then(progress -> waitForIndexToBeStable(proxy, proxyClient, progress))
+            .then(progress -> stabilize(proxy, proxyClient, progress))
              // STEP 3 [TODO: post create and stabilize update]
             .then(progress ->
                 // If your resource is provisioned through multiple API calls, you will need to apply each subsequent update
