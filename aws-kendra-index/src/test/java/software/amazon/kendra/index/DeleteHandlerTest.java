@@ -6,9 +6,7 @@ import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.services.kendra.model.DeleteIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DeleteIndexResponse;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
-import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
 import software.amazon.awssdk.services.kendra.model.IndexEdition;
-import software.amazon.awssdk.services.kendra.model.IndexStatus;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
@@ -66,13 +64,6 @@ public class DeleteHandlerTest extends AbstractTestBase {
                 .build();
 
         when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
-                .thenReturn(DescribeIndexResponse.builder()
-                        .id(id)
-                        .name(name)
-                        .roleArn(roleArn)
-                        .edition(indexEdition)
-                        .status(IndexStatus.ACTIVE.toString())
-                        .build())
                 .thenThrow(ResourceNotFoundException.builder().build());
 
         when(proxyClient.client().deleteIndex(any(DeleteIndexRequest.class)))

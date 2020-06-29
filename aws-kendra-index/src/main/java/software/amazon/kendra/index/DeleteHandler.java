@@ -36,7 +36,7 @@ public class DeleteHandler extends BaseHandlerStd {
             // STEP 1 [check if resource already exists]
             // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
             // if target API does not support 'ResourceNotFoundException' then following check is required
-            .then(progress -> checkForPreDeleteResourceExistence(proxy, proxyClient, request, progress))
+            //.then(progress -> checkForPreDeleteResourceExistence(proxy, proxyClient, request, progress))
 
             // STEP 2.0 [delete/stabilize progress chain - required for resource deletion]
             .then(progress ->
@@ -57,34 +57,6 @@ public class DeleteHandler extends BaseHandlerStd {
     }
 
     /**
-     * If your service API does not return ResourceNotFoundException on delete requests against some identifier (e.g; resource Name)
-     * and instead returns a 200 even though a resource already deleted, you must first check if the resource exists here
-     * NOTE: If your service API throws 'ResourceNotFoundException' for delete requests this method is not necessary
-     * @param proxy Amazon webservice proxy to inject credentials correctly.
-     * @param request incoming resource handler request
-     * @param progressEvent event of the previous state indicating success, in progress with delay callback or failed state
-     * @return progressEvent indicating success, in progress with delay callback or failed state
-     */
-    private ProgressEvent<ResourceModel, CallbackContext> checkForPreDeleteResourceExistence(
-        final AmazonWebServicesClientProxy proxy,
-        final ProxyClient<KendraClient> proxyClient,
-        final ResourceHandlerRequest<ResourceModel> request,
-        final ProgressEvent<ResourceModel, CallbackContext> progressEvent) {
-        final ResourceModel model = progressEvent.getResourceModel();
-        final CallbackContext callbackContext = progressEvent.getCallbackContext();
-        try {
-            new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, logger);
-            return ProgressEvent.progress(model, callbackContext);
-        } catch (CfnNotFoundException e) { // ResourceNotFoundException
-            logger.log(String.format("%s does not exist. RequestId: %s. Message: %s",
-                model.getPrimaryIdentifier(),
-                request.getClientRequestToken(),
-                e.getMessage()));
-            throw e;
-        }
-    }
-
-    /**
      * Implement client invocation of the delete request through the proxyClient, which is already initialised with
      * caller credentials, correct region and retry settings
      * @param deleteIndexRequest the aws service request to delete a resource
@@ -94,9 +66,11 @@ public class DeleteHandler extends BaseHandlerStd {
     private DeleteIndexResponse deleteResource(
         final DeleteIndexRequest deleteIndexRequest,
         final ProxyClient<KendraClient> proxyClient) {
-        DeleteIndexResponse deleteIndexResponse = null;
+        DeleteIndexResponse deleteIndexResponse;
         try {
             deleteIndexResponse = proxyClient.injectCredentialsAndInvokeV2(deleteIndexRequest, proxyClient.client()::deleteIndex);
+        } catch (ResourceNotFoundException e) {
+            throw new CfnNotFoundException(ResourceModel.TYPE_NAME, deleteIndexRequest.id(), e);
         } catch (final AwsServiceException e) {
             /*
              * While the handler contract states that the handler must always return a progress event,

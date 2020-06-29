@@ -4,7 +4,9 @@ import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
+import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
+import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -56,6 +58,8 @@ public class ReadHandler extends BaseHandlerStd {
         try {
             describeIndexResponse = proxyClient.injectCredentialsAndInvokeV2(
                     describeIndexRequest, proxyClient.client()::describeIndex);
+        } catch (ResourceNotFoundException e) {
+            throw new CfnNotFoundException(ResourceModel.TYPE_NAME, describeIndexRequest.id(), e);
         } catch (final AwsServiceException e) { // ResourceNotFoundException
             /*
              * While the handler contract states that the handler must always return a progress event,
