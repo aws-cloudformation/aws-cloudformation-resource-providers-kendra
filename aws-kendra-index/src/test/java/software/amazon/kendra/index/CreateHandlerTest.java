@@ -261,39 +261,6 @@ public class CreateHandlerTest extends AbstractTestBase {
         assertThrows(CfnServiceInternalErrorException.class, () -> {
             handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
         });
-    }    @Test
-    public void handleRequest_CreateIndexFailedAsynchronously() {
-        final CreateHandler handler = new CreateHandler();
-
-        String name = "testName";
-        String roleArn = "testRoleArn";
-        String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
-        final ResourceModel model = ResourceModel
-                .builder()
-                .name(name)
-                .roleArn(roleArn)
-                .edition(indexEdition)
-                .build();
-
-        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-                .desiredResourceState(model)
-                .build();
-
-        String id = "testId";
-        when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
-                .thenReturn(CreateIndexResponse.builder().id(id).build());
-        when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
-                .thenReturn(DescribeIndexResponse.builder()
-                        .id(id)
-                        .name(name)
-                        .roleArn(roleArn)
-                        .edition(indexEdition)
-                        .status(IndexStatus.FAILED.toString())
-                        .build());
-
-        assertThrows(CfnServiceInternalErrorException.class, () -> {
-            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
-        });
     }
 
     @Test
