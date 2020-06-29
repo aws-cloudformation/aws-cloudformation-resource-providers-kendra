@@ -1,6 +1,5 @@
 package software.amazon.kendra.index;
 
-import com.google.common.collect.Lists;
 import software.amazon.awssdk.services.kendra.model.CreateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DeleteIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
