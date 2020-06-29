@@ -2,12 +2,15 @@ package software.amazon.kendra.index;
 
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.KendraClient;
+import software.amazon.awssdk.services.kendra.model.ConflictException;
 import software.amazon.awssdk.services.kendra.model.DeleteIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DeleteIndexResponse;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
+import software.amazon.awssdk.services.kendra.model.ResourceInUseException;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
+import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -71,6 +74,8 @@ public class DeleteHandler extends BaseHandlerStd {
             deleteIndexResponse = proxyClient.injectCredentialsAndInvokeV2(deleteIndexRequest, proxyClient.client()::deleteIndex);
         } catch (ResourceNotFoundException e) {
             throw new CfnNotFoundException(ResourceModel.TYPE_NAME, deleteIndexRequest.id(), e);
+        } catch (ConflictException e) {
+            throw new CfnResourceConflictException(e);
         } catch (final AwsServiceException e) {
             /*
              * While the handler contract states that the handler must always return a progress event,

@@ -3,11 +3,13 @@ package software.amazon.kendra.index;
 import java.time.Duration;
 
 import software.amazon.awssdk.services.kendra.KendraClient;
+import software.amazon.awssdk.services.kendra.model.ConflictException;
 import software.amazon.awssdk.services.kendra.model.DeleteIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DeleteIndexResponse;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.IndexEdition;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
+import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -20,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -79,5 +82,28 @@ public class DeleteHandlerTest extends AbstractTestBase {
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
+    }
+
+    @Test
+    public void handleRequest_FailWith_ConflictException() {
+        final DeleteHandler handler = new DeleteHandler();
+
+        when(proxyClient.client().deleteIndex(any(DeleteIndexRequest.class)))
+                .thenThrow(ConflictException.builder().build());
+
+        final ResourceModel model = ResourceModel
+                .builder()
+                .name("name")
+                .roleArn("role")
+                .edition(IndexEdition.ENTERPRISE_EDITION.toString())
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        assertThrows(CfnResourceConflictException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
     }
 }

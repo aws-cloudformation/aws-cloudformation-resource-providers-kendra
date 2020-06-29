@@ -5,6 +5,7 @@ import java.time.Duration;
 import org.junit.jupiter.api.AfterEach;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.KendraClient;
+import software.amazon.awssdk.services.kendra.model.ConflictException;
 import software.amazon.awssdk.services.kendra.model.CreateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.CreateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
@@ -16,6 +17,7 @@ import software.amazon.awssdk.services.kendra.model.UpdateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
+import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
 import software.amazon.cloudformation.exceptions.CfnServiceInternalErrorException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
@@ -257,6 +259,62 @@ public class CreateHandlerTest extends AbstractTestBase {
                         .build());
 
         assertThrows(CfnServiceInternalErrorException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
+    }    @Test
+    public void handleRequest_CreateIndexFailedAsynchronously() {
+        final CreateHandler handler = new CreateHandler();
+
+        String name = "testName";
+        String roleArn = "testRoleArn";
+        String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
+        final ResourceModel model = ResourceModel
+                .builder()
+                .name(name)
+                .roleArn(roleArn)
+                .edition(indexEdition)
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        String id = "testId";
+        when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
+                .thenReturn(CreateIndexResponse.builder().id(id).build());
+        when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
+                .thenReturn(DescribeIndexResponse.builder()
+                        .id(id)
+                        .name(name)
+                        .roleArn(roleArn)
+                        .edition(indexEdition)
+                        .status(IndexStatus.FAILED.toString())
+                        .build());
+
+        assertThrows(CfnServiceInternalErrorException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
+    }
+
+    @Test
+    public void handleRequest_FailWith_ConflictException() {
+        final CreateHandler handler = new CreateHandler();
+
+        when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
+                .thenThrow(ConflictException.builder().build());
+
+        final ResourceModel model = ResourceModel
+                .builder()
+                .name("name")
+                .roleArn("role")
+                .edition(IndexEdition.ENTERPRISE_EDITION.toString())
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        assertThrows(CfnResourceConflictException.class, () -> {
             handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
         });
     }
