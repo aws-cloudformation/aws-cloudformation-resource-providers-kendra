@@ -50,6 +50,23 @@
       "permissions": [
         "kendra:DescribeIndex"
       ]
+    },
+    "update": {
+      "permissions": [
+        "kendra:DescribeIndex",
+        "kendra:UpdateIndex"
+      ]
+    },
+    "delete": {
+      "permissions": [
+        "kendra:DescribeIndex",
+        "kendra:DeleteIndex"
+      ]
+    },
+    "list": {
+      "permissions": [
+        "kendra:ListIndices"
+      ]
     }
   },
   "additionalProperties": false,

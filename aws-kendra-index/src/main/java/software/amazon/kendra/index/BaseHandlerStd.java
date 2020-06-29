@@ -4,6 +4,7 @@ import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
 import software.amazon.awssdk.services.kendra.model.IndexStatus;
+import software.amazon.cloudformation.exceptions.CfnServiceInternalErrorException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -60,7 +61,11 @@ public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
             .build();
     DescribeIndexResponse describeIndexResponse = proxyClient.injectCredentialsAndInvokeV2(describeIndexRequest,
             proxyClient.client()::describeIndex);
-    final boolean stabilized = describeIndexResponse.status().equals(IndexStatus.ACTIVE);
+    IndexStatus indexStatus = describeIndexResponse.status();
+    if (indexStatus.equals(IndexStatus.FAILED)) {
+      throw new CfnServiceInternalErrorException(String.format("Index %s failed to get created.", model.getId()));
+    }
+    final boolean stabilized = indexStatus.equals(IndexStatus.ACTIVE);
     return stabilized;
   }
 
