@@ -57,7 +57,7 @@ public class CreateHandler extends BaseHandlerStd {
                 // STEP 2.0 [initialize a proxy context]
                 proxy.initiate("AWS-Kendra-Index::Create", proxyClient, model, callbackContext)
                     .translateToServiceRequest(Translator::translateToCreateRequest)
-                    .makeServiceCall(this::createResource)
+                    .makeServiceCall(this::createIndex)
                     .done((createIndexRequest1, createIndexResponse1, proxyInvocation1, model1, context1) -> {
                         model1.setId(createIndexResponse1.id());
                         return ProgressEvent.defaultInProgressHandler(context1, 0, model);
@@ -113,7 +113,7 @@ public class CreateHandler extends BaseHandlerStd {
      * @param proxyClient the aws service client to make the call
      * @return createIndexResponse create resource response
      */
-    private CreateIndexResponse createResource(
+    private CreateIndexResponse createIndex(
             final CreateIndexRequest createIndexRequest,
             final ProxyClient<KendraClient> proxyClient) {
         CreateIndexResponse createIndexResponse;

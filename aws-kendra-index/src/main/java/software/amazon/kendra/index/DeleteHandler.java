@@ -50,7 +50,7 @@ public class DeleteHandler extends BaseHandlerStd {
                     .translateToServiceRequest(Translator::translateToDeleteRequest)
 
                     // STEP 2.2 [TODO: make an api call]
-                    .makeServiceCall(this::deleteResource)
+                    .makeServiceCall(this::deleteIndex)
 
                     // STEP 2.3 [TODO: stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]
                     // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
@@ -65,7 +65,7 @@ public class DeleteHandler extends BaseHandlerStd {
      * @param proxyClient the aws service client to make the call
      * @return delete resource response
      */
-    private DeleteIndexResponse deleteResource(
+    private DeleteIndexResponse deleteIndex(
         final DeleteIndexRequest deleteIndexRequest,
         final ProxyClient<KendraClient> proxyClient) {
         DeleteIndexResponse deleteIndexResponse;

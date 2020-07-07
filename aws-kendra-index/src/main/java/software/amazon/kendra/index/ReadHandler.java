@@ -37,7 +37,7 @@ public class ReadHandler extends BaseHandlerStd {
             .translateToServiceRequest(Translator::translateToReadRequest)
 
             // STEP 3 [TODO: make an api call]
-            .makeServiceCall((awsRequest, sdkProxyClient) -> readResource(awsRequest, sdkProxyClient , model))
+            .makeServiceCall((awsRequest, sdkProxyClient) -> readIndex(awsRequest, sdkProxyClient , model))
 
             // STEP 4 [TODO: gather all properties of the resource]
             .done(this::constructResourceModelFromResponse);
@@ -50,7 +50,7 @@ public class ReadHandler extends BaseHandlerStd {
      * @param proxyClient the aws service client to make the call
      * @return describe resource response
      */
-    private DescribeIndexResponse readResource(
+    private DescribeIndexResponse readIndex(
         final DescribeIndexRequest describeIndexRequest,
         final ProxyClient<KendraClient> proxyClient,
         final ResourceModel model) {
