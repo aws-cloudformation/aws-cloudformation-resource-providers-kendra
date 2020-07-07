@@ -3,6 +3,9 @@ package software.amazon.kendra.index;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.services.kendra.model.ConflictException;
+import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
+import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
+import software.amazon.awssdk.services.kendra.model.IndexStatus;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
@@ -44,10 +47,25 @@ public class UpdateHandler extends BaseHandlerStd {
                                 // STEP 1.3 [TODO: stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]
                                 // stabilization step may or may not be needed after each API call
                                 // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
+                                .stabilize(this::stabilize)
                                 .progress())
-                .then(progress -> stabilize(proxy, proxyClient, progress))
                 // STEP 3 [TODO: describe call/chain to return the resource model]
                 .then(progress -> new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, logger));
+    }
+
+    private boolean stabilize(
+            final UpdateIndexRequest updateIndexRequest,
+            final UpdateIndexResponse updateIndexResponse,
+            final ProxyClient<KendraClient> proxyClient,
+            final ResourceModel model,
+            final CallbackContext callbackContext) {
+        DescribeIndexRequest describeIndexRequest = DescribeIndexRequest.builder()
+                .id(model.getId())
+                .build();
+        DescribeIndexResponse describeIndexResponse = proxyClient.injectCredentialsAndInvokeV2(describeIndexRequest,
+                proxyClient.client()::describeIndex);
+        IndexStatus indexStatus = describeIndexResponse.status();
+        return indexStatus.equals(IndexStatus.ACTIVE);
     }
 
     /**
@@ -80,4 +98,5 @@ public class UpdateHandler extends BaseHandlerStd {
         logger.log(String.format("%s has successfully been updated.", ResourceModel.TYPE_NAME));
         return updateIndexResponse;
     }
+
 }
