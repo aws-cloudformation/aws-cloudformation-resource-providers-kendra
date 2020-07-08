@@ -45,10 +45,10 @@ public class Translator {
     return builder.build();
   }
 
-  static ListTagsForResourceRequest translateToListTagsRequest(final ResourceModel model) {
+  static ListTagsForResourceRequest translateToListTagsRequest(final String arn) {
       return ListTagsForResourceRequest
               .builder()
-              .resourceARN(model.getArn())
+              .resourceARN(arn)
               .build();
   }
 
@@ -70,7 +70,8 @@ public class Translator {
    * @return model resource model
    */
   static ResourceModel translateFromReadResponse(final DescribeIndexResponse describeIndexResponse,
-                                                 final ListTagsForResourceResponse listTagsForResourceResponse) {
+                                                 final ListTagsForResourceResponse listTagsForResourceResponse,
+                                                 String arn) {
     // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/2077c92299aeb9a68ae8f4418b5e932b12a8b186/aws-logs-loggroup/src/main/java/com/aws/logs/loggroup/Translator.java#L58-L73
     List<software.amazon.kendra.index.Tag> tags = null;
     if (listTagsForResourceResponse.tags() != null && !listTagsForResourceResponse.tags().isEmpty()) {
@@ -80,6 +81,7 @@ public class Translator {
     }
     return ResourceModel.builder()
             .id(describeIndexResponse.id())
+            .arn(arn)
             .name(describeIndexResponse.name())
             .roleArn(describeIndexResponse.roleArn())
             .edition(describeIndexResponse.edition().toString())

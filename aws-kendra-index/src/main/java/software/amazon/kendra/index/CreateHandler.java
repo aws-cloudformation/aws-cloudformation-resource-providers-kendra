@@ -74,7 +74,6 @@ public class CreateHandler extends BaseHandlerStd {
                     .makeServiceCall(this::createIndex)
                     .done((createIndexRequest1, createIndexResponse1, proxyInvocation1, model1, context1) -> {
                         model1.setId(createIndexResponse1.id());
-                        model1.setArn(indexArnBuilder.build(request, createIndexResponse1.id()));
                         return ProgressEvent.defaultInProgressHandler(context1, 0, model1);
                     })
             )
