@@ -1,17 +1,57 @@
 {
   "typeName": "AWS::Kendra::Index",
-  "description": "A Kendra Index",
+  "description": "A Kendra index",
   "sourceUrl": "https://docs.aws.amazon.com/kendra/latest/dg/hiw-index.html",
+  "definitions": {
+    "Tag": {
+      "description": "A label for tagging Kendra resources",
+      "type": "object",
+      "properties": {
+        "Key": {
+          "description": "A string used to identify this tag",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "Value": {
+          "description": "A string containing the value for the tag",
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "Key",
+        "Value"
+      ],
+      "additionalProperties": false
+    },
+    "TagList": {
+      "description": "List of tags",
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "$ref": "#/definitions/Tag"
+      }
+    }
+  },
   "properties": {
     "Id": {
-      "description": "Unique ID of Index",
+      "description": "Unique ID of index",
       "type": "string",
       "minLength": 36,
       "maxLength": 36,
       "pattern": "[a-zA-Z0-9][a-zA-Z0-9-]*"
     },
+    "Arn": {
+      "type": "string"
+    },
+    "Tags": {
+      "description": "Tags for labeling the index",
+      "$ref": "#/definitions/TagList"
+    },
     "Name": {
-      "description": "Name of Index",
+      "description": "Name of index",
       "type": "string",
       "minLength": 1,
       "maxLength": 1000,
@@ -25,7 +65,7 @@
       "pattern": "arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}"
     },
     "Edition": {
-      "description": "Edition of Index",
+      "description": "Edition of index",
       "type": "string",
       "enum": [
         "DEVELOPER_EDITION",
@@ -74,7 +114,8 @@
     "/properties/Id"
   ],
   "readOnlyProperties": [
-    "/properties/Id"
+    "/properties/Id",
+    "/properties/Arn"
   ],
   "createOnlyProperties": [
     "/properties/Edition"

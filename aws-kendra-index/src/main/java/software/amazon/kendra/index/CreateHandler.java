@@ -25,10 +25,24 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class CreateHandler extends BaseHandlerStd {
+
+
     protected static final BiFunction<ResourceModel, ProxyClient<KendraClient>, ResourceModel> EMPTY_CALL =
             (model, proxyClient) -> model;
 
     private Logger logger;
+
+    private IndexArnBuilder indexArnBuilder;
+
+    public CreateHandler() {
+        super();
+        indexArnBuilder = new IndexArn();
+    }
+
+    public CreateHandler(IndexArnBuilder indexArnBuilder) {
+        super();
+        this.indexArnBuilder = indexArnBuilder;
+    }
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
         final AmazonWebServicesClientProxy proxy,
@@ -60,7 +74,8 @@ public class CreateHandler extends BaseHandlerStd {
                     .makeServiceCall(this::createIndex)
                     .done((createIndexRequest1, createIndexResponse1, proxyInvocation1, model1, context1) -> {
                         model1.setId(createIndexResponse1.id());
-                        return ProgressEvent.defaultInProgressHandler(context1, 0, model);
+                        model1.setArn(indexArnBuilder.build(request, createIndexResponse1.id()));
+                        return ProgressEvent.defaultInProgressHandler(context1, 0, model1);
                     })
             )
              // stabilize

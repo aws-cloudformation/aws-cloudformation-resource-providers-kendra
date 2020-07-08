@@ -9,6 +9,8 @@ import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
 import software.amazon.awssdk.services.kendra.model.IndexEdition;
 import software.amazon.awssdk.services.kendra.model.IndexStatus;
+import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
@@ -89,6 +91,8 @@ public class UpdateHandlerTest extends AbstractTestBase {
                         .edition(indexEdition.toString())
                         .status(IndexStatus.ACTIVE.toString())
                         .build());
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
+                .thenReturn(ListTagsForResourceResponse.builder().build());
 
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
 
@@ -110,6 +114,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
         verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
     }
 
     @Test
@@ -149,6 +154,8 @@ public class UpdateHandlerTest extends AbstractTestBase {
                                 .edition(indexEdition.toString())
                                 .status(IndexStatus.ACTIVE.toString())
                                 .build());
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
+                .thenReturn(ListTagsForResourceResponse.builder().build());
 
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
 
@@ -170,6 +177,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
         verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
     }
 
     @Test
