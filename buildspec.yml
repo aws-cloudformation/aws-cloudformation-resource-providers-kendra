@@ -11,8 +11,11 @@ phases:
       - pre-commit run --all-files
       - cd "$CODEBUILD_SRC_DIR/aws-kendra-index"
       - mvn clean verify --no-transfer-progress
+      - cd "$CODEBUILD_SRC_DIR/aws-kendra-data-source"
+      - mvn clean verify --no-transfer-progress
       - cd "$CODEBUILD_SRC_DIR/aws-kendra-faq"
       - mvn clean verify --no-transfer-progress
     finally:
       - cat "$CODEBUILD_SRC_DIR/aws-kendra-index/rpdk.log"
+      - cat "$CODEBUILD_SRC_DIR/aws-kendra-data-source/rpdk.log"
       - cat "$CODEBUILD_SRC_DIR/aws-kendra-faq/rpdk.log"

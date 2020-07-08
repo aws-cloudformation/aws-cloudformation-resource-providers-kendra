@@ -1,0 +1,16 @@
+{
+    "typeName": "AWS::Kendra::DataSource",
+    "language": "java",
+    "runtime": "java8",
+    "entrypoint": "software.amazon.kendra.datasource.HandlerWrapper::handleRequest",
+    "testEntrypoint": "software.amazon.kendra.datasource.HandlerWrapper::testEntrypoint",
+    "settings": {
+        "namespace": [
+            "software",
+            "amazon",
+            "kendra",
+            "datasource"
+        ],
+        "codegen_template_path": "guided_aws"
+    }
+}
