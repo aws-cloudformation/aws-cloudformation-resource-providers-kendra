@@ -2,20 +2,32 @@ package software.amazon.kendra.index;
 
 import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.kendra.model.ConflictException;
 import software.amazon.awssdk.services.kendra.model.CreateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.CreateIndexResponse;
+import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
+import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
+import software.amazon.awssdk.services.kendra.model.IndexStatus;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
+import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
+import software.amazon.cloudformation.exceptions.CfnServiceInternalErrorException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 public class CreateHandler extends BaseHandlerStd {
+    protected static final BiFunction<ResourceModel, ProxyClient<KendraClient>, ResourceModel> EMPTY_CALL =
+            (model, proxyClient) -> model;
+
     private Logger logger;
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
@@ -45,7 +57,7 @@ public class CreateHandler extends BaseHandlerStd {
                 // STEP 2.0 [initialize a proxy context]
                 proxy.initiate("AWS-Kendra-Index::Create", proxyClient, model, callbackContext)
                     .translateToServiceRequest(Translator::translateToCreateRequest)
-                    .makeServiceCall(this::createResource)
+                    .makeServiceCall(this::createIndex)
                     .done((createIndexRequest1, createIndexResponse1, proxyInvocation1, model1, context1) -> {
                         model1.setId(createIndexResponse1.id());
                         return ProgressEvent.defaultInProgressHandler(context1, 0, model);
@@ -101,7 +113,7 @@ public class CreateHandler extends BaseHandlerStd {
      * @param proxyClient the aws service client to make the call
      * @return createIndexResponse create resource response
      */
-    private CreateIndexResponse createResource(
+    private CreateIndexResponse createIndex(
             final CreateIndexRequest createIndexRequest,
             final ProxyClient<KendraClient> proxyClient) {
         CreateIndexResponse createIndexResponse;
@@ -109,6 +121,8 @@ public class CreateHandler extends BaseHandlerStd {
             createIndexResponse = proxyClient.injectCredentialsAndInvokeV2(createIndexRequest, proxyClient.client()::createIndex);
         } catch (ValidationException e) {
             throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME, e);
+        } catch (ConflictException e) {
+            throw new CfnResourceConflictException(e);
         } catch (final AwsServiceException e) {
             /*
              * While the handler contract states that the handler must always return a progress event,
@@ -149,5 +163,31 @@ public class CreateHandler extends BaseHandlerStd {
 
         logger.log(String.format("%s successfully updated.", ResourceModel.TYPE_NAME));
         return updateIndexResponse;
+    }
+
+    private ProgressEvent<ResourceModel, CallbackContext> stabilize(
+            final AmazonWebServicesClientProxy proxy,
+            final ProxyClient<KendraClient> proxyClient,
+            final ProgressEvent<ResourceModel, CallbackContext> progress) {
+        return proxy.initiate("AWS-Kendra-Index::stabilize", proxyClient, progress.getResourceModel(),
+                progress.getCallbackContext())
+                .translateToServiceRequest(Function.identity())
+                .makeServiceCall(EMPTY_CALL)
+                .stabilize((resourceModel, response, proxyInvocation, model, callbackContext) ->
+                        isStabilized(proxyInvocation, model)).progress();
+
+    }
+
+    private boolean isStabilized(final ProxyClient<KendraClient> proxyClient, final ResourceModel model) {
+        DescribeIndexRequest describeIndexRequest = DescribeIndexRequest.builder()
+                .id(model.getId())
+                .build();
+        DescribeIndexResponse describeIndexResponse = proxyClient.injectCredentialsAndInvokeV2(describeIndexRequest,
+                proxyClient.client()::describeIndex);
+        IndexStatus indexStatus = describeIndexResponse.status();
+        if (indexStatus.equals(IndexStatus.FAILED)) {
+            throw new CfnServiceInternalErrorException(String.format("Index %s failed to get created.", model.getId()));
+        }
+        return indexStatus.equals(IndexStatus.ACTIVE);
     }
 }

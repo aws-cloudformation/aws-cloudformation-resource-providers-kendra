@@ -25,7 +25,10 @@ Resources:
                 Action:
                 - "iam:PassRole"
                 - "kendra:CreateIndex"
+                - "kendra:DeleteIndex"
                 - "kendra:DescribeIndex"
+                - "kendra:ListIndices"
+                - "kendra:UpdateIndex"
                 Resource: "*"
 Outputs:
   ExecutionRoleArn:

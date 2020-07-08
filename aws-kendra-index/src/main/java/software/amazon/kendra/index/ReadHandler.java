@@ -4,7 +4,9 @@ import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
+import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
+import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -35,7 +37,7 @@ public class ReadHandler extends BaseHandlerStd {
             .translateToServiceRequest(Translator::translateToReadRequest)
 
             // STEP 3 [TODO: make an api call]
-            .makeServiceCall((awsRequest, sdkProxyClient) -> readResource(awsRequest, sdkProxyClient , model))
+            .makeServiceCall((awsRequest, sdkProxyClient) -> readIndex(awsRequest, sdkProxyClient , model))
 
             // STEP 4 [TODO: gather all properties of the resource]
             .done(this::constructResourceModelFromResponse);
@@ -48,7 +50,7 @@ public class ReadHandler extends BaseHandlerStd {
      * @param proxyClient the aws service client to make the call
      * @return describe resource response
      */
-    private DescribeIndexResponse readResource(
+    private DescribeIndexResponse readIndex(
         final DescribeIndexRequest describeIndexRequest,
         final ProxyClient<KendraClient> proxyClient,
         final ResourceModel model) {
@@ -56,6 +58,8 @@ public class ReadHandler extends BaseHandlerStd {
         try {
             describeIndexResponse = proxyClient.injectCredentialsAndInvokeV2(
                     describeIndexRequest, proxyClient.client()::describeIndex);
+        } catch (ResourceNotFoundException e) {
+            throw new CfnNotFoundException(ResourceModel.TYPE_NAME, describeIndexRequest.id(), e);
         } catch (final AwsServiceException e) { // ResourceNotFoundException
             /*
              * While the handler contract states that the handler must always return a progress event,
