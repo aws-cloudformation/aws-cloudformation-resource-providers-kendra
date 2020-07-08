@@ -5,9 +5,9 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>software.amazon.kendra.index</groupId>
-    <artifactId>aws-kendra-index-handler</artifactId>
-    <name>aws-kendra-index-handler</name>
+    <groupId>software.amazon.kendra.datasource</groupId>
+    <artifactId>aws-kendra-datasource-handler</artifactId>
+    <name>aws-kendra-datasource-handler</name>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
@@ -19,11 +19,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>kendra</artifactId>
-            <version>2.13.41</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/software.amazon.cloudformation/aws-cloudformation-rpdk-java-plugin -->
         <dependency>
             <groupId>software.amazon.cloudformation</groupId>
@@ -201,7 +196,7 @@
             <resource>
                 <directory>${project.basedir}</directory>
                 <includes>
-                    <include>aws-kendra-index.json</include>
+                    <include>aws-kendra-datasource.json</include>
                 </includes>
             </resource>
         </resources>
