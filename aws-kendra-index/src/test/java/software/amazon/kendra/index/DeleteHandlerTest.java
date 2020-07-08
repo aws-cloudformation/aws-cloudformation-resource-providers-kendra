@@ -101,7 +101,7 @@ public class DeleteHandlerTest extends AbstractTestBase {
     }
 
     @Test
-    public void handleRequest_DeletingToActive() {
+    public void handleRequest_DeletingToNotFound() {
         final DeleteHandler handler = new DeleteHandler();
 
         String roleArn = "roleArn";
