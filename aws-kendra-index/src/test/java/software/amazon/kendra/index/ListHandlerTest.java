@@ -1,5 +1,6 @@
 package software.amazon.kendra.index;
 
+import org.junit.jupiter.api.AfterEach;
 import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.services.kendra.model.IndexConfigurationSummary;
 import software.amazon.awssdk.services.kendra.model.IndexEdition;
@@ -22,7 +23,11 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +47,11 @@ public class ListHandlerTest extends AbstractTestBase {
         proxy = new AmazonWebServicesClientProxy(logger, MOCK_CREDENTIALS, () -> Duration.ofSeconds(600).toMillis());
         sdkClient = mock(KendraClient.class);
         proxyClient = MOCK_PROXY(proxy, sdkClient);
+    }
+
+    @AfterEach
+    public void post_execute() {
+        verifyNoMoreInteractions(sdkClient);
     }
 
     @Test
@@ -83,5 +93,7 @@ public class ListHandlerTest extends AbstractTestBase {
         assertThat(response.getResourceModels()).isNotNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
+
+        verify(proxyClient.client(), times(1)).listIndices(any(ListIndicesRequest.class));
     }
 }
