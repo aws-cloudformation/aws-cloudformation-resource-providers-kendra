@@ -112,6 +112,7 @@ public class CreateHandlerTest extends AbstractTestBase {
         ResourceModel expectedResourceModel = ResourceModel
                 .builder()
                 .id(id)
+                .arn(arnBuilder.build(request, id))
                 .name(name)
                 .roleArn(roleArn)
                 .edition(indexEdition)
@@ -178,6 +179,7 @@ public class CreateHandlerTest extends AbstractTestBase {
         ResourceModel expectedResourceModel = ResourceModel
                 .builder()
                 .id(id)
+                .arn(arnBuilder.build(request, id))
                 .name(name)
                 .roleArn(roleArn)
                 .edition(indexEdition)
@@ -346,6 +348,7 @@ public class CreateHandlerTest extends AbstractTestBase {
         ResourceModel expectedResourceModel = ResourceModel
                 .builder()
                 .id(id)
+                .arn(arnBuilder.build(request, id))
                 .name(name)
                 .roleArn(roleArn)
                 .edition(indexEdition)

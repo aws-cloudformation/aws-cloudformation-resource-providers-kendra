@@ -19,7 +19,20 @@ import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 public class UpdateHandler extends BaseHandlerStd {
+
     private Logger logger;
+
+    private IndexArnBuilder indexArnBuilder;
+
+    public UpdateHandler() {
+        super();
+        this.indexArnBuilder = new IndexArn();
+    }
+
+    public UpdateHandler(IndexArnBuilder indexArnBuilder) {
+        super();
+        this.indexArnBuilder = indexArnBuilder;
+    }
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
         final AmazonWebServicesClientProxy proxy,
@@ -50,7 +63,7 @@ public class UpdateHandler extends BaseHandlerStd {
                                 .stabilize(this::stabilize)
                                 .progress())
                 // STEP 3 [TODO: describe call/chain to return the resource model]
-                .then(progress -> new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, logger));
+                .then(progress -> new ReadHandler(indexArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
     }
 
     private boolean stabilize(

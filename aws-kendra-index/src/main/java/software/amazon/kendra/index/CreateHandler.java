@@ -92,7 +92,7 @@ public class CreateHandler extends BaseHandlerStd {
                     .progress()
                 )
             // STEP 4 [TODO: describe call/chain to return the resource model]
-            .then(progress -> new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, logger));
+            .then(progress -> new ReadHandler(indexArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
     }
 
     /**

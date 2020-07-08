@@ -49,6 +49,8 @@ public class UpdateHandlerTest extends AbstractTestBase {
     @Mock
     KendraClient sdkClient;
 
+    TestIndexArnBuilder testIndexArnBuilder = new TestIndexArnBuilder();
+
     @BeforeEach
     public void setup() {
         proxy = new AmazonWebServicesClientProxy(logger, MOCK_CREDENTIALS, () -> Duration.ofSeconds(600).toMillis());
@@ -64,7 +66,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_SimpleSuccess() {
-        final UpdateHandler handler = new UpdateHandler();
+        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder);
 
         String roleArn = "roleArn";
         String name = "name";
@@ -102,10 +104,11 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceModel expectedModel = ResourceModel
                 .builder()
+                .id(id)
+                .arn(testIndexArnBuilder.build(request, id))
+                .edition(indexEdition.toString())
                 .roleArn(roleArn)
                 .name(name)
-                .id(id)
-                .edition(indexEdition.toString())
                 .build();
         assertThat(response.getResourceModel()).isEqualTo(expectedModel);
         assertThat(response.getResourceModels()).isNull();
@@ -119,7 +122,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_UpdatingToActive() {
-        final UpdateHandler handler = new UpdateHandler();
+        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder);
 
         String roleArn = "roleArn";
         String name = "name";
@@ -165,10 +168,11 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceModel expectedModel = ResourceModel
                 .builder()
+                .id(id)
+                .arn(testIndexArnBuilder.build(request, id))
+                .edition(indexEdition.toString())
                 .roleArn(roleArn)
                 .name(name)
-                .id(id)
-                .edition(indexEdition.toString())
                 .build();
         assertThat(response.getResourceModel()).isEqualTo(expectedModel);
         assertThat(response.getResourceModels()).isNull();
@@ -182,7 +186,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_FailWith_InvalidRoleArn() {
-        final UpdateHandler handler = new UpdateHandler();
+        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder);
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
                 .thenThrow(ValidationException.builder().build());
@@ -207,7 +211,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_FailWith_ConflictException() {
-        final UpdateHandler handler = new UpdateHandler();
+        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder);
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
                 .thenThrow(ConflictException.builder().build());

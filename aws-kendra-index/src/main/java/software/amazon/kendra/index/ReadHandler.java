@@ -16,7 +16,19 @@ import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 public class ReadHandler extends BaseHandlerStd {
+
     private Logger logger;
+
+    private IndexArnBuilder indexArnBuilder;
+
+    public ReadHandler() {
+        super();
+        this.indexArnBuilder = new IndexArn();
+    }
+
+    public ReadHandler(IndexArnBuilder indexArnBuilder) {
+        this.indexArnBuilder = indexArnBuilder;
+    }
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
         final AmazonWebServicesClientProxy proxy,
@@ -50,8 +62,7 @@ public class ReadHandler extends BaseHandlerStd {
         ListTagsForResourceResponse listTagsForResourceResponse = proxyClient.injectCredentialsAndInvokeV2(listTagsForResourceRequest,
                 proxyClient.client()::listTagsForResource);
 
-        return constructResourceModelFromResponse(describeIndexResponse, listTagsForResourceResponse);
-
+        return constructResourceModelFromResponse(describeIndexResponse, listTagsForResourceResponse, request);
     }
 
     /**
@@ -62,8 +73,10 @@ public class ReadHandler extends BaseHandlerStd {
      */
     private ProgressEvent<ResourceModel, CallbackContext> constructResourceModelFromResponse(
             final DescribeIndexResponse describeIndexResponse,
-            final ListTagsForResourceResponse listTagsForResourceResponse) {
-        return ProgressEvent.defaultSuccessHandler(
-                Translator.translateFromReadResponse(describeIndexResponse, listTagsForResourceResponse));
+            final ListTagsForResourceResponse listTagsForResourceResponse,
+            ResourceHandlerRequest<ResourceModel> request) {
+        ResourceModel resourceModel = Translator.translateFromReadResponse(describeIndexResponse, listTagsForResourceResponse);
+        resourceModel.setArn(indexArnBuilder.build(request, resourceModel.getId()));
+        return ProgressEvent.defaultSuccessHandler(resourceModel);
     }
 }

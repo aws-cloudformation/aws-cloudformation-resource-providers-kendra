@@ -25,7 +25,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -44,6 +43,8 @@ public class ReadHandlerTest extends AbstractTestBase {
     @Mock
     KendraClient awsKendraClient;
 
+    TestIndexArnBuilder testIndexArnBuilder = new TestIndexArnBuilder();
+
     @BeforeEach
     public void setup() {
         proxy = new AmazonWebServicesClientProxy(logger, MOCK_CREDENTIALS, () -> Duration.ofSeconds(600).toMillis());
@@ -58,19 +59,12 @@ public class ReadHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_SimpleSuccess() {
-        final ReadHandler handler = new ReadHandler();
+        final ReadHandler handler = new ReadHandler(testIndexArnBuilder);
 
         String id = "testId";
         String name = "testName";
         String roleArn = "testRoleArn";
         String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
-        final ResourceModel model = ResourceModel
-                .builder()
-                .id(id)
-                .name(name)
-                .roleArn(roleArn)
-                .edition(indexEdition)
-                .build();
 
         when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
                 .thenReturn(DescribeIndexResponse.builder()
@@ -84,6 +78,10 @@ public class ReadHandlerTest extends AbstractTestBase {
         when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
                 .thenReturn(ListTagsForResourceResponse.builder().build());
 
+        final ResourceModel model = ResourceModel
+                .builder()
+                .id(id)
+                .build();
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
             .desiredResourceState(model)
             .build();
@@ -93,7 +91,15 @@ public class ReadHandlerTest extends AbstractTestBase {
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
         assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getResourceModel()).isEqualTo(request.getDesiredResourceState());
+        final ResourceModel expected = ResourceModel
+                .builder()
+                .id(id)
+                .arn(testIndexArnBuilder.build(request, id))
+                .name(name)
+                .roleArn(roleArn)
+                .edition(indexEdition)
+                .build();
+        assertThat(response.getResourceModel()).isEqualTo(expected);
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
@@ -104,7 +110,7 @@ public class ReadHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_Tags() {
-        final ReadHandler handler = new ReadHandler();
+        final ReadHandler handler = new ReadHandler(testIndexArnBuilder);
 
         String id = "testId";
         String name = "testName";
@@ -144,6 +150,7 @@ public class ReadHandlerTest extends AbstractTestBase {
         final ResourceModel expected = ResourceModel
                 .builder()
                 .id(id)
+                .arn(testIndexArnBuilder.build(request, id))
                 .name(name)
                 .roleArn(roleArn)
                 .edition(indexEdition)
