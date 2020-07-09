@@ -28,6 +28,9 @@ Resources:
                 - "kendra:DeleteIndex"
                 - "kendra:DescribeIndex"
                 - "kendra:ListIndices"
+                - "kendra:ListTagsForResource"
+                - "kendra:TagResource"
+                - "kendra:UntagResource"
                 - "kendra:UpdateIndex"
                 Resource: "*"
 Outputs:

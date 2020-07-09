@@ -83,18 +83,23 @@
       "permissions": [
         "kendra:CreateIndex",
         "kendra:DescribeIndex",
+        "kendra:ListTagsForResource",
         "iam:PassRole"
       ]
     },
     "read": {
       "permissions": [
-        "kendra:DescribeIndex"
+        "kendra:DescribeIndex",
+        "kendra:ListTagsForResource"
       ]
     },
     "update": {
       "permissions": [
         "kendra:DescribeIndex",
-        "kendra:UpdateIndex"
+        "kendra:UpdateIndex",
+        "kendra:ListTagsForResource",
+        "kendra:TagResource",
+        "kendra:UntagResource"
       ]
     },
     "delete": {
