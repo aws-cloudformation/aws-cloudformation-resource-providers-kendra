@@ -1,7 +1,6 @@
 package software.amazon.kendra.index;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -101,7 +100,10 @@ public class UpdateHandlerTest extends AbstractTestBase {
                         .status(IndexStatus.ACTIVE.toString())
                         .build());
         when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
-                .thenReturn(ListTagsForResourceResponse.builder().build());
+                .thenReturn(ListTagsForResourceResponse
+                        .builder()
+                        .tags((java.util.Collection<software.amazon.awssdk.services.kendra.model.Tag>) null)
+                        .build());
 
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
 
@@ -450,5 +452,101 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).tagResource(any(TagResourceRequest.class));
         verify(proxyClient.client(), times(1)).untagResource(any(UntagResourceRequest.class));
+    }
+
+    @Test
+    public void handleRequest_FailWith_TagResourceThrowsException() {
+        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder);
+
+        String roleArn = "roleArn";
+        String name = "name";
+        String id = "id";
+        String key = "key";
+        String value = "value";
+        List<Tag> tags = Arrays.asList(Tag.builder().key(key).value(value).build());
+        final ResourceModel model = ResourceModel
+                .builder()
+                .id(id)
+                .roleArn(roleArn)
+                .name(name)
+                .tags(tags)
+                .build();
+
+        when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
+                .thenReturn(UpdateIndexResponse.builder().build());
+        when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
+                .thenReturn(DescribeIndexResponse.builder()
+                        .id(id)
+                        .name(name)
+                        .roleArn(roleArn)
+                        .edition(IndexEdition.ENTERPRISE_EDITION)
+                        .status(IndexStatus.ACTIVE.toString())
+                        .build());
+
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
+                .thenReturn(ListTagsForResourceResponse.builder().build());
+
+        when(proxyClient.client().tagResource(any(TagResourceRequest.class)))
+                .thenThrow(ValidationException.builder().build());
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        assertThrows(CfnInvalidRequestException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
+
+        verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
+        verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
+    }
+
+    @Test
+    public void handleRequest_FailWith_UntagResourceThrowsException() {
+        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder);
+
+        String roleArn = "roleArn";
+        String name = "name";
+        String id = "id";
+        String key = "key";
+        String value = "value";
+        final ResourceModel model = ResourceModel
+                .builder()
+                .id(id)
+                .roleArn(roleArn)
+                .name(name)
+                .build();
+
+        when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
+                .thenReturn(UpdateIndexResponse.builder().build());
+        when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
+                .thenReturn(DescribeIndexResponse.builder()
+                        .id(id)
+                        .name(name)
+                        .roleArn(roleArn)
+                        .edition(IndexEdition.ENTERPRISE_EDITION)
+                        .status(IndexStatus.ACTIVE.toString())
+                        .build());
+
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
+                .thenReturn(ListTagsForResourceResponse
+                        .builder()
+                        .tags(Arrays.asList(software.amazon.awssdk.services.kendra.model.Tag
+                                .builder().key("key").value("value").build()))
+                        .build());
+
+        when(proxyClient.client().untagResource(any(UntagResourceRequest.class)))
+                .thenThrow(ValidationException.builder().build());
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        assertThrows(CfnInvalidRequestException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
+
+        verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
+        verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
     }
 }

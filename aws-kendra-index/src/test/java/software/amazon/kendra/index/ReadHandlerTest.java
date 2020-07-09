@@ -11,7 +11,9 @@ import software.amazon.awssdk.services.kendra.model.IndexEdition;
 import software.amazon.awssdk.services.kendra.model.IndexStatus;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
+import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.kendra.model.Tag;
+import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -24,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -163,5 +166,26 @@ public class ReadHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
+    }
+
+    @Test
+    public void handleRequest_ThrowsResourceNotFoundException() {
+        final ReadHandler handler = new ReadHandler(testIndexArnBuilder);
+        when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
+                .thenThrow(ResourceNotFoundException.builder().build());
+
+        final ResourceModel model = ResourceModel
+                .builder()
+                .id("id")
+                .build();
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        assertThrows(CfnNotFoundException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
+
+        verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
     }
 }

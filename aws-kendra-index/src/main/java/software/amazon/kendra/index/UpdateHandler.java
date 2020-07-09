@@ -140,13 +140,8 @@ public class UpdateHandler extends BaseHandlerStd {
         ListTagsForResourceRequest listTagsForResourceRequest = Translator.translateToListTagsRequest(arn);
         List<software.amazon.awssdk.services.kendra.model.Tag> existingTagsSdk = proxyClient.injectCredentialsAndInvokeV2(
                 listTagsForResourceRequest, proxyClient.client()::listTagsForResource).tags();
-        Set<Tag> existingTags;
-        if (existingTagsSdk != null) {
-            existingTags = existingTagsSdk.stream().map(x -> Tag.builder().key(x.key()).value(x.value()).build())
-                    .collect(Collectors.toSet());
-        } else {
-            existingTags = new HashSet<>();
-        }
+        Set<Tag> existingTags = existingTagsSdk.stream().map(x -> Tag.builder().key(x.key()).value(x.value()).build())
+                .collect(Collectors.toSet());
 
 
         final Set<Tag> tagsToAdd = Sets.difference(currentTags, existingTags);

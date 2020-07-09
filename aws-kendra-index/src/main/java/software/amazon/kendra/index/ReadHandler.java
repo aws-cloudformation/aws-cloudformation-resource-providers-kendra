@@ -58,12 +58,13 @@ public class ReadHandler extends BaseHandlerStd {
             throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e); // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/commit/2077c92299aeb9a68ae8f4418b5e932b12a8b186#diff-5761e3a9f732dc1ef84103dc4bc93399R56-R63
         }
 
+        String indexArn = indexArnBuilder.build(request);
         final ListTagsForResourceRequest listTagsForResourceRequest =
-                Translator.translateToListTagsRequest(indexArnBuilder.build(request));
+                Translator.translateToListTagsRequest(indexArn);
         ListTagsForResourceResponse listTagsForResourceResponse = proxyClient.injectCredentialsAndInvokeV2(listTagsForResourceRequest,
                 proxyClient.client()::listTagsForResource);
 
-        return constructResourceModelFromResponse(describeIndexResponse, listTagsForResourceResponse, request);
+        return constructResourceModelFromResponse(describeIndexResponse, listTagsForResourceResponse, indexArn);
     }
 
     /**
@@ -75,9 +76,8 @@ public class ReadHandler extends BaseHandlerStd {
     private ProgressEvent<ResourceModel, CallbackContext> constructResourceModelFromResponse(
             final DescribeIndexResponse describeIndexResponse,
             final ListTagsForResourceResponse listTagsForResourceResponse,
-            ResourceHandlerRequest<ResourceModel> request) {
-        String arn = indexArnBuilder.build(request);
-        ResourceModel resourceModel = Translator.translateFromReadResponse(describeIndexResponse, listTagsForResourceResponse, arn);
+            String indexArn) {
+        ResourceModel resourceModel = Translator.translateFromReadResponse(describeIndexResponse, listTagsForResourceResponse, indexArn);
         return ProgressEvent.defaultSuccessHandler(resourceModel);
     }
 }
