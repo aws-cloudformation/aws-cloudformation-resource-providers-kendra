@@ -143,7 +143,6 @@ public class UpdateHandler extends BaseHandlerStd {
         Set<Tag> existingTags = existingTagsSdk.stream().map(x -> Tag.builder().key(x.key()).value(x.value()).build())
                 .collect(Collectors.toSet());
 
-
         final Set<Tag> tagsToAdd = Sets.difference(currentTags, existingTags);
         if (!tagsToAdd.isEmpty()) {
             TagResourceRequest tagResourceRequest = Translator.translateToTagResourceRequest(tagsToAdd, arn);

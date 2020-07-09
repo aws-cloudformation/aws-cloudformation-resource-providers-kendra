@@ -67,7 +67,7 @@ public class Translator {
     return TagResourceRequest
             .builder()
             .resourceARN(arn)
-            .tags(tags.stream().map(x -> Tag.builder().key(x.getKey()).value(x.getKey()).build()).collect(Collectors.toList()))
+            .tags(tags.stream().map(x -> Tag.builder().key(x.getKey()).value(x.getValue()).build()).collect(Collectors.toList()))
             .build();
   }
 
