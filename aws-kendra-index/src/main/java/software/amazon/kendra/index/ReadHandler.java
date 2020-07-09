@@ -59,8 +59,7 @@ public class ReadHandler extends BaseHandlerStd {
         }
 
         String indexArn = indexArnBuilder.build(request);
-        final ListTagsForResourceRequest listTagsForResourceRequest =
-                Translator.translateToListTagsRequest(indexArn);
+        final ListTagsForResourceRequest listTagsForResourceRequest = Translator.translateToListTagsRequest(indexArn);
         ListTagsForResourceResponse listTagsForResourceResponse = proxyClient.injectCredentialsAndInvokeV2(listTagsForResourceRequest,
                 proxyClient.client()::listTagsForResource);
 
