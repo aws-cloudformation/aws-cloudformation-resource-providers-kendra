@@ -94,7 +94,7 @@ public class ReadHandlerTest extends AbstractTestBase {
         final ResourceModel expected = ResourceModel
                 .builder()
                 .id(id)
-                .arn(testIndexArnBuilder.build(request, id))
+                .arn(testIndexArnBuilder.build(request))
                 .name(name)
                 .roleArn(roleArn)
                 .edition(indexEdition)
@@ -150,7 +150,7 @@ public class ReadHandlerTest extends AbstractTestBase {
         final ResourceModel expected = ResourceModel
                 .builder()
                 .id(id)
-                .arn(testIndexArnBuilder.build(request, id))
+                .arn(testIndexArnBuilder.build(request))
                 .name(name)
                 .roleArn(roleArn)
                 .edition(indexEdition)

@@ -18,7 +18,8 @@ class IndexArnTest {
         request.setAwsPartition(partition);
         request.setAwsAccountId(accountId);
         request.setRegion(region);
-        assertThat(new IndexArn().build(request, indexId))
+        request.setDesiredResourceState(ResourceModel.builder().id(indexId).build());
+        assertThat(new IndexArn().build(request))
                 .isEqualTo("arn:aws:kendra:us-west-2:0123456789:index/0123456789abcdef");
     }
 
@@ -31,8 +32,9 @@ class IndexArnTest {
         request.setAwsPartition(null);
         request.setAwsAccountId(accountId);
         request.setRegion(region);
+        request.setDesiredResourceState(ResourceModel.builder().id(indexId).build());
         assertThrows(NullPointerException.class, () -> {
-            new IndexArn().build(request, indexId);
+            new IndexArn().build(request);
         });
     }
 
@@ -45,8 +47,9 @@ class IndexArnTest {
         request.setAwsPartition(partition);
         request.setAwsAccountId(accountId);
         request.setRegion(null);
+        request.setDesiredResourceState(ResourceModel.builder().id(indexId).build());
         assertThrows(NullPointerException.class, () -> {
-            new IndexArn().build(request, indexId);
+            new IndexArn().build(request);
         });
     }
 
@@ -59,8 +62,9 @@ class IndexArnTest {
         request.setAwsPartition(partition);
         request.setAwsAccountId(null);
         request.setRegion(region);
+        request.setDesiredResourceState(ResourceModel.builder().id(indexId).build());
         assertThrows(NullPointerException.class, () -> {
-            new IndexArn().build(request, indexId);
+            new IndexArn().build(request);
         });
     }
 
@@ -73,8 +77,9 @@ class IndexArnTest {
         request.setAwsPartition(partition);
         request.setAwsAccountId(accountId);
         request.setRegion(region);
+        request.setDesiredResourceState(ResourceModel.builder().id(null).build());
         assertThrows(NullPointerException.class, () -> {
-            new IndexArn().build(request, null);
+            new IndexArn().build(request);
         });
     }
 

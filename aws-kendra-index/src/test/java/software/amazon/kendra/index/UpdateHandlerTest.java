@@ -1,6 +1,9 @@
 package software.amazon.kendra.index;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import software.amazon.awssdk.services.kendra.KendraClient;
@@ -11,6 +14,10 @@ import software.amazon.awssdk.services.kendra.model.IndexEdition;
 import software.amazon.awssdk.services.kendra.model.IndexStatus;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
+import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
+import software.amazon.awssdk.services.kendra.model.TagResourceResponse;
+import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
+import software.amazon.awssdk.services.kendra.model.UntagResourceResponse;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
@@ -105,7 +112,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         final ResourceModel expectedModel = ResourceModel
                 .builder()
                 .id(id)
-                .arn(testIndexArnBuilder.build(request, id))
+                .arn(testIndexArnBuilder.build(request))
                 .edition(indexEdition.toString())
                 .roleArn(roleArn)
                 .name(name)
@@ -117,7 +124,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
         verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
-        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
     }
 
     @Test
@@ -169,7 +176,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         final ResourceModel expectedModel = ResourceModel
                 .builder()
                 .id(id)
-                .arn(testIndexArnBuilder.build(request, id))
+                .arn(testIndexArnBuilder.build(request))
                 .edition(indexEdition.toString())
                 .roleArn(roleArn)
                 .name(name)
@@ -181,7 +188,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
         verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
-        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
     }
 
     @Test
@@ -231,5 +238,217 @@ public class UpdateHandlerTest extends AbstractTestBase {
             handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
         });
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
+    }
+
+    @Test
+    public void handleRequest_AddNewTags() {
+        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder);
+
+        String roleArn = "roleArn";
+        String name = "name";
+        String id = "id";
+        String key = "key";
+        String value = "value";
+        List<Tag> tags = Arrays.asList(Tag.builder().key(key).value(value).build());
+        final ResourceModel model = ResourceModel
+                .builder()
+                .id(id)
+                .roleArn(roleArn)
+                .name(name)
+                .tags(tags)
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
+                .thenReturn(UpdateIndexResponse.builder().build());
+        IndexEdition indexEdition = IndexEdition.ENTERPRISE_EDITION;
+        when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
+                .thenReturn(DescribeIndexResponse.builder()
+                        .id(id)
+                        .name(name)
+                        .roleArn(roleArn)
+                        .edition(indexEdition.toString())
+                        .status(IndexStatus.ACTIVE.toString())
+                        .build());
+
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
+                .thenReturn(ListTagsForResourceResponse.builder().build())
+                .thenReturn(ListTagsForResourceResponse
+                        .builder()
+                        .tags(Arrays.asList(software.amazon.awssdk.services.kendra.model.Tag
+                                .builder().key(key).value(value).build()))
+                        .build());
+        when(proxyClient.client().tagResource(any(TagResourceRequest.class)))
+                .thenReturn(TagResourceResponse.builder().build());
+
+        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        final ResourceModel expectedModel = ResourceModel
+                .builder()
+                .id(id)
+                .arn(testIndexArnBuilder.build(request))
+                .edition(indexEdition.toString())
+                .roleArn(roleArn)
+                .name(name)
+                .tags(tags)
+                .build();
+        assertThat(response.getResourceModel()).isEqualTo(expectedModel);
+        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getMessage()).isNull();
+        assertThat(response.getErrorCode()).isNull();
+
+        verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
+        verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(proxyClient.client(), times(1)).tagResource(any(TagResourceRequest.class));
+    }
+
+    @Test
+    public void handleRequest_RemoveTags() {
+        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder);
+
+        String roleArn = "roleArn";
+        String name = "name";
+        String id = "id";
+        final ResourceModel model = ResourceModel
+                .builder()
+                .id(id)
+                .roleArn(roleArn)
+                .name(name)
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
+                .thenReturn(UpdateIndexResponse.builder().build());
+        IndexEdition indexEdition = IndexEdition.ENTERPRISE_EDITION;
+        when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
+                .thenReturn(DescribeIndexResponse.builder()
+                        .id(id)
+                        .name(name)
+                        .roleArn(roleArn)
+                        .edition(indexEdition.toString())
+                        .status(IndexStatus.ACTIVE.toString())
+                        .build());
+
+        String key = "key";
+        String value = "value";
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
+                .thenReturn(ListTagsForResourceResponse
+                        .builder()
+                        .tags(Arrays.asList(software.amazon.awssdk.services.kendra.model.Tag
+                                .builder().key(key).value(value).build()))
+                        .build())
+                .thenReturn(ListTagsForResourceResponse.builder().build());
+        when(proxyClient.client().untagResource(any(UntagResourceRequest.class)))
+                .thenReturn(UntagResourceResponse.builder().build());
+
+        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        final ResourceModel expectedModel = ResourceModel
+                .builder()
+                .id(id)
+                .arn(testIndexArnBuilder.build(request))
+                .edition(indexEdition.toString())
+                .roleArn(roleArn)
+                .name(name)
+                .build();
+        assertThat(response.getResourceModel()).isEqualTo(expectedModel);
+        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getMessage()).isNull();
+        assertThat(response.getErrorCode()).isNull();
+
+        verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
+        verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(proxyClient.client(), times(1)).untagResource(any(UntagResourceRequest.class));
+    }
+
+    @Test
+    public void handleRequest_AddAndRemoveTags() {
+        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder);
+
+        String roleArn = "roleArn";
+        String name = "name";
+        String id = "id";
+        String keyAdd = "keyAdd";
+        String valueAdd = "valueAdd";
+        List<Tag> tagsToAdd = Arrays.asList(Tag.builder().key(keyAdd).value(valueAdd).build());
+        final ResourceModel model = ResourceModel
+                .builder()
+                .id(id)
+                .roleArn(roleArn)
+                .name(name)
+                .tags(tagsToAdd)
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
+                .thenReturn(UpdateIndexResponse.builder().build());
+        IndexEdition indexEdition = IndexEdition.ENTERPRISE_EDITION;
+        when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
+                .thenReturn(DescribeIndexResponse.builder()
+                        .id(id)
+                        .name(name)
+                        .roleArn(roleArn)
+                        .edition(indexEdition.toString())
+                        .status(IndexStatus.ACTIVE.toString())
+                        .build());
+
+        String keyRemove = "keyRemove";
+        String valueRemove = "valueRemove";
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
+                .thenReturn(ListTagsForResourceResponse
+                        .builder()
+                        .tags(Arrays.asList(software.amazon.awssdk.services.kendra.model.Tag
+                                .builder().key(keyRemove).value(valueRemove).build()))
+                        .build())
+                .thenReturn(ListTagsForResourceResponse
+                        .builder()
+                        .tags(Arrays.asList(software.amazon.awssdk.services.kendra.model.Tag
+                                .builder().key(keyAdd).value(valueAdd).build()))
+                        .build());
+
+        when(proxyClient.client().untagResource(any(UntagResourceRequest.class)))
+                .thenReturn(UntagResourceResponse.builder().build());
+
+        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        final ResourceModel expectedModel = ResourceModel
+                .builder()
+                .id(id)
+                .arn(testIndexArnBuilder.build(request))
+                .edition(indexEdition.toString())
+                .roleArn(roleArn)
+                .name(name)
+                .tags(tagsToAdd)
+                .build();
+        assertThat(response.getResourceModel()).isEqualTo(expectedModel);
+        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getMessage()).isNull();
+        assertThat(response.getErrorCode()).isNull();
+
+        verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
+        verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(proxyClient.client(), times(1)).tagResource(any(TagResourceRequest.class));
+        verify(proxyClient.client(), times(1)).untagResource(any(UntagResourceRequest.class));
     }
 }

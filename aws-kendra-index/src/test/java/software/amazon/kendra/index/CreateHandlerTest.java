@@ -55,7 +55,7 @@ public class CreateHandlerTest extends AbstractTestBase {
     @Mock
     KendraClient awsKendraClient;
 
-    TestIndexArnBuilder arnBuilder = new TestIndexArnBuilder();
+    TestIndexArnBuilder testIndexArnBuilder = new TestIndexArnBuilder();
 
     @BeforeEach
     public void setup() {
@@ -72,7 +72,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_SimpleSuccess() {
-        final CreateHandler handler = new CreateHandler(arnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
 
         String name = "testName";
         String roleArn = "testRoleArn";
@@ -112,7 +112,7 @@ public class CreateHandlerTest extends AbstractTestBase {
         ResourceModel expectedResourceModel = ResourceModel
                 .builder()
                 .id(id)
-                .arn(arnBuilder.build(request, id))
+                .arn(testIndexArnBuilder.build(request))
                 .name(name)
                 .roleArn(roleArn)
                 .edition(indexEdition)
@@ -130,7 +130,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_SimpleSuccessTransitionsFromCreatingToActive() {
-        final CreateHandler handler = new CreateHandler(arnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
 
         String name = "testName";
         String roleArn = "testRoleArn";
@@ -179,7 +179,7 @@ public class CreateHandlerTest extends AbstractTestBase {
         ResourceModel expectedResourceModel = ResourceModel
                 .builder()
                 .id(id)
-                .arn(arnBuilder.build(request, id))
+                .arn(testIndexArnBuilder.build(request))
                 .name(name)
                 .roleArn(roleArn)
                 .edition(indexEdition)
@@ -197,7 +197,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_FailWith_InvalidRoleArn() {
-        final CreateHandler handler = new CreateHandler(arnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
 
         when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
                 .thenThrow(ValidationException.builder().build());
@@ -220,7 +220,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_FailWith_GeneralAwsServiceException() {
-        final CreateHandler handler = new CreateHandler(arnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
 
         when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
                 .thenThrow(AwsServiceException.builder().build());
@@ -243,7 +243,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_CreateIndexFailedAsynchronously() {
-        final CreateHandler handler = new CreateHandler(arnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
 
         String name = "testName";
         String roleArn = "testRoleArn";
@@ -278,7 +278,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_FailWith_ConflictException() {
-        final CreateHandler handler = new CreateHandler(arnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
 
         when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
                 .thenThrow(ConflictException.builder().build());
@@ -301,7 +301,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_Tags() {
-        final CreateHandler handler = new CreateHandler(arnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
 
         String name = "testName";
         String roleArn = "testRoleArn";
@@ -348,7 +348,7 @@ public class CreateHandlerTest extends AbstractTestBase {
         ResourceModel expectedResourceModel = ResourceModel
                 .builder()
                 .id(id)
-                .arn(arnBuilder.build(request, id))
+                .arn(testIndexArnBuilder.build(request))
                 .name(name)
                 .roleArn(roleArn)
                 .edition(indexEdition)

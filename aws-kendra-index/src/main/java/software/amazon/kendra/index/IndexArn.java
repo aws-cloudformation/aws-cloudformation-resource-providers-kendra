@@ -10,9 +10,9 @@ public class IndexArn implements IndexArnBuilder {
     private String indexArnFormat = "arn:%s:kendra:%s:%s:index/%s";
 
     @Override
-    public String build(ResourceHandlerRequest<ResourceModel> request, String indexId) {
+    public String build(ResourceHandlerRequest<ResourceModel> request) {
         return build(request.getAwsPartition(), request.getRegion(),
-                request.getAwsAccountId(), indexId);
+                request.getAwsAccountId(), request.getDesiredResourceState().getId());
     }
 
     private String build(@NonNull String partition, @NonNull String region,

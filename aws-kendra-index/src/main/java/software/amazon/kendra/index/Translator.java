@@ -9,11 +9,14 @@ import software.amazon.awssdk.services.kendra.model.ListIndicesResponse;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.kendra.model.Tag;
+import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
+import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -52,7 +55,23 @@ public class Translator {
               .build();
   }
 
-    /**
+  static UntagResourceRequest translateToUntagResourceRequest(Set<software.amazon.kendra.index.Tag> tags, String arn) {
+    return UntagResourceRequest
+            .builder()
+            .resourceARN(arn)
+            .tagKeys(tags.stream().map(x -> x.getKey()).collect(Collectors.toList()))
+            .build();
+  }
+
+  static TagResourceRequest translateToTagResourceRequest(Set<software.amazon.kendra.index.Tag> tags, String arn) {
+    return TagResourceRequest
+            .builder()
+            .resourceARN(arn)
+            .tags(tags.stream().map(x -> Tag.builder().key(x.getKey()).value(x.getKey()).build()).collect(Collectors.toList()))
+            .build();
+  }
+
+  /**
      * Request to read a resource
      * @param model resource model
    * @return describeIndexRequest the aws service request to describe a resource
