@@ -99,7 +99,8 @@
         "kendra:UpdateIndex",
         "kendra:ListTagsForResource",
         "kendra:TagResource",
-        "kendra:UntagResource"
+        "kendra:UntagResource",
+        "iam:PassRole"
       ]
     },
     "delete": {
