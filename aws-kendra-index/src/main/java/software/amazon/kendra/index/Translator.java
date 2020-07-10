@@ -6,11 +6,17 @@ import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ListIndicesRequest;
 import software.amazon.awssdk.services.kendra.model.ListIndicesResponse;
+import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
+import software.amazon.awssdk.services.kendra.model.Tag;
+import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
+import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,18 +35,45 @@ public class Translator {
    * @return createIndexRequest the aws service request to create a resource
    */
   static CreateIndexRequest translateToCreateRequest(final ResourceModel model) {
-    final CreateIndexRequest createIndexRequest = CreateIndexRequest
+    final CreateIndexRequest.Builder builder = CreateIndexRequest
             .builder()
             .name(model.getName())
             .roleArn(model.getRoleArn())
-            .edition(model.getEdition())
+            .edition(model.getEdition());
+    if (model.getTags() != null && !model.getTags().isEmpty()) {
+      builder.tags(model.getTags().stream().map(
+              x -> Tag.builder().key(x.getKey()).value(x.getValue()).build())
+              .collect(Collectors.toList()));
+    }
+    return builder.build();
+  }
+
+  static ListTagsForResourceRequest translateToListTagsRequest(final String arn) {
+      return ListTagsForResourceRequest
+              .builder()
+              .resourceARN(arn)
+              .build();
+  }
+
+  static UntagResourceRequest translateToUntagResourceRequest(Set<software.amazon.kendra.index.Tag> tags, String arn) {
+    return UntagResourceRequest
+            .builder()
+            .resourceARN(arn)
+            .tagKeys(tags.stream().map(x -> x.getKey()).collect(Collectors.toList()))
             .build();
-    return createIndexRequest;
+  }
+
+  static TagResourceRequest translateToTagResourceRequest(Set<software.amazon.kendra.index.Tag> tags, String arn) {
+    return TagResourceRequest
+            .builder()
+            .resourceARN(arn)
+            .tags(tags.stream().map(x -> Tag.builder().key(x.getKey()).value(x.getValue()).build()).collect(Collectors.toList()))
+            .build();
   }
 
   /**
-   * Request to read a resource
-   * @param model resource model
+     * Request to read a resource
+     * @param model resource model
    * @return describeIndexRequest the aws service request to describe a resource
    */
   static DescribeIndexRequest translateToReadRequest(final ResourceModel model) {
@@ -55,14 +88,24 @@ public class Translator {
    * @param describeIndexResponse the aws service describe resource response
    * @return model resource model
    */
-  static ResourceModel translateFromReadResponse(final DescribeIndexResponse describeIndexResponse) {
+  static ResourceModel translateFromReadResponse(final DescribeIndexResponse describeIndexResponse,
+                                                 final ListTagsForResourceResponse listTagsForResourceResponse,
+                                                 String arn) {
     // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/2077c92299aeb9a68ae8f4418b5e932b12a8b186/aws-logs-loggroup/src/main/java/com/aws/logs/loggroup/Translator.java#L58-L73
-    return ResourceModel.builder()
+    ResourceModel.ResourceModelBuilder builder = ResourceModel.builder()
             .id(describeIndexResponse.id())
+            .arn(arn)
             .name(describeIndexResponse.name())
             .roleArn(describeIndexResponse.roleArn())
-            .edition(describeIndexResponse.edition().toString())
-            .build();
+            .edition(describeIndexResponse.edition().toString());
+    if (listTagsForResourceResponse.tags() != null && !listTagsForResourceResponse.tags().isEmpty()) {
+      List<software.amazon.kendra.index.Tag> tags = listTagsForResourceResponse.tags().stream()
+              .map(x -> software.amazon.kendra.index.Tag.builder().key(x.key()).value(x.value()).build())
+              .collect(Collectors.toList());
+      builder.tags(tags);
+    }
+
+    return builder.build();
   }
 
   /**

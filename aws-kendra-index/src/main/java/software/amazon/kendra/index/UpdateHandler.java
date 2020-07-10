@@ -1,11 +1,15 @@
 package software.amazon.kendra.index;
 
+import com.google.common.collect.Sets;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.services.kendra.model.ConflictException;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
 import software.amazon.awssdk.services.kendra.model.IndexStatus;
+import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
+import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
@@ -18,8 +22,26 @@ import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public class UpdateHandler extends BaseHandlerStd {
+
     private Logger logger;
+
+    private IndexArnBuilder indexArnBuilder;
+
+    public UpdateHandler() {
+        super();
+        this.indexArnBuilder = new IndexArn();
+    }
+
+    public UpdateHandler(IndexArnBuilder indexArnBuilder) {
+        super();
+        this.indexArnBuilder = indexArnBuilder;
+    }
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
         final AmazonWebServicesClientProxy proxy,
@@ -49,8 +71,10 @@ public class UpdateHandler extends BaseHandlerStd {
                                 // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
                                 .stabilize(this::stabilize)
                                 .progress())
-                // STEP 3 [TODO: describe call/chain to return the resource model]
-                .then(progress -> new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, logger));
+                // STEP 3 Add/remove tags
+                .then(progress -> updateTags(proxyClient, progress, request))
+                // STEP 4 [TODO: describe call/chain to return the resource model]
+                .then(progress -> new ReadHandler(indexArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
     }
 
     private boolean stabilize(
@@ -82,7 +106,7 @@ public class UpdateHandler extends BaseHandlerStd {
         try {
             updateIndexResponse = proxyClient.injectCredentialsAndInvokeV2(updateIndexRequest, proxyClient.client()::updateIndex);
         } catch (ValidationException e) {
-            throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME, e);
+            throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME + e.getMessage(), e);
         } catch (ConflictException e) {
             throw new CfnResourceConflictException(e);
         } catch (final AwsServiceException e) {
@@ -97,6 +121,48 @@ public class UpdateHandler extends BaseHandlerStd {
 
         logger.log(String.format("%s has successfully been updated.", ResourceModel.TYPE_NAME));
         return updateIndexResponse;
+    }
+
+    private ProgressEvent<ResourceModel, CallbackContext> updateTags(
+            final ProxyClient<KendraClient> proxyClient,
+            final ProgressEvent<ResourceModel, CallbackContext> progress,
+            ResourceHandlerRequest<ResourceModel> request) {
+        ResourceModel resourceModel = progress.getResourceModel();
+        CallbackContext callbackContext = progress.getCallbackContext();
+        Set<Tag> currentTags;
+        if (resourceModel.getTags() != null) {
+            currentTags = resourceModel.getTags().stream().collect(Collectors.toSet());
+        } else {
+            currentTags = new HashSet<>();
+        }
+
+        String arn = indexArnBuilder.build(request);
+        ListTagsForResourceRequest listTagsForResourceRequest = Translator.translateToListTagsRequest(arn);
+        List<software.amazon.awssdk.services.kendra.model.Tag> existingTagsSdk = proxyClient.injectCredentialsAndInvokeV2(
+                listTagsForResourceRequest, proxyClient.client()::listTagsForResource).tags();
+        Set<Tag> existingTags = existingTagsSdk.stream().map(x -> Tag.builder().key(x.key()).value(x.value()).build())
+                .collect(Collectors.toSet());
+
+        final Set<Tag> tagsToAdd = Sets.difference(currentTags, existingTags);
+        if (!tagsToAdd.isEmpty()) {
+            TagResourceRequest tagResourceRequest = Translator.translateToTagResourceRequest(tagsToAdd, arn);
+            try {
+                proxyClient.injectCredentialsAndInvokeV2(tagResourceRequest, proxyClient.client()::tagResource);
+            } catch (ValidationException e) {
+                throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME, e);
+            }
+        }
+
+        final Set<Tag> tagsToRemove = Sets.difference(existingTags, currentTags);
+        if (!tagsToRemove.isEmpty()) {
+            UntagResourceRequest untagResourceRequest = Translator.translateToUntagResourceRequest(tagsToRemove, arn);
+            try {
+                proxyClient.injectCredentialsAndInvokeV2(untagResourceRequest, proxyClient.client()::untagResource);
+            } catch (ValidationException e) {
+                throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME, e);
+            }
+        }
+        return ProgressEvent.progress(resourceModel, callbackContext);
     }
 
 }

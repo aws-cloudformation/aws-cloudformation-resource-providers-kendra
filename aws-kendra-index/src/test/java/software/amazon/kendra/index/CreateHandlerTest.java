@@ -1,6 +1,7 @@
 package software.amazon.kendra.index;
 
 import java.time.Duration;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.AfterEach;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
@@ -12,6 +13,8 @@ import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
 import software.amazon.awssdk.services.kendra.model.IndexEdition;
 import software.amazon.awssdk.services.kendra.model.IndexStatus;
+import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
@@ -52,6 +55,8 @@ public class CreateHandlerTest extends AbstractTestBase {
     @Mock
     KendraClient awsKendraClient;
 
+    TestIndexArnBuilder testIndexArnBuilder = new TestIndexArnBuilder();
+
     @BeforeEach
     public void setup() {
         proxy = new AmazonWebServicesClientProxy(logger, MOCK_CREDENTIALS, () -> Duration.ofSeconds(600).toMillis());
@@ -67,7 +72,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_SimpleSuccess() {
-        final CreateHandler handler = new CreateHandler();
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
 
         String name = "testName";
         String roleArn = "testRoleArn";
@@ -94,6 +99,8 @@ public class CreateHandlerTest extends AbstractTestBase {
                         .edition(indexEdition)
                         .status(IndexStatus.ACTIVE.toString())
                         .build());
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
+                .thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
                 .thenReturn(UpdateIndexResponse.builder().build());
 
@@ -105,6 +112,7 @@ public class CreateHandlerTest extends AbstractTestBase {
         ResourceModel expectedResourceModel = ResourceModel
                 .builder()
                 .id(id)
+                .arn(testIndexArnBuilder.build(request))
                 .name(name)
                 .roleArn(roleArn)
                 .edition(indexEdition)
@@ -116,12 +124,13 @@ public class CreateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).createIndex(any(CreateIndexRequest.class));
         verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
     }
 
     @Test
     public void handleRequest_SimpleSuccessTransitionsFromCreatingToActive() {
-        final CreateHandler handler = new CreateHandler();
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
 
         String name = "testName";
         String roleArn = "testRoleArn";
@@ -156,6 +165,8 @@ public class CreateHandlerTest extends AbstractTestBase {
                                 .edition(indexEdition)
                                 .status(IndexStatus.ACTIVE)
                                 .build());
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
+                .thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
                 .thenReturn(UpdateIndexResponse.builder().build());
 
@@ -168,6 +179,7 @@ public class CreateHandlerTest extends AbstractTestBase {
         ResourceModel expectedResourceModel = ResourceModel
                 .builder()
                 .id(id)
+                .arn(testIndexArnBuilder.build(request))
                 .name(name)
                 .roleArn(roleArn)
                 .edition(indexEdition)
@@ -179,12 +191,13 @@ public class CreateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).createIndex(any(CreateIndexRequest.class));
         verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
     }
 
     @Test
     public void handleRequest_FailWith_InvalidRoleArn() {
-        final CreateHandler handler = new CreateHandler();
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
 
         when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
                 .thenThrow(ValidationException.builder().build());
@@ -207,7 +220,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_FailWith_GeneralAwsServiceException() {
-        final CreateHandler handler = new CreateHandler();
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
 
         when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
                 .thenThrow(AwsServiceException.builder().build());
@@ -230,7 +243,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_CreateIndexFailedAsynchronously() {
-        final CreateHandler handler = new CreateHandler();
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
 
         String name = "testName";
         String roleArn = "testRoleArn";
@@ -265,7 +278,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_FailWith_ConflictException() {
-        final CreateHandler handler = new CreateHandler();
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
 
         when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
                 .thenThrow(ConflictException.builder().build());
@@ -284,5 +297,71 @@ public class CreateHandlerTest extends AbstractTestBase {
         assertThrows(CfnResourceConflictException.class, () -> {
             handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
         });
+    }
+
+    @Test
+    public void handleRequest_Tags() {
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+
+        String name = "testName";
+        String roleArn = "testRoleArn";
+        String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
+        String key = "key";
+        String value = "value";
+        final ResourceModel model = ResourceModel
+                .builder()
+                .name(name)
+                .roleArn(roleArn)
+                .edition(indexEdition)
+                .tags(Arrays.asList(Tag.builder().key(key).value(value).build()))
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        String id = "testId";
+        when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
+                .thenReturn(CreateIndexResponse.builder().id(id).build());
+        when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
+                .thenReturn(DescribeIndexResponse.builder()
+                        .id(id)
+                        .name(name)
+                        .roleArn(roleArn)
+                        .edition(indexEdition)
+                        .status(IndexStatus.ACTIVE.toString())
+                        .build());
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
+                .thenReturn(ListTagsForResourceResponse
+                        .builder()
+                        .tags(Arrays.asList(software.amazon.awssdk.services.kendra.model.Tag
+                                .builder().key(key).value(value).build()))
+                        .build());
+        when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
+                .thenReturn(UpdateIndexResponse.builder().build());
+
+        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        ResourceModel expectedResourceModel = ResourceModel
+                .builder()
+                .id(id)
+                .arn(testIndexArnBuilder.build(request))
+                .name(name)
+                .roleArn(roleArn)
+                .edition(indexEdition)
+                .tags(Arrays.asList(Tag.builder().key(key).value(value).build()))
+                .build();
+        assertThat(response.getResourceModel()).isEqualTo(expectedResourceModel);
+        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getMessage()).isNull();
+        assertThat(response.getErrorCode()).isNull();
+
+        verify(proxyClient.client(), times(1)).createIndex(any(CreateIndexRequest.class));
+        verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
     }
 }
