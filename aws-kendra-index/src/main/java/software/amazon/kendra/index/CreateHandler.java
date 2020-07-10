@@ -26,7 +26,6 @@ import java.util.function.Function;
 
 public class CreateHandler extends BaseHandlerStd {
 
-
     protected static final BiFunction<ResourceModel, ProxyClient<KendraClient>, ResourceModel> EMPTY_CALL =
             (model, proxyClient) -> model;
 
