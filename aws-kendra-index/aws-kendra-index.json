@@ -85,7 +85,8 @@
         "kendra:DescribeIndex",
         "kendra:ListTagsForResource",
         "iam:PassRole"
-      ]
+      ],
+      "timeoutInMinutes": 60
     },
     "read": {
       "permissions": [
@@ -101,13 +102,15 @@
         "kendra:TagResource",
         "kendra:UntagResource",
         "iam:PassRole"
-      ]
+      ],
+      "timeoutInMinutes": 60
     },
     "delete": {
       "permissions": [
         "kendra:DescribeIndex",
         "kendra:DeleteIndex"
-      ]
+      ],
+      "timeoutInMinutes": 720
     },
     "list": {
       "permissions": [
