@@ -6,9 +6,11 @@ import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
+import software.amazon.awssdk.services.kendra.model.ResourceInUseException;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
+import software.amazon.cloudformation.exceptions.CfnNotStabilizedException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -60,8 +62,13 @@ public class ReadHandler extends BaseHandlerStd {
 
         String indexArn = indexArnBuilder.build(request);
         final ListTagsForResourceRequest listTagsForResourceRequest = Translator.translateToListTagsRequest(indexArn);
-        ListTagsForResourceResponse listTagsForResourceResponse = proxyClient.injectCredentialsAndInvokeV2(listTagsForResourceRequest,
-                proxyClient.client()::listTagsForResource);
+        ListTagsForResourceResponse listTagsForResourceResponse;
+        try {
+            listTagsForResourceResponse = proxyClient.injectCredentialsAndInvokeV2(listTagsForResourceRequest,
+                    proxyClient.client()::listTagsForResource);
+        } catch (ResourceInUseException e) {
+            throw new CfnNotStabilizedException(ResourceModel.TYPE_NAME, model.getId(), e);
+        }
 
         return constructResourceModelFromResponse(describeIndexResponse, listTagsForResourceResponse, indexArn);
     }
