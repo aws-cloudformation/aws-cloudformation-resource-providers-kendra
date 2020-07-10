@@ -133,7 +133,7 @@ public class CreateHandler extends BaseHandlerStd {
         try {
             createIndexResponse = proxyClient.injectCredentialsAndInvokeV2(createIndexRequest, proxyClient.client()::createIndex);
         } catch (ValidationException e) {
-            throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME, e);
+            throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME + e.getMessage(), e);
         } catch (ConflictException e) {
             throw new CfnResourceConflictException(e);
         } catch (final AwsServiceException e) {

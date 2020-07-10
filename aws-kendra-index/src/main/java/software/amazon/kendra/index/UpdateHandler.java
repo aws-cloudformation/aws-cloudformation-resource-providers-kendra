@@ -106,7 +106,7 @@ public class UpdateHandler extends BaseHandlerStd {
         try {
             updateIndexResponse = proxyClient.injectCredentialsAndInvokeV2(updateIndexRequest, proxyClient.client()::updateIndex);
         } catch (ValidationException e) {
-            throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME, e);
+            throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME + e.getMessage(), e);
         } catch (ConflictException e) {
             throw new CfnResourceConflictException(e);
         } catch (final AwsServiceException e) {
