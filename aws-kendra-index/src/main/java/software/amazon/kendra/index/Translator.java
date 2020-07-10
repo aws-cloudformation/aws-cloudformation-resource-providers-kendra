@@ -92,20 +92,20 @@ public class Translator {
                                                  final ListTagsForResourceResponse listTagsForResourceResponse,
                                                  String arn) {
     // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/2077c92299aeb9a68ae8f4418b5e932b12a8b186/aws-logs-loggroup/src/main/java/com/aws/logs/loggroup/Translator.java#L58-L73
-    List<software.amazon.kendra.index.Tag> tags = null;
-    if (listTagsForResourceResponse.tags() != null && !listTagsForResourceResponse.tags().isEmpty()) {
-      tags = listTagsForResourceResponse.tags().stream()
-              .map(x -> software.amazon.kendra.index.Tag.builder().key(x.key()).value(x.value()).build())
-              .collect(Collectors.toList());
-    }
-    return ResourceModel.builder()
+    ResourceModel.ResourceModelBuilder builder = ResourceModel.builder()
             .id(describeIndexResponse.id())
             .arn(arn)
             .name(describeIndexResponse.name())
             .roleArn(describeIndexResponse.roleArn())
-            .edition(describeIndexResponse.edition().toString())
-            .tags(tags)
-            .build();
+            .edition(describeIndexResponse.edition().toString());
+    if (listTagsForResourceResponse.tags() != null && !listTagsForResourceResponse.tags().isEmpty()) {
+      List<software.amazon.kendra.index.Tag> tags = listTagsForResourceResponse.tags().stream()
+              .map(x -> software.amazon.kendra.index.Tag.builder().key(x.key()).value(x.value()).build())
+              .collect(Collectors.toList());
+      builder.tags(tags);
+    }
+
+    return builder.build();
   }
 
   /**
