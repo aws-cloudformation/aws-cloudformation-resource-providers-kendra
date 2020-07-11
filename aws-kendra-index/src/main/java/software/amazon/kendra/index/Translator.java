@@ -190,7 +190,7 @@ public class Translator {
       }
       return sdkDocumentMetadataConfigurationList;
     } else {
-      return null;
+      return new ArrayList<>();
     }
   }
 

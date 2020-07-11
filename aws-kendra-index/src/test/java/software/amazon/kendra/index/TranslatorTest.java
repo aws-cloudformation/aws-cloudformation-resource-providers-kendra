@@ -11,7 +11,8 @@ class TranslatorTest {
 
     @Test
     void translateToSdkDocumentMetadataConfigurationListNullDocumentMetadataConfiguration() {
-        assertThat(Translator.translateToSdkDocumentMetadataConfigurationList(null)).isNull();
+        assertThat(Translator.translateToSdkDocumentMetadataConfigurationList(null))
+                .isEmpty();
     }
 
     @Test
@@ -133,6 +134,10 @@ class TranslatorTest {
         DocumentMetadataConfiguration modelDocumentMetadataConfiguration = Translator.translateFromSdkDocumentMetadataConfigurationList(
                 Arrays.asList(sdkDocumentMetadataConfigurationBuilder.build())).get(0);
         assertThat(modelDocumentMetadataConfiguration.getName()).isEqualTo(name);
+
+        assertThat(modelDocumentMetadataConfiguration.getType()).isNull();
+        assertThat(modelDocumentMetadataConfiguration.getRelevance()).isNull();
+        assertThat(modelDocumentMetadataConfiguration.getSearch()).isNull();
     }
 
     @Test
@@ -145,6 +150,10 @@ class TranslatorTest {
         DocumentMetadataConfiguration modelDocumentMetadataConfiguration = Translator.translateFromSdkDocumentMetadataConfigurationList(
                 Arrays.asList(sdkDocumentMetadataConfigurationBuilder.build())).get(0);
         assertThat(modelDocumentMetadataConfiguration.getType()).isEqualTo(type);
+
+        assertThat(modelDocumentMetadataConfiguration.getName()).isNull();
+        assertThat(modelDocumentMetadataConfiguration.getRelevance()).isNull();
+        assertThat(modelDocumentMetadataConfiguration.getSearch()).isNull();
     }
 
     @Test
@@ -177,6 +186,10 @@ class TranslatorTest {
         assertThat(modelRelevance.getRankOrder()).isEqualTo(rankOrder);
         assertThat(modelRelevance.getImportance()).isEqualTo(importance);
         assertThat(modelRelevance.getFreshness()).isEqualTo(freshness);
+
+        assertThat(modelDocumentMetadataConfiguration.getName()).isNull();
+        assertThat(modelDocumentMetadataConfiguration.getType()).isNull();
+        assertThat(modelDocumentMetadataConfiguration.getSearch()).isNull();
     }
 
     @Test
@@ -198,6 +211,10 @@ class TranslatorTest {
         assertThat(modelSearch.getSearchable()).isTrue();
         assertThat(modelSearch.getFacetable()).isTrue();
         assertThat(modelSearch.getDisplayable()).isTrue();
+
+        assertThat(modelDocumentMetadataConfiguration.getName()).isNull();
+        assertThat(modelDocumentMetadataConfiguration.getType()).isNull();
+        assertThat(modelDocumentMetadataConfiguration.getRelevance()).isNull();
     }
 
 }
