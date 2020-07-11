@@ -4,6 +4,9 @@ import software.amazon.awssdk.services.kendra.model.CreateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DeleteIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
+import software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration;
+import software.amazon.awssdk.services.kendra.model.Relevance;
+import software.amazon.awssdk.services.kendra.model.Search;
 import software.amazon.awssdk.services.kendra.model.ListIndicesRequest;
 import software.amazon.awssdk.services.kendra.model.ListIndicesResponse;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
@@ -13,6 +16,7 @@ import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -126,7 +130,7 @@ public class Translator {
    * @param model resource model
    * @return updateIndexRequest the aws service request to modify a resource
    */
-  static UpdateIndexRequest translateToFirstUpdateRequest(final ResourceModel model) {
+  static UpdateIndexRequest translateToUpdateRequest(final ResourceModel model) {
     final UpdateIndexRequest updateIndexRequest = UpdateIndexRequest
             .builder()
             .id(model.getId())
@@ -141,13 +145,40 @@ public class Translator {
    * @param model resource model
    * @return updateIndexRequest the aws service request to modify a resource
    */
-  static UpdateIndexRequest translateToSecondUpdateRequest(final ResourceModel model) {
-    final UpdateIndexRequest updateIndexRequest = UpdateIndexRequest.builder()
-            .id(model.getId())
-            .name(model.getName())
-            .roleArn(model.getRoleArn())
-            .build();
-    return updateIndexRequest;
+  static UpdateIndexRequest translateToPostCreateUpdateRequest(final ResourceModel model) {
+    final UpdateIndexRequest.Builder updateIndexBuilder = UpdateIndexRequest.builder().id(model.getId());
+
+    if (model.getDocumentMetadataConfigurationUpdates() != null
+            && !model.getDocumentMetadataConfigurationUpdates().isEmpty()) {
+      List<DocumentMetadataConfiguration> documentMetadataConfigurationList = new ArrayList<>();
+      for (software.amazon.kendra.index.DocumentMetadataConfiguration modelDocumentMetadataConfiguration : model.getDocumentMetadataConfigurationUpdates()) {
+        DocumentMetadataConfiguration.Builder documentMetadataConfigurationBuilder = DocumentMetadataConfiguration.builder();
+        documentMetadataConfigurationBuilder.name(modelDocumentMetadataConfiguration.getName());
+        documentMetadataConfigurationBuilder.type(modelDocumentMetadataConfiguration.getType());
+        if (modelDocumentMetadataConfiguration.getRelevance() != null) {
+          software.amazon.kendra.index.Relevance modelRelevance = modelDocumentMetadataConfiguration.getRelevance();
+          Relevance.Builder relevanceBuilder = Relevance.builder();
+          relevanceBuilder.freshness(modelRelevance.getFreshness());
+          relevanceBuilder.importance(modelRelevance.getImportance());
+          relevanceBuilder.duration(modelRelevance.getDuration());
+          relevanceBuilder.rankOrder(modelRelevance.getRankOrder());
+          relevanceBuilder.valueImportanceMap(modelRelevance.getValueImportanceMap().stream()
+                  .collect(Collectors.toMap(ValueImportanceItem::getKey, ValueImportanceItem::getValue)));
+          documentMetadataConfigurationBuilder.relevance(relevanceBuilder.build());
+        }
+        if (modelDocumentMetadataConfiguration.getSearch() != null) {
+          software.amazon.kendra.index.Search modelSearch = modelDocumentMetadataConfiguration.getSearch();
+          Search.Builder searchBuilder = Search.builder();
+          searchBuilder.displayable(modelSearch.getDisplayable());
+          searchBuilder.facetable(modelSearch.getFacetable());
+          searchBuilder.searchable(modelSearch.getSearchable());
+          documentMetadataConfigurationBuilder.search(searchBuilder.build());
+        }
+        documentMetadataConfigurationList.add(documentMetadataConfigurationBuilder.build());
+      }
+      updateIndexBuilder.documentMetadataConfigurationUpdates(documentMetadataConfigurationList);
+    }
+    return updateIndexBuilder.build();
   }
 
   /**

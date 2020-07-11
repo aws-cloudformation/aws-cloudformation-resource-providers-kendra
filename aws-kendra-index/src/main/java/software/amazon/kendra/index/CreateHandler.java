@@ -84,7 +84,7 @@ public class CreateHandler extends BaseHandlerStd {
                 // STEP 3.0 [initialize a proxy context]
                 proxy.initiate("AWS-Kendra-Index::postCreate", proxyClient, model, callbackContext)
                     // STEP 3.1 [TODO: construct a body of a request]
-                    .translateToServiceRequest(Translator::translateToSecondUpdateRequest)
+                    .translateToServiceRequest(Translator::translateToPostCreateUpdateRequest)
                     // STEP 3.2 [TODO: make an api call]
                     .makeServiceCall(this::postCreate)
                     .progress()

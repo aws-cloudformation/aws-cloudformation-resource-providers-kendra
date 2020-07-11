@@ -63,7 +63,7 @@ public class UpdateHandler extends BaseHandlerStd {
                         // STEP 1.0 [initialize a proxy context]
                         proxy.initiate("AWS-Kendra-Index::Update", proxyClient, model, callbackContext)
                                 // STEP 1.1 [TODO: construct a body of a request]
-                                .translateToServiceRequest(Translator::translateToFirstUpdateRequest)
+                                .translateToServiceRequest(Translator::translateToUpdateRequest)
                                 // STEP 1.2 [TODO: make an api call]
                                 .makeServiceCall(this::updateIndex)
                                 // STEP 1.3 [TODO: stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]
