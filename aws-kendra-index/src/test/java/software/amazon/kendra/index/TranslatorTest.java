@@ -1,54 +1,52 @@
 package software.amazon.kendra.index;
 
 import org.junit.jupiter.api.Test;
-import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class TranslatorTest {
 
     @Test
-    void translateToPostCreateUpdateRequestNullDocumentMetadataConfiguration() {
-        UpdateIndexRequest updateIndexRequest = Translator.translateToPostCreateUpdateRequest(ResourceModel.builder().build());
-        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates()).isEmpty();
+    void translateToSdkDocumentMetadataConfigurationListNullDocumentMetadataConfiguration() {
+        assertThat(Translator.translateToSdkDocumentMetadataConfigurationList(null)).isNull();
     }
 
     @Test
-    void translateToPostCreateUpdateRequestDocumentMetadataConfigurationName() {
-        ResourceModel.ResourceModelBuilder resourceModelBuilder = ResourceModel.builder();
+    void translateToSdkDocumentMetadataConfigurationListDocumentMetadataConfigurationName() {
         DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder =
                 DocumentMetadataConfiguration.builder();
         String name = "name";
         documentMetadataConfigurationBuilder.name(name);
-        resourceModelBuilder.documentMetadataConfigurationUpdates(
-                Arrays.asList(documentMetadataConfigurationBuilder.build()));
 
-        UpdateIndexRequest updateIndexRequest = Translator.translateToPostCreateUpdateRequest(resourceModelBuilder.build());
-        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates()).isNotEmpty();
-        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates().get(0).name())
-                .isEqualTo(name);
+        software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration sdkDocumentMetadataConfiguration =
+                Translator.translateToSdkDocumentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build())).get(0);
+        assertThat(sdkDocumentMetadataConfiguration.name()).isEqualTo(name);
+        assertThat(sdkDocumentMetadataConfiguration.type()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.relevance()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.search()).isNull();
     }
 
     @Test
-    void translateToPostCreateUpdateRequestDocumentMetadataConfigurationType() {
-        ResourceModel.ResourceModelBuilder resourceModelBuilder = ResourceModel.builder();
+    void translateToSdkDocumentMetadataConfigurationListDocumentMetadataConfigurationType() {
         DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder =
                 DocumentMetadataConfiguration.builder();
         String type = "type";
         documentMetadataConfigurationBuilder.type(type);
-        resourceModelBuilder.documentMetadataConfigurationUpdates(
-                Arrays.asList(documentMetadataConfigurationBuilder.build()));
 
-        UpdateIndexRequest updateIndexRequest = Translator.translateToPostCreateUpdateRequest(resourceModelBuilder.build());
-        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates()).isNotEmpty();
-        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates().get(0).typeAsString())
+        software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration sdkDocumentMetadataConfiguration =
+                Translator.translateToSdkDocumentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build())).get(0);
+        assertThat(sdkDocumentMetadataConfiguration.typeAsString())
                 .isEqualTo(type);
+        assertThat(sdkDocumentMetadataConfiguration.name()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.relevance()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.search()).isNull();
     }
 
     @Test
-    void translateToPostCreateUpdateRequestDocumentMetadataConfigurationRelevance() {
+    void translateToSdkDocumentMetadataConfigurationListDocumentMetadataConfigurationRelevance() {
         ResourceModel.ResourceModelBuilder resourceModelBuilder = ResourceModel.builder();
         DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder =
                 DocumentMetadataConfiguration.builder();
@@ -75,22 +73,26 @@ class TranslatorTest {
         resourceModelBuilder.documentMetadataConfigurationUpdates(
                 Arrays.asList(documentMetadataConfigurationBuilder.build()));
 
-        UpdateIndexRequest updateIndexRequest = Translator.translateToPostCreateUpdateRequest(resourceModelBuilder.build());
-        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates()).isNotEmpty();
-        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates().get(0).relevance().importance())
+        software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration sdkDocumentMetadataConfiguration =
+                Translator.translateToSdkDocumentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build())).get(0);
+        assertThat(sdkDocumentMetadataConfiguration.relevance().importance())
                 .isEqualTo(importance);
-        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates().get(0).relevance().duration())
+        assertThat(sdkDocumentMetadataConfiguration.relevance().duration())
                 .isEqualTo(duration);
-        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates().get(0).relevance().rankOrderAsString())
+        assertThat(sdkDocumentMetadataConfiguration.relevance().rankOrderAsString())
                 .isEqualTo(rankOrder);
-        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates().get(0).relevance().freshness())
+        assertThat(sdkDocumentMetadataConfiguration.relevance().freshness())
                 .isEqualTo(freshness);
-        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates().get(0).relevance().valueImportanceMap().get(key))
+        assertThat(sdkDocumentMetadataConfiguration.relevance().valueImportanceMap().get(key))
                 .isEqualTo(value);
+
+        assertThat(sdkDocumentMetadataConfiguration.name()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.type()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.search()).isNull();
     }
 
     @Test
-    void translateToPostCreateUpdateRequestDocumentMetadataConfigurationSearch() {
+    void translateToSdkDocumentMetadataConfigurationListDocumentMetadataConfigurationSearch() {
         ResourceModel.ResourceModelBuilder resourceModelBuilder = ResourceModel.builder();
         DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder =
                 DocumentMetadataConfiguration.builder();
@@ -103,13 +105,99 @@ class TranslatorTest {
         resourceModelBuilder.documentMetadataConfigurationUpdates(
                 Arrays.asList(documentMetadataConfigurationBuilder.build()));
 
-        UpdateIndexRequest updateIndexRequest = Translator.translateToPostCreateUpdateRequest(resourceModelBuilder.build());
-        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates()).isNotEmpty();
-        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates().get(0).search().displayable())
+        software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration sdkDocumentMetadataConfiguration =
+                Translator.translateToSdkDocumentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build())).get(0);
+        assertThat(sdkDocumentMetadataConfiguration.search().displayable())
                 .isTrue();
-        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates().get(0).search().facetable())
+        assertThat(sdkDocumentMetadataConfiguration.search().facetable())
                 .isTrue();
-        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates().get(0).search().searchable())
+        assertThat(sdkDocumentMetadataConfiguration.search().searchable())
                 .isTrue();
+        assertThat(sdkDocumentMetadataConfiguration.name()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.type()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.relevance()).isNull();
     }
+
+    @Test
+    void testTranslateFromSdkDocumentMetadataConfigurationListNull() {
+        assertThat(Translator.translateFromSdkDocumentMetadataConfigurationList(null)).isNull();
+    }
+
+    @Test
+    void testTranslateFromSdkDocumentMetadataConfigurationListName() {
+        String name = "name";
+        software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration.Builder sdkDocumentMetadataConfigurationBuilder =
+                software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration.builder()
+                .name(name);
+
+        DocumentMetadataConfiguration modelDocumentMetadataConfiguration = Translator.translateFromSdkDocumentMetadataConfigurationList(
+                Arrays.asList(sdkDocumentMetadataConfigurationBuilder.build())).get(0);
+        assertThat(modelDocumentMetadataConfiguration.getName()).isEqualTo(name);
+    }
+
+    @Test
+    void testTranslateFromSdkDocumentMetadataConfigurationListType() {
+        String type = "type";
+        software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration.Builder sdkDocumentMetadataConfigurationBuilder =
+                software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration.builder()
+                        .type(type);
+
+        DocumentMetadataConfiguration modelDocumentMetadataConfiguration = Translator.translateFromSdkDocumentMetadataConfigurationList(
+                Arrays.asList(sdkDocumentMetadataConfigurationBuilder.build())).get(0);
+        assertThat(modelDocumentMetadataConfiguration.getType()).isEqualTo(type);
+    }
+
+    @Test
+    void testTranslateFromSdkDocumentMetadataConfigurationListRelevance() {
+        software.amazon.awssdk.services.kendra.model.Relevance.Builder sdkRelevanceBuilder =
+                software.amazon.awssdk.services.kendra.model.Relevance.builder();
+        String rankOrder = "rankOrder";
+        sdkRelevanceBuilder.rankOrder(rankOrder);
+        String duration = "duration";
+        sdkRelevanceBuilder.duration(duration);
+        Integer importance = 2;
+        sdkRelevanceBuilder.importance(importance);
+        Boolean freshness = true;
+        sdkRelevanceBuilder.freshness(freshness);
+        String key = "key";
+        Integer value = 5;
+        HashMap<String, Integer> importanceMap = new HashMap<>();
+        importanceMap.put(key, value);
+        sdkRelevanceBuilder.valueImportanceMap(importanceMap);
+
+        software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration.Builder sdkDocumentMetadataConfigurationBuilder =
+                software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration.builder()
+                        .relevance(sdkRelevanceBuilder.build());
+
+
+        DocumentMetadataConfiguration modelDocumentMetadataConfiguration = Translator.translateFromSdkDocumentMetadataConfigurationList(
+                Arrays.asList(sdkDocumentMetadataConfigurationBuilder.build())).get(0);
+        Relevance modelRelevance = modelDocumentMetadataConfiguration.getRelevance();
+        assertThat(modelRelevance.getDuration()).isEqualTo(duration);
+        assertThat(modelRelevance.getRankOrder()).isEqualTo(rankOrder);
+        assertThat(modelRelevance.getImportance()).isEqualTo(importance);
+        assertThat(modelRelevance.getFreshness()).isEqualTo(freshness);
+    }
+
+    @Test
+    void testTranslateFromSdkDocumentMetadataConfigurationListSearch() {
+        software.amazon.awssdk.services.kendra.model.Search.Builder sdkSearchBuilder =
+                software.amazon.awssdk.services.kendra.model.Search.builder();
+        sdkSearchBuilder.searchable(true);
+        sdkSearchBuilder.facetable(true);
+        sdkSearchBuilder.displayable(true);
+
+        software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration.Builder sdkDocumentMetadataConfigurationBuilder =
+                software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration.builder()
+                        .search(sdkSearchBuilder.build());
+
+
+        DocumentMetadataConfiguration modelDocumentMetadataConfiguration = Translator.translateFromSdkDocumentMetadataConfigurationList(
+                Arrays.asList(sdkDocumentMetadataConfigurationBuilder.build())).get(0);
+        Search modelSearch = modelDocumentMetadataConfiguration.getSearch();
+        assertThat(modelSearch.getSearchable()).isTrue();
+        assertThat(modelSearch.getFacetable()).isTrue();
+        assertThat(modelSearch.getDisplayable()).isTrue();
+    }
+
 }
