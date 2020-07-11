@@ -108,6 +108,11 @@ public class Translator {
               .collect(Collectors.toList());
       builder.tags(tags);
     }
+    List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList =
+            translateFromSdkDocumentMetadataConfigurationList(describeIndexResponse.documentMetadataConfigurations());
+    if (modelDocumentMetadataConfigurationList != null && !modelDocumentMetadataConfigurationList.isEmpty()) {
+      builder.documentMetadataConfigurationUpdates(modelDocumentMetadataConfigurationList);
+    }
 
     return builder.build();
   }
