@@ -136,6 +136,7 @@ public class Translator {
             .id(model.getId())
             .roleArn(model.getRoleArn())
             .name(model.getName())
+            .documentMetadataConfigurationUpdates(translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurationUpdates()))
             .build();
     return updateIndexRequest;
   }
@@ -146,12 +147,20 @@ public class Translator {
    * @return updateIndexRequest the aws service request to modify a resource
    */
   static UpdateIndexRequest translateToPostCreateUpdateRequest(final ResourceModel model) {
-    final UpdateIndexRequest.Builder updateIndexBuilder = UpdateIndexRequest.builder().id(model.getId());
+    final UpdateIndexRequest.Builder updateIndexBuilder = UpdateIndexRequest
+            .builder()
+            .id(model.getId());
+    List<DocumentMetadataConfiguration> documentMetadataConfigurationList =
+            translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurationUpdates());
+    updateIndexBuilder.documentMetadataConfigurationUpdates(documentMetadataConfigurationList);
+    return updateIndexBuilder.build();
+  }
 
-    if (model.getDocumentMetadataConfigurationUpdates() != null
-            && !model.getDocumentMetadataConfigurationUpdates().isEmpty()) {
+  static List<DocumentMetadataConfiguration> translateToSdkDocumentMetadataConfigurationList(List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList) {
+    if (modelDocumentMetadataConfigurationList != null
+            && !modelDocumentMetadataConfigurationList.isEmpty()) {
       List<DocumentMetadataConfiguration> documentMetadataConfigurationList = new ArrayList<>();
-      for (software.amazon.kendra.index.DocumentMetadataConfiguration modelDocumentMetadataConfiguration : model.getDocumentMetadataConfigurationUpdates()) {
+      for (software.amazon.kendra.index.DocumentMetadataConfiguration modelDocumentMetadataConfiguration : modelDocumentMetadataConfigurationList) {
         DocumentMetadataConfiguration.Builder documentMetadataConfigurationBuilder = DocumentMetadataConfiguration.builder();
         documentMetadataConfigurationBuilder.name(modelDocumentMetadataConfiguration.getName());
         documentMetadataConfigurationBuilder.type(modelDocumentMetadataConfiguration.getType());
@@ -176,9 +185,9 @@ public class Translator {
         }
         documentMetadataConfigurationList.add(documentMetadataConfigurationBuilder.build());
       }
-      updateIndexBuilder.documentMetadataConfigurationUpdates(documentMetadataConfigurationList);
+      return documentMetadataConfigurationList;
     }
-    return updateIndexBuilder.build();
+    return null;
   }
 
   /**
