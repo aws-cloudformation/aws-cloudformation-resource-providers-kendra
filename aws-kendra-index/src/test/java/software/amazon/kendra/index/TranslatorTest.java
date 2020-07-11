@@ -121,7 +121,7 @@ class TranslatorTest {
 
     @Test
     void testTranslateFromSdkDocumentMetadataConfigurationListNull() {
-        assertThat(Translator.translateFromSdkDocumentMetadataConfigurationList(null)).isNull();
+        assertThat(Translator.translateFromSdkDocumentMetadataConfigurationList(null)).isEmpty();
     }
 
     @Test

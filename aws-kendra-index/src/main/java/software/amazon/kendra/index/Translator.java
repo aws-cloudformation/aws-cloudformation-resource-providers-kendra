@@ -110,7 +110,7 @@ public class Translator {
     }
     List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList =
             translateFromSdkDocumentMetadataConfigurationList(describeIndexResponse.documentMetadataConfigurations());
-    if (modelDocumentMetadataConfigurationList != null && !modelDocumentMetadataConfigurationList.isEmpty()) {
+    if (!modelDocumentMetadataConfigurationList.isEmpty()) {
       builder.documentMetadataConfigurationUpdates(modelDocumentMetadataConfigurationList);
     }
 
@@ -231,7 +231,7 @@ public class Translator {
       }
       return modelDocumentMetadataConfigurationList;
     } else {
-      return null;
+      return new ArrayList<>();
     }
   }
 
