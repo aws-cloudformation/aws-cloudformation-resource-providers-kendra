@@ -152,6 +152,7 @@ public class Translator {
    * @return updateIndexRequest the aws service request to modify a resource
    */
   static UpdateIndexRequest translateToPostCreateUpdateRequest(final ResourceModel model) {
+    // We only need to update attributes we couldn't set during create.
     final UpdateIndexRequest.Builder updateIndexBuilder = UpdateIndexRequest
             .builder()
             .id(model.getId())
