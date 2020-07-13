@@ -167,30 +167,46 @@ public class Translator {
         DocumentMetadataConfiguration.Builder sdkDocumentMetadataConfigurationBuilder = DocumentMetadataConfiguration.builder();
         sdkDocumentMetadataConfigurationBuilder.name(modelDocumentMetadataConfiguration.getName());
         sdkDocumentMetadataConfigurationBuilder.type(modelDocumentMetadataConfiguration.getType());
-        if (modelDocumentMetadataConfiguration.getRelevance() != null) {
-          software.amazon.kendra.index.Relevance modelRelevance = modelDocumentMetadataConfiguration.getRelevance();
-          Relevance.Builder sdkRelevanceBuilder = Relevance.builder();
-          sdkRelevanceBuilder.freshness(modelRelevance.getFreshness());
-          sdkRelevanceBuilder.importance(modelRelevance.getImportance());
-          sdkRelevanceBuilder.duration(modelRelevance.getDuration());
-          sdkRelevanceBuilder.rankOrder(modelRelevance.getRankOrder());
-          sdkRelevanceBuilder.valueImportanceMap(modelRelevance.getValueImportanceItems().stream()
-                  .collect(Collectors.toMap(ValueImportanceItem::getKey, ValueImportanceItem::getValue)));
-          sdkDocumentMetadataConfigurationBuilder.relevance(sdkRelevanceBuilder.build());
+        Relevance sdkRelevance = translateToSdkRelevance(modelDocumentMetadataConfiguration.getRelevance());
+        if (sdkRelevance != null) {
+          sdkDocumentMetadataConfigurationBuilder.relevance(sdkRelevance);
         }
-        if (modelDocumentMetadataConfiguration.getSearch() != null) {
-          software.amazon.kendra.index.Search modelSearch = modelDocumentMetadataConfiguration.getSearch();
-          Search.Builder sdkSearchBuilder = Search.builder();
-          sdkSearchBuilder.displayable(modelSearch.getDisplayable());
-          sdkSearchBuilder.facetable(modelSearch.getFacetable());
-          sdkSearchBuilder.searchable(modelSearch.getSearchable());
-          sdkDocumentMetadataConfigurationBuilder.search(sdkSearchBuilder.build());
+        Search sdkSearch = translateToSdkSearch(modelDocumentMetadataConfiguration.getSearch());
+        if (sdkSearch != null) {
+          sdkDocumentMetadataConfigurationBuilder.search(sdkSearch);
         }
         sdkDocumentMetadataConfigurationList.add(sdkDocumentMetadataConfigurationBuilder.build());
       }
       return sdkDocumentMetadataConfigurationList;
     } else {
       return new ArrayList<>();
+    }
+  }
+
+  static Relevance translateToSdkRelevance(software.amazon.kendra.index.Relevance modelRelevance) {
+    if (modelRelevance != null) {
+      Relevance.Builder sdkRelevanceBuilder = Relevance.builder();
+      sdkRelevanceBuilder.freshness(modelRelevance.getFreshness());
+      sdkRelevanceBuilder.importance(modelRelevance.getImportance());
+      sdkRelevanceBuilder.duration(modelRelevance.getDuration());
+      sdkRelevanceBuilder.rankOrder(modelRelevance.getRankOrder());
+      sdkRelevanceBuilder.valueImportanceMap(modelRelevance.getValueImportanceItems().stream()
+              .collect(Collectors.toMap(ValueImportanceItem::getKey, ValueImportanceItem::getValue)));
+      return sdkRelevanceBuilder.build();
+    } else {
+      return null;
+    }
+  }
+
+  static Search translateToSdkSearch(software.amazon.kendra.index.Search modelSearch) {
+    if (modelSearch != null) {
+      Search.Builder sdkSearchBuilder = Search.builder();
+      sdkSearchBuilder.displayable(modelSearch.getDisplayable());
+      sdkSearchBuilder.facetable(modelSearch.getFacetable());
+      sdkSearchBuilder.searchable(modelSearch.getSearchable());
+      return sdkSearchBuilder.build();
+    } else {
+      return null;
     }
   }
 
@@ -205,33 +221,50 @@ public class Translator {
                 modelDocumentMetadataConfigurationBuilder = software.amazon.kendra.index.DocumentMetadataConfiguration.builder();
         modelDocumentMetadataConfigurationBuilder.name(sdkDocumentMetadataConfiguration.name());
         modelDocumentMetadataConfigurationBuilder.type(sdkDocumentMetadataConfiguration.typeAsString());
-        if (sdkDocumentMetadataConfiguration.relevance() != null) {
-          software.amazon.kendra.index.Relevance.RelevanceBuilder modelRelevanceBuilder =
-                  software.amazon.kendra.index.Relevance.builder();
-          Relevance sdkRelevance = sdkDocumentMetadataConfiguration.relevance();
-          modelRelevanceBuilder.importance(sdkRelevance.importance());
-          modelRelevanceBuilder.freshness(sdkRelevance.freshness());
-          modelRelevanceBuilder.duration(sdkRelevance.duration());
-          modelRelevanceBuilder.rankOrder(sdkRelevance.rankOrderAsString());
-          modelRelevanceBuilder.valueImportanceItems(sdkRelevance.valueImportanceMap().entrySet()
-                  .stream().map(entry -> ValueImportanceItem.builder().key(entry.getKey()).value(entry.getValue()).build())
-                  .collect(Collectors.toList()));
-          modelDocumentMetadataConfigurationBuilder.relevance(modelRelevanceBuilder.build());
+        software.amazon.kendra.index.Relevance modelRelevance =
+                translateFromSdkRelevance(sdkDocumentMetadataConfiguration.relevance());
+        if (modelRelevance != null) {
+          modelDocumentMetadataConfigurationBuilder.relevance(modelRelevance);
         }
-        if (sdkDocumentMetadataConfiguration.search() != null) {
-          software.amazon.kendra.index.Search.SearchBuilder modelSearchBuilder =
-                  software.amazon.kendra.index.Search.builder();
-          Search sdkSearch = sdkDocumentMetadataConfiguration.search();
-          modelSearchBuilder.searchable(sdkSearch.searchable());
-          modelSearchBuilder.facetable(sdkSearch.facetable());
-          modelSearchBuilder.displayable(sdkSearch.displayable());
-          modelDocumentMetadataConfigurationBuilder.search(modelSearchBuilder.build());
+        software.amazon.kendra.index.Search modelSearch = translateFromSdkSearch(sdkDocumentMetadataConfiguration.search());
+        if (modelSearch != null) {
+          modelDocumentMetadataConfigurationBuilder.search(modelSearch);
         }
         modelDocumentMetadataConfigurationList.add(modelDocumentMetadataConfigurationBuilder.build());
       }
       return modelDocumentMetadataConfigurationList;
     } else {
       return new ArrayList<>();
+    }
+  }
+
+  static software.amazon.kendra.index.Relevance translateFromSdkRelevance(Relevance sdkRelevance) {
+    if (sdkRelevance != null) {
+      software.amazon.kendra.index.Relevance.RelevanceBuilder modelRelevanceBuilder =
+              software.amazon.kendra.index.Relevance.builder();
+      modelRelevanceBuilder.importance(sdkRelevance.importance());
+      modelRelevanceBuilder.freshness(sdkRelevance.freshness());
+      modelRelevanceBuilder.duration(sdkRelevance.duration());
+      modelRelevanceBuilder.rankOrder(sdkRelevance.rankOrderAsString());
+      modelRelevanceBuilder.valueImportanceItems(sdkRelevance.valueImportanceMap().entrySet()
+              .stream().map(entry -> ValueImportanceItem.builder().key(entry.getKey()).value(entry.getValue()).build())
+              .collect(Collectors.toList()));
+      return modelRelevanceBuilder.build();
+    } else {
+      return null;
+    }
+  }
+
+  static software.amazon.kendra.index.Search translateFromSdkSearch(Search sdkSearch) {
+    if (sdkSearch != null) {
+      software.amazon.kendra.index.Search.SearchBuilder modelSearchBuilder =
+              software.amazon.kendra.index.Search.builder();
+      modelSearchBuilder.searchable(sdkSearch.searchable());
+      modelSearchBuilder.facetable(sdkSearch.facetable());
+      modelSearchBuilder.displayable(sdkSearch.displayable());
+      return modelSearchBuilder.build();
+    } else {
+      return null;
     }
   }
 
