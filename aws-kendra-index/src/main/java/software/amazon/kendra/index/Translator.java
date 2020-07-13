@@ -111,7 +111,7 @@ public class Translator {
     List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList =
             translateFromSdkDocumentMetadataConfigurationList(describeIndexResponse.documentMetadataConfigurations());
     if (!modelDocumentMetadataConfigurationList.isEmpty()) {
-      builder.documentMetadataConfigurationUpdates(modelDocumentMetadataConfigurationList);
+      builder.documentMetadataConfigurations(modelDocumentMetadataConfigurationList);
     }
 
     return builder.build();
@@ -141,7 +141,7 @@ public class Translator {
             .id(model.getId())
             .roleArn(model.getRoleArn())
             .name(model.getName())
-            .documentMetadataConfigurationUpdates(translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurationUpdates()))
+            .documentMetadataConfigurationUpdates(translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations()))
             .build();
     return updateIndexRequest;
   }
@@ -157,7 +157,7 @@ public class Translator {
             .builder()
             .id(model.getId())
             .documentMetadataConfigurationUpdates(
-                    translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurationUpdates()));
+                    translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations()));
     return updateIndexBuilder.build();
   }
 

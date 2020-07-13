@@ -265,7 +265,7 @@ public class ReadHandlerTest extends AbstractTestBase {
         final ResourceModel model = ResourceModel
                 .builder()
                 .id(id)
-                .documentMetadataConfigurationUpdates(documentMetadataConfigurationList)
+                .documentMetadataConfigurations(documentMetadataConfigurationList)
                 .build();
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
@@ -284,7 +284,7 @@ public class ReadHandlerTest extends AbstractTestBase {
                 .name(name)
                 .roleArn(roleArn)
                 .edition(indexEdition)
-                .documentMetadataConfigurationUpdates(documentMetadataConfigurationList)
+                .documentMetadataConfigurations(documentMetadataConfigurationList)
                 .build();
         assertThat(response.getResourceModel()).isEqualTo(expected);
         assertThat(response.getResourceModels()).isNull();

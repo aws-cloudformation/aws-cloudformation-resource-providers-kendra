@@ -200,8 +200,8 @@
         "ENTERPRISE_EDITION"
       ]
     },
-    "DocumentMetadataConfigurationUpdates": {
-      "description": "Document metadata configuration",
+    "DocumentMetadataConfigurations": {
+      "description": "Document metadata configurations",
       "$ref": "#/definitions/DocumentMetadataConfigurationList"
     }
   },

@@ -71,7 +71,7 @@ class TranslatorTest {
                                 .build())
         );
         documentMetadataConfigurationBuilder.relevance(relevanceBuilder.build());
-        resourceModelBuilder.documentMetadataConfigurationUpdates(
+        resourceModelBuilder.documentMetadataConfigurations(
                 Arrays.asList(documentMetadataConfigurationBuilder.build()));
 
         software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration sdkDocumentMetadataConfiguration =
@@ -103,7 +103,7 @@ class TranslatorTest {
         searchBuilder.searchable(true);
 
         documentMetadataConfigurationBuilder.search(searchBuilder.build());
-        resourceModelBuilder.documentMetadataConfigurationUpdates(
+        resourceModelBuilder.documentMetadataConfigurations(
                 Arrays.asList(documentMetadataConfigurationBuilder.build()));
 
         software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration sdkDocumentMetadataConfiguration =
