@@ -62,7 +62,7 @@ class TranslatorTest {
         relevanceBuilder.freshness(freshness);
         String key = "key";
         Integer value = 5;
-        relevanceBuilder.valueImportanceMap(
+        relevanceBuilder.valueImportanceItems(
                 Arrays.asList(
                         ValueImportanceItem
                                 .builder()

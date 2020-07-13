@@ -174,7 +174,7 @@ public class Translator {
           sdkRelevanceBuilder.importance(modelRelevance.getImportance());
           sdkRelevanceBuilder.duration(modelRelevance.getDuration());
           sdkRelevanceBuilder.rankOrder(modelRelevance.getRankOrder());
-          sdkRelevanceBuilder.valueImportanceMap(modelRelevance.getValueImportanceMap().stream()
+          sdkRelevanceBuilder.valueImportanceMap(modelRelevance.getValueImportanceItems().stream()
                   .collect(Collectors.toMap(ValueImportanceItem::getKey, ValueImportanceItem::getValue)));
           sdkDocumentMetadataConfigurationBuilder.relevance(sdkRelevanceBuilder.build());
         }
@@ -213,7 +213,7 @@ public class Translator {
           modelRelevanceBuilder.freshness(sdkRelevance.freshness());
           modelRelevanceBuilder.duration(sdkRelevance.duration());
           modelRelevanceBuilder.rankOrder(sdkRelevance.rankOrderAsString());
-          modelRelevanceBuilder.valueImportanceMap(sdkRelevance.valueImportanceMap().entrySet()
+          modelRelevanceBuilder.valueImportanceItems(sdkRelevance.valueImportanceMap().entrySet()
                   .stream().map(entry -> ValueImportanceItem.builder().key(entry.getKey()).value(entry.getValue()).build())
                   .collect(Collectors.toList()));
           modelDocumentMetadataConfigurationBuilder.relevance(modelRelevanceBuilder.build());

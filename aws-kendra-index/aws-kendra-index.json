@@ -72,22 +72,17 @@
         "RankOrder": {
           "$ref": "#/definitions/Order"
         },
-        "ValueImportanceMap": {
-          "$ref": "#/definitions/ValueImportanceMap"
+        "ValueImportanceItems": {
+          "$ref": "#/definitions/ValueImportanceItems"
         }
       }
     },
-    "ValueImportanceMap": {
-      "description": "Value Importance Map",
+    "ValueImportanceItems": {
+      "description": "Array of value importance items",
       "type": "array",
       "items": {
         "$ref": "#/definitions/ValueImportanceItem"
       }
-    },
-    "ValueImportanceMapKey": {
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 50
     },
     "ValueImportanceItem": {
       "description": "Value importance item",
@@ -95,13 +90,18 @@
       "properties": {
         "Key": {
           "description": "Importance key",
-          "$ref": "#/definitions/ValueImportanceMapKey"
+          "$ref": "#/definitions/ValueImportanceItemKey"
         },
         "Value": {
           "description": "Importance value",
           "$ref": "#/definitions/Importance"
         }
       }
+    },
+    "ValueImportanceItemKey": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50
     },
     "Search": {
       "description": "Search",
