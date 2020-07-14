@@ -75,14 +75,17 @@ public class CreateHandler extends BaseHandlerStd {
                 // STEP 2.0 [initialize a proxy context]
                 proxy.initiate("AWS-Kendra-Index::Create", proxyClient, model, callbackContext)
                     .translateToServiceRequest(Translator::translateToCreateRequest)
-                    .makeServiceCall(this::createIndex)
-                    .done((createIndexRequest1, createIndexResponse1, proxyInvocation1, model1, context1) -> {
-                        model1.setId(createIndexResponse1.id());
-                        return ProgressEvent.defaultInProgressHandler(context1, callbackDelaySeconds, model1);
-                    })
+                        .makeServiceCall(this::createIndex)
+                        .done((createIndexRequest1, createIndexResponse1, proxyInvocation1, model1, context1) -> {
+                            if (model1.getId() != null && !model1.getId().isEmpty()) {
+                                return ProgressEvent.progress(model1, context1);
+                            }
+                            model1.setId(createIndexResponse1.id());
+                            return ProgressEvent.defaultInProgressHandler(context1, callbackDelaySeconds, model1);
+                        })
             )
-             // stabilize
-            .then(progress -> stabilize(proxy, proxyClient, progress))
+                // stabilize
+                .then(progress -> stabilize(proxy, proxyClient, progress))
              // STEP 3 [TODO: post create and stabilize update]
             .then(progress ->
                 // If your resource is provisioned through multiple API calls, you will need to apply each subsequent update
