@@ -38,7 +38,7 @@ public class CreateHandler extends BaseHandlerStd {
     public CreateHandler() {
         super();
         indexArnBuilder = new IndexArn();
-        callbackDelaySeconds = 60;
+        callbackDelaySeconds = 0;
     }
 
     // Used for testing.
@@ -57,12 +57,10 @@ public class CreateHandler extends BaseHandlerStd {
 
         this.logger = logger;
 
-        final ResourceModel model = request.getDesiredResourceState();
-
         // TODO: Adjust Progress Chain according to your implementation
         // https://github.com/aws-cloudformation/cloudformation-cli-java-plugin/blob/master/src/main/java/software/amazon/cloudformation/proxy/CallChain.java
 
-        return ProgressEvent.progress(model, callbackContext)
+        return ProgressEvent.progress(request.getDesiredResourceState(), callbackContext)
 
             // STEP 1 [check if resource already exists]
             // if target API does not support 'ResourceAlreadyExistsException' then following check is required
@@ -72,14 +70,11 @@ public class CreateHandler extends BaseHandlerStd {
             // STEP 2 [create progress chain - required for resource creation]
             .then(progress ->
                 // If your service API throws 'ResourceAlreadyExistsException' for create requests then CreateHandler can return just proxy.initiate construction
-                // STEP 2.0 [initialize a proxy context]
-                proxy.initiate("AWS-Kendra-Index::Create", proxyClient, model, callbackContext)
-                    .translateToServiceRequest(Translator::translateToCreateRequest)
+                    // STEP 2.0 [initialize a proxy context]
+                    proxy.initiate("AWS-Kendra-Index::Create", proxyClient, request.getDesiredResourceState(), callbackContext)
+                            .translateToServiceRequest(Translator::translateToCreateRequest)
                         .makeServiceCall(this::createIndex)
                         .done((createIndexRequest1, createIndexResponse1, proxyInvocation1, model1, context1) -> {
-                            if (model1.getId() != null && !model1.getId().isEmpty()) {
-                                return ProgressEvent.progress(model1, context1);
-                            }
                             model1.setId(createIndexResponse1.id());
                             return ProgressEvent.defaultInProgressHandler(context1, callbackDelaySeconds, model1);
                         })
@@ -90,7 +85,7 @@ public class CreateHandler extends BaseHandlerStd {
             .then(progress ->
                 // If your resource is provisioned through multiple API calls, you will need to apply each subsequent update
                 // STEP 3.0 [initialize a proxy context]
-                proxy.initiate("AWS-Kendra-Index::postCreate", proxyClient, model, callbackContext)
+                proxy.initiate("AWS-Kendra-Index::postCreate", proxyClient, request.getDesiredResourceState(), callbackContext)
                     // STEP 3.1 [TODO: construct a body of a request]
                     .translateToServiceRequest(Translator::translateToPostCreateUpdateRequest)
                     // STEP 3.2 [TODO: make an api call]
@@ -196,7 +191,7 @@ public class CreateHandler extends BaseHandlerStd {
                 progress.getCallbackContext())
                 .translateToServiceRequest(Function.identity())
                 .makeServiceCall(EMPTY_CALL)
-                .stabilize((resourceModel, response, proxyInvocation, model, callbackContext) ->
+                .stabilize((request, response, proxyInvocation, model, callbackContext) ->
                         isStabilized(proxyInvocation, model)).progress();
 
     }
