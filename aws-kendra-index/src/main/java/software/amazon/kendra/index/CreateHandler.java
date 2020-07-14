@@ -33,14 +33,19 @@ public class CreateHandler extends BaseHandlerStd {
 
     private IndexArnBuilder indexArnBuilder;
 
+    private int callbackDelaySeconds;
+
     public CreateHandler() {
         super();
         indexArnBuilder = new IndexArn();
+        callbackDelaySeconds = 60;
     }
 
-    public CreateHandler(IndexArnBuilder indexArnBuilder) {
+    // Used for testing.
+    public CreateHandler(IndexArnBuilder indexArnBuilder, int callbackDelaySeconds) {
         super();
         this.indexArnBuilder = indexArnBuilder;
+        this.callbackDelaySeconds = callbackDelaySeconds;
     }
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
@@ -73,7 +78,7 @@ public class CreateHandler extends BaseHandlerStd {
                     .makeServiceCall(this::createIndex)
                     .done((createIndexRequest1, createIndexResponse1, proxyInvocation1, model1, context1) -> {
                         model1.setId(createIndexResponse1.id());
-                        return ProgressEvent.defaultInProgressHandler(context1, 0, model1);
+                        return ProgressEvent.defaultInProgressHandler(context1, callbackDelaySeconds, model1);
                     })
             )
              // stabilize

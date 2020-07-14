@@ -206,6 +206,7 @@
       "permissions": [
         "kendra:CreateIndex",
         "kendra:DescribeIndex",
+        "kendra:UpdateIndex",
         "kendra:ListTagsForResource",
         "iam:PassRole"
       ],

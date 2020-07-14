@@ -72,7 +72,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_SimpleSuccess() {
-        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder, 0);
 
         String name = "testName";
         String roleArn = "testRoleArn";
@@ -130,7 +130,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_SimpleSuccessTransitionsFromCreatingToActive() {
-        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder, 0);
 
         String name = "testName";
         String roleArn = "testRoleArn";
@@ -197,7 +197,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_FailWith_InvalidRoleArn() {
-        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder, 0);
 
         when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
                 .thenThrow(ValidationException.builder().build());
@@ -220,7 +220,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_FailWith_GeneralAwsServiceException() {
-        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder, 0);
 
         when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
                 .thenThrow(AwsServiceException.builder().build());
@@ -243,7 +243,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_CreateIndexFailedAsynchronously() {
-        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder, 0);
 
         String name = "testName";
         String roleArn = "testRoleArn";
@@ -278,7 +278,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_FailWith_ConflictException() {
-        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder, 0);
 
         when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
                 .thenThrow(ConflictException.builder().build());
@@ -301,7 +301,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_Tags() {
-        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder, 0);
 
         String name = "testName";
         String roleArn = "testRoleArn";
