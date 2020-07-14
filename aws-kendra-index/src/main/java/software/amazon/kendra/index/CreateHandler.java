@@ -33,19 +33,15 @@ public class CreateHandler extends BaseHandlerStd {
 
     private IndexArnBuilder indexArnBuilder;
 
-    private int callbackDelaySeconds;
-
     public CreateHandler() {
         super();
         indexArnBuilder = new IndexArn();
-        callbackDelaySeconds = 0;
     }
 
     // Used for testing.
-    public CreateHandler(IndexArnBuilder indexArnBuilder, int callbackDelaySeconds) {
+    public CreateHandler(IndexArnBuilder indexArnBuilder) {
         super();
         this.indexArnBuilder = indexArnBuilder;
-        this.callbackDelaySeconds = callbackDelaySeconds;
     }
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
@@ -76,11 +72,11 @@ public class CreateHandler extends BaseHandlerStd {
                         .makeServiceCall(this::createIndex)
                         .done((createIndexRequest1, createIndexResponse1, proxyInvocation1, model1, context1) -> {
                             model1.setId(createIndexResponse1.id());
-                            return ProgressEvent.defaultInProgressHandler(context1, callbackDelaySeconds, model1);
+                            return ProgressEvent.progress(model1, context1);
                         })
             )
                 // stabilize
-                .then(progress -> stabilize(proxy, proxyClient, progress))
+            .then(progress -> stabilize(proxy, proxyClient, progress))
              // STEP 3 [TODO: post create and stabilize update]
             .then(progress ->
                 // If your resource is provisioned through multiple API calls, you will need to apply each subsequent update
