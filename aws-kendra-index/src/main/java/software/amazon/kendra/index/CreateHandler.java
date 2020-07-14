@@ -169,6 +169,8 @@ public class CreateHandler extends BaseHandlerStd {
         try {
             updateIndexResponse = proxyClient.injectCredentialsAndInvokeV2(updateIndexRequest,
                     proxyClient.client()::updateIndex);
+        } catch (ValidationException e) {
+            throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME + e.getMessage(), e);
         } catch (final AwsServiceException e) {
             /*
              * While the handler contract states that the handler must always return a progress event,
