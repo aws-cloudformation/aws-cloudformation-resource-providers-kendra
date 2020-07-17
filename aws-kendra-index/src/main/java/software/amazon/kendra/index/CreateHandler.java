@@ -78,7 +78,7 @@ public class CreateHandler extends BaseHandlerStd {
                 .then(progress ->
                         // If your resource is provisioned through multiple API calls, you will need to apply each subsequent update
                         // STEP 3.0 [initialize a proxy context]
-                        proxy.initiate("AWS-Kendra-Index::postCreate", proxyClient, request.getDesiredResourceState(), callbackContext)
+                        proxy.initiate("AWS-Kendra-Index::PostCreateUpdate", proxyClient, request.getDesiredResourceState(), callbackContext)
                                 // STEP 3.1 [TODO: construct a body of a request]
                                 .translateToServiceRequest(Translator::translateToPostCreateUpdateRequest)
                                 // STEP 3.2 [TODO: make an api call]
@@ -165,7 +165,7 @@ public class CreateHandler extends BaseHandlerStd {
             final AmazonWebServicesClientProxy proxy,
             final ProxyClient<KendraClient> proxyClient,
             final ProgressEvent<ResourceModel, CallbackContext> progress) {
-        return proxy.initiate("AWS-Kendra-Index::stabilize", proxyClient, progress.getResourceModel(),
+        return proxy.initiate("AWS-Kendra-Index::PostCreateStabilize", proxyClient, progress.getResourceModel(),
                 progress.getCallbackContext())
                 .translateToServiceRequest(Function.identity())
                 .makeServiceCall(EMPTY_CALL)
