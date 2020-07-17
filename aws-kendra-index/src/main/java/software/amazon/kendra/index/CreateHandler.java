@@ -13,8 +13,8 @@ import software.amazon.awssdk.services.kendra.model.UpdateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
+import software.amazon.cloudformation.exceptions.CfnNotStabilizedException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
-import software.amazon.cloudformation.exceptions.CfnServiceInternalErrorException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -69,11 +69,8 @@ public class CreateHandler extends BaseHandlerStd {
                     // STEP 2.0 [initialize a proxy context]
                     proxy.initiate("AWS-Kendra-Index::Create", proxyClient, request.getDesiredResourceState(), callbackContext)
                             .translateToServiceRequest(Translator::translateToCreateRequest)
-                        .makeServiceCall(this::createIndex)
-                        .done((createIndexRequest1, createIndexResponse1, proxyInvocation1, model1, context1) -> {
-                            model1.setId(createIndexResponse1.id());
-                            return ProgressEvent.progress(model1, context1);
-                        })
+                            .makeServiceCall(this::createIndex)
+                            .done(this::setId)
             )
                 // stabilize
             .then(progress -> stabilize(proxy, proxyClient, progress))
@@ -91,6 +88,17 @@ public class CreateHandler extends BaseHandlerStd {
             // STEP 4 [TODO: describe call/chain to return the resource model]
             .then(progress -> new ReadHandler(indexArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
     }
+
+    private ProgressEvent<ResourceModel, CallbackContext> setId(CreateIndexRequest createIndexRequest,
+                                                                CreateIndexResponse createIndexResponse,
+                                                                ProxyClient<KendraClient> proxyClient,
+                                                                ResourceModel resourceModel,
+                                                                CallbackContext callbackContext) {
+
+        resourceModel.setId(createIndexResponse.id());
+        return ProgressEvent.progress(resourceModel, callbackContext);
+    }
+
 
     /**
      * If your service API is not idempotent, meaning it does not distinguish duplicate create requests against some identifier (e.g; resource Name)
@@ -200,7 +208,7 @@ public class CreateHandler extends BaseHandlerStd {
                 proxyClient.client()::describeIndex);
         IndexStatus indexStatus = describeIndexResponse.status();
         if (indexStatus.equals(IndexStatus.FAILED)) {
-            throw new CfnServiceInternalErrorException(String.format("Index %s failed to get created.", model.getId()));
+            throw new CfnNotStabilizedException(ResourceModel.TYPE_NAME, model.getId());
         }
         return indexStatus.equals(IndexStatus.ACTIVE);
     }

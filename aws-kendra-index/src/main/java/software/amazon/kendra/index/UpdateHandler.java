@@ -35,7 +35,7 @@ public class UpdateHandler extends BaseHandlerStd {
 
     public UpdateHandler() {
         super();
-        this.indexArnBuilder = new IndexArn();
+        indexArnBuilder = new IndexArn();
     }
 
     public UpdateHandler(IndexArnBuilder indexArnBuilder) {
