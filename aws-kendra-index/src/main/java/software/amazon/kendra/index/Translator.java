@@ -53,10 +53,10 @@ public class Translator {
   }
 
   static ListTagsForResourceRequest translateToListTagsRequest(final String arn) {
-      return ListTagsForResourceRequest
-              .builder()
-              .resourceARN(arn)
-              .build();
+    return ListTagsForResourceRequest
+            .builder()
+            .resourceARN(arn)
+            .build();
   }
 
   static UntagResourceRequest translateToUntagResourceRequest(Set<software.amazon.kendra.index.Tag> tags, String arn) {
@@ -76,8 +76,8 @@ public class Translator {
   }
 
   /**
-     * Request to read a resource
-     * @param model resource model
+   * Request to read a resource
+   * @param model resource model
    * @return describeIndexRequest the aws service request to describe a resource
    */
   static DescribeIndexRequest translateToReadRequest(final ResourceModel model) {
@@ -296,7 +296,7 @@ public class Translator {
 
   private static <T> Stream<T> streamOfOrEmpty(final Collection<T> collection) {
     return Optional.ofNullable(collection)
-        .map(Collection::stream)
-        .orElseGet(Stream::empty);
+            .map(Collection::stream)
+            .orElseGet(Stream::empty);
   }
 }

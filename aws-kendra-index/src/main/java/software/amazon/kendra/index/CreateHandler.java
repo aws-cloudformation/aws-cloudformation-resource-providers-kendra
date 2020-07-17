@@ -45,11 +45,11 @@ public class CreateHandler extends BaseHandlerStd {
     }
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
-        final AmazonWebServicesClientProxy proxy,
-        final ResourceHandlerRequest<ResourceModel> request,
-        final CallbackContext callbackContext,
-        final ProxyClient<KendraClient> proxyClient,
-        final Logger logger) {
+            final AmazonWebServicesClientProxy proxy,
+            final ResourceHandlerRequest<ResourceModel> request,
+            final CallbackContext callbackContext,
+            final ProxyClient<KendraClient> proxyClient,
+            final Logger logger) {
 
         this.logger = logger;
 
@@ -58,35 +58,35 @@ public class CreateHandler extends BaseHandlerStd {
 
         return ProgressEvent.progress(request.getDesiredResourceState(), callbackContext)
 
-            // STEP 1 [check if resource already exists]
-            // if target API does not support 'ResourceAlreadyExistsException' then following check is required
-            // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
-            //.then(progress -> checkForPreCreateResourceExistence(proxy, request, progress))
+                // STEP 1 [check if resource already exists]
+                // if target API does not support 'ResourceAlreadyExistsException' then following check is required
+                // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
+                //.then(progress -> checkForPreCreateResourceExistence(proxy, request, progress))
 
-            // STEP 2 [create progress chain - required for resource creation]
-            .then(progress ->
-                // If your service API throws 'ResourceAlreadyExistsException' for create requests then CreateHandler can return just proxy.initiate construction
-                    // STEP 2.0 [initialize a proxy context]
-                    proxy.initiate("AWS-Kendra-Index::Create", proxyClient, request.getDesiredResourceState(), callbackContext)
-                            .translateToServiceRequest(Translator::translateToCreateRequest)
-                            .makeServiceCall(this::createIndex)
-                            .done(this::setId)
-            )
-                // stabilize
-            .then(progress -> stabilize(proxy, proxyClient, progress))
-             // STEP 3 [TODO: post create and stabilize update]
-            .then(progress ->
-                // If your resource is provisioned through multiple API calls, you will need to apply each subsequent update
-                // STEP 3.0 [initialize a proxy context]
-                proxy.initiate("AWS-Kendra-Index::postCreate", proxyClient, request.getDesiredResourceState(), callbackContext)
-                    // STEP 3.1 [TODO: construct a body of a request]
-                    .translateToServiceRequest(Translator::translateToPostCreateUpdateRequest)
-                    // STEP 3.2 [TODO: make an api call]
-                    .makeServiceCall(this::postCreate)
-                    .progress()
+                // STEP 2 [create progress chain - required for resource creation]
+                .then(progress ->
+                        // If your service API throws 'ResourceAlreadyExistsException' for create requests then CreateHandler can return just proxy.initiate construction
+                        // STEP 2.0 [initialize a proxy context]
+                        proxy.initiate("AWS-Kendra-Index::Create", proxyClient, request.getDesiredResourceState(), callbackContext)
+                                .translateToServiceRequest(Translator::translateToCreateRequest)
+                                .makeServiceCall(this::createIndex)
+                                .done(this::setId)
                 )
-            // STEP 4 [TODO: describe call/chain to return the resource model]
-            .then(progress -> new ReadHandler(indexArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
+                // stabilize
+                .then(progress -> stabilize(proxy, proxyClient, progress))
+                // STEP 3 [TODO: post create and stabilize update]
+                .then(progress ->
+                        // If your resource is provisioned through multiple API calls, you will need to apply each subsequent update
+                        // STEP 3.0 [initialize a proxy context]
+                        proxy.initiate("AWS-Kendra-Index::postCreate", proxyClient, request.getDesiredResourceState(), callbackContext)
+                                // STEP 3.1 [TODO: construct a body of a request]
+                                .translateToServiceRequest(Translator::translateToPostCreateUpdateRequest)
+                                // STEP 3.2 [TODO: make an api call]
+                                .makeServiceCall(this::postCreate)
+                                .progress()
+                )
+                // STEP 4 [TODO: describe call/chain to return the resource model]
+                .then(progress -> new ReadHandler(indexArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
     }
 
     private ProgressEvent<ResourceModel, CallbackContext> setId(CreateIndexRequest createIndexRequest,
@@ -99,32 +99,6 @@ public class CreateHandler extends BaseHandlerStd {
         return ProgressEvent.progress(resourceModel, callbackContext);
     }
 
-
-    /**
-     * If your service API is not idempotent, meaning it does not distinguish duplicate create requests against some identifier (e.g; resource Name)
-     * and instead returns a 200 even though a resource already exists, you must first check if the resource exists here
-     * NOTE: If your service API throws 'ResourceAlreadyExistsException' for create requests this method is not necessary
-     * @param proxy Amazon webservice proxy to inject credentials correctly.
-     * @param request incoming resource handler request
-     * @param progressEvent event of the previous state indicating success, in progress with delay callback or failed state
-     * @return progressEvent indicating success, in progress with delay callback or failed state
-     */
-    /*
-    private ProgressEvent<ResourceModel, CallbackContext> checkForPreCreateResourceExistence(
-        final AmazonWebServicesClientProxy proxy,
-        final ResourceHandlerRequest<ResourceModel> request,
-        final ProgressEvent<ResourceModel, CallbackContext> progressEvent) {
-        final ResourceModel model = progressEvent.getResourceModel();
-        final CallbackContext callbackContext = progressEvent.getCallbackContext();
-        try {
-            new ReadHandler().handleRequest(proxy, request, callbackContext, logger);
-            throw new CfnAlreadyExistsException(ResourceModel.TYPE_NAME, Objects.toString(model.getPrimaryIdentifier()));
-        } catch (CfnNotFoundException e) {
-            logger.log(model.getPrimaryIdentifier() + " does not exist; creating the resource.");
-            return ProgressEvent.progress(model, callbackContext);
-        }
-    }
-     */
 
     /**
      * Implement client invocation of the create request through the proxyClient, which is already initialised with
@@ -165,8 +139,8 @@ public class CreateHandler extends BaseHandlerStd {
      * @return updateIndexResponse create resource response
      */
     private UpdateIndexResponse postCreate(
-        final UpdateIndexRequest updateIndexRequest,
-        final ProxyClient<KendraClient> proxyClient) {
+            final UpdateIndexRequest updateIndexRequest,
+            final ProxyClient<KendraClient> proxyClient) {
         UpdateIndexResponse updateIndexResponse;
         try {
             updateIndexResponse = proxyClient.injectCredentialsAndInvokeV2(updateIndexRequest,

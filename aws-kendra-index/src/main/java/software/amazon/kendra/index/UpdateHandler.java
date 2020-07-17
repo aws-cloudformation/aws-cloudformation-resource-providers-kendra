@@ -44,11 +44,11 @@ public class UpdateHandler extends BaseHandlerStd {
     }
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
-        final AmazonWebServicesClientProxy proxy,
-        final ResourceHandlerRequest<ResourceModel> request,
-        final CallbackContext callbackContext,
-        final ProxyClient<KendraClient> proxyClient,
-        final Logger logger) {
+            final AmazonWebServicesClientProxy proxy,
+            final ResourceHandlerRequest<ResourceModel> request,
+            final CallbackContext callbackContext,
+            final ProxyClient<KendraClient> proxyClient,
+            final Logger logger) {
 
         this.logger = logger;
 
@@ -58,7 +58,7 @@ public class UpdateHandler extends BaseHandlerStd {
         // https://github.com/aws-cloudformation/cloudformation-cli-java-plugin/blob/master/src/main/java/software/amazon/cloudformation/proxy/CallChain.java
 
         return ProgressEvent.progress(model, callbackContext)
-            // STEP 1 [first update/stabilize progress chain - required for resource update]
+                // STEP 1 [first update/stabilize progress chain - required for resource update]
                 .then(progress ->
                         // STEP 1.0 [initialize a proxy context]
                         proxy.initiate("AWS-Kendra-Index::Update", proxyClient, model, callbackContext)
@@ -100,8 +100,8 @@ public class UpdateHandler extends BaseHandlerStd {
      * @return update resource response
      */
     private UpdateIndexResponse updateIndex(
-        final UpdateIndexRequest updateIndexRequest,
-        final ProxyClient<KendraClient> proxyClient) {
+            final UpdateIndexRequest updateIndexRequest,
+            final ProxyClient<KendraClient> proxyClient) {
         UpdateIndexResponse updateIndexResponse;
         try {
             updateIndexResponse = proxyClient.injectCredentialsAndInvokeV2(updateIndexRequest, proxyClient.client()::updateIndex);
