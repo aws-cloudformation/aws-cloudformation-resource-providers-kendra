@@ -67,7 +67,7 @@ public class ReadHandler extends BaseHandlerStd {
             listTagsForResourceResponse = proxyClient.injectCredentialsAndInvokeV2(listTagsForResourceRequest,
                     proxyClient.client()::listTagsForResource);
         } catch (ResourceInUseException e) {
-            throw new CfnNotStabilizedException(ResourceModel.TYPE_NAME, model.getId(), e);
+            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e);
         }
 
         return constructResourceModelFromResponse(describeIndexResponse, listTagsForResourceResponse, indexArn);
