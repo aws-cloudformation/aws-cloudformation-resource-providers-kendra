@@ -1,105 +1,204 @@
 {
   "typeName": "AWS::Kendra::DataSource",
-  "description": "An example resource schema demonstrating some basic constructs and validation rules.",
-  "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-rpdk.git",
+  "description": "Kendra DataSource",
+  "sourceUrl": "https://docs.aws.amazon.com/kendra/latest/dg/hiw-data-source.html",
   "definitions": {
-    "InitechDateFormat": {
-      "$comment": "Use the `definitions` block to provide shared resource property schemas",
+    "IndexId": {
+      "description": "ID of Index",
       "type": "string",
-      "format": "date-time"
+      "minLength": 36,
+      "maxLength": 36,
+      "pattern": "[a-zA-Z0-9][a-zA-Z0-9-]*"
     },
-    "Memo": {
+    "Tag": {
+      "description": "Tag type",
       "type": "object",
       "properties": {
-        "Heading": {
-          "type": "string"
+        "Key": {
+          "description": "A string used to identify this tag. You can specify a maximum of 128 characters for a tag key.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
         },
-        "Body": {
-          "type": "string"
+        "Value": {
+          "description": "A string containing the value for this tag. You can specify a maximum of 256 characters for a tag value.",
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 256
         }
       },
+      "required": [
+        "Key",
+        "Value"
+      ],
       "additionalProperties": false
+    },
+    "DataSourceInclusionsExclusionsStrings": {
+      "type": "array",
+      "uniqueItems": true,
+      "insertionOrder": false,
+      "maxItems": 100,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 50
+      }
+    },
+    "S3Path": {
+      "type": "object",
+      "properties": {
+        "Bucket": {
+          "$ref": "#/definitions/S3BucketName"
+        },
+        "Key": {
+          "$ref": "#/definitions/S3ObjectKey"
+        }
+      },
+      "required": [
+        "Bucket",
+        "Key"
+      ]
+    },
+    "S3BucketName": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 63,
+      "pattern": "[a-z0-9][\\.\\-a-z0-9]{1,61}[a-z0-9]"
+    },
+    "S3ObjectKey": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "DocumentsMetadataConfiguration": {
+      "type": "object",
+      "properties": {
+        "S3Prefix": {
+          "$ref": "#/definitions/S3ObjectKey"
+        }
+      }
+    },
+    "AccessControlListConfiguration": {
+      "type": "object",
+      "properties": {
+        "KeyPath": {
+          "$ref": "#/definitions/S3ObjectKey"
+        }
+      }
+    },
+    "S3DataSourceConfiguration": {
+      "description": "S3 Data Source configuration",
+      "type": "object",
+      "properties": {
+        "BucketName": {
+          "$ref": "#/definitions/S3BucketName"
+        },
+        "InclusionPrefixes": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "InclusionPatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "ExclusionPatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "DocumentsMetadataConfiguration": {
+          "$ref": "#/definitions/DocumentsMetadataConfiguration"
+        },
+        "AccessControlListConfiguration": {
+          "$ref": "#/definitions/AccessControlListConfiguration"
+        }
+      },
+      "required": [
+        "BucketName"
+      ]
     }
   },
   "properties": {
-    "TPSCode": {
-      "description": "A TPS Code is automatically generated on creation and assigned as the unique identifier.",
+    "Id": {
+      "description": "ID of Data Source",
       "type": "string",
-      "pattern": "^[A-Z]{3,5}[0-9]{8}-[0-9]{4}$"
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "[a-zA-Z0-9][a-zA-Z0-9_-]*"
     },
-    "Title": {
-      "description": "The title of the TPS report is a mandatory element.",
+    "Name": {
+      "description": "Name of Data Source",
       "type": "string",
-      "minLength": 20,
-      "maxLength": 250
+      "minLength": 1,
+      "maxLength": 1000,
+      "pattern": "[a-zA-Z0-9][a-zA-Z0-9_-]*"
     },
-    "CoverSheetIncluded": {
-      "description": "Required for all TPS Reports submitted after 2/19/1999",
-      "type": "boolean"
+    "IndexId": {
+      "$ref": "#/definitions/IndexId"
     },
-    "DueDate": {
-      "$ref": "#/definitions/InitechDateFormat"
-    },
-    "ApprovalDate": {
-      "$ref": "#/definitions/InitechDateFormat"
-    },
-    "Memo": {
-      "$ref": "#/definitions/Memo"
-    },
-    "SecondCopyOfMemo": {
-      "description": "In case you didn't get the first one.",
-      "$ref": "#/definitions/Memo"
-    },
-    "TestCode": {
+    "Type": {
+      "description": "Data Source type",
       "type": "string",
       "enum": [
-        "NOT_STARTED",
-        "CANCELLED"
+        "S3"
       ]
     },
-    "Authors": {
+    "DataSourceConfiguration": {
+      "type": "object",
+      "properties": {
+        "S3Configuration": {
+          "$ref": "#/definitions/S3DataSourceConfiguration"
+        }
+      }
+    },
+    "Description": {
+      "description": "Description of Data Source",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000,
+      "pattern": "^\\P{C}*$"
+    },
+    "Schedule": {
+      "description": "Schedule",
+      "type": "string"
+    },
+    "RoleArn": {
+      "description": "Role ARN",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1284,
+      "pattern": "arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}"
+    },
+    "Tags": {
+      "description": "Tags for Data Source.",
       "type": "array",
+      "uniqueItems": true,
+      "insertionOrder": false,
+      "maxItems": 200,
       "items": {
-        "type": "string"
+        "$ref": "#/definitions/Tag"
       }
     }
   },
-  "additionalProperties": false,
   "required": [
-    "TestCode",
-    "Title"
-  ],
-  "readOnlyProperties": [
-    "/properties/TPSCode"
-  ],
-  "primaryIdentifier": [
-    "/properties/TPSCode"
+    "Name",
+    "IndexId",
+    "Type",
+    "Configuration",
+    "RoleArn"
   ],
   "handlers": {
     "create": {
       "permissions": [
-        "initech:CreateReport"
-      ]
-    },
-    "read": {
-      "permissions": [
-        "initech:DescribeReport"
-      ]
-    },
-    "update": {
-      "permissions": [
-        "initech:UpdateReport"
-      ]
-    },
-    "delete": {
-      "permissions": [
-        "initech:DeleteReport"
-      ]
-    },
-    "list": {
-      "permissions": [
-        "initech:ListReports"
+        "kendra:CreateDataSource"
       ]
     }
-  }
+  },
+  "additionalProperties": false,
+  "primaryIdentifier": [
+    "/properties/Id"
+  ],
+  "readOnlyProperties": [
+    "/properties/Id"
+  ],
+  "createOnlyProperties": [
+    "/properties/Tags",
+    "/properties/Type"
+  ]
 }
