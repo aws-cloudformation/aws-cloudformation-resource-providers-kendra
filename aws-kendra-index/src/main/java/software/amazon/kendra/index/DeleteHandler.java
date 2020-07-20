@@ -45,13 +45,10 @@ public class DeleteHandler extends BaseHandlerStd {
                         // If your service API throws 'ResourceNotFoundException' for delete requests then DeleteHandler can return just proxy.initiate construction
                         // STEP 2.0 [initialize a proxy context]
                         proxy.initiate("AWS-Kendra-Index::Delete", proxyClient, model, callbackContext)
-
                                 // STEP 2.1 [TODO: construct a body of a request]
                                 .translateToServiceRequest(Translator::translateToDeleteRequest)
-
                                 // STEP 2.2 [TODO: make an api call]
                                 .makeServiceCall(this::deleteIndex)
-
                                 // STEP 2.3 [TODO: stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]
                                 // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
                                 .stabilize(this::stabilizedOnDelete)
@@ -82,7 +79,7 @@ public class DeleteHandler extends BaseHandlerStd {
              * Each BaseHandlerException maps to a specific error code, and you should map service exceptions as closely as possible
              * to more specific error codes
              */
-            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e);
+            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME + e.getMessage(), e);
         }
 
         logger.log(String.format("%s successfully deleted.", ResourceModel.TYPE_NAME));

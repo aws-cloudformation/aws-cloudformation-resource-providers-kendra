@@ -116,7 +116,7 @@ public class UpdateHandler extends BaseHandlerStd {
              * Each BaseHandlerException maps to a specific error code, and you should map service exceptions as closely as possible
              * to more specific error codes
              */
-            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e);
+            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME + e.getMessage(), e);
         }
 
         logger.log(String.format("%s has successfully been updated.", ResourceModel.TYPE_NAME));
