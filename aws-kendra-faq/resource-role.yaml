@@ -24,10 +24,6 @@ Resources:
               - Effect: Allow
                 Action:
                 - "initech:CreateReport"
-                - "initech:DeleteReport"
-                - "initech:DescribeReport"
-                - "initech:ListReports"
-                - "initech:UpdateReport"
                 Resource: "*"
 Outputs:
   ExecutionRoleArn:

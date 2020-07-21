@@ -3,102 +3,104 @@
   "description": "An example resource schema demonstrating some basic constructs and validation rules.",
   "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-rpdk.git",
   "definitions": {
-    "InitechDateFormat": {
-      "$comment": "Use the `definitions` block to provide shared resource property schemas",
+    "IndexId": {
+      "description": "Unique ID of Index",
       "type": "string",
-      "format": "date-time"
+      "minLength": 36,
+      "maxLength": 36,
+      "pattern": "[a-zA-Z0-9][a-zA-Z0-9-]*"
     },
-    "Memo": {
+    "Description": {
+      "description": "Description of Faq",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000,
+      "pattern": "^\\P{C}*$"
+    },
+    "S3Path": {
       "type": "object",
       "properties": {
-        "Heading": {
-          "type": "string"
+        "Bucket": {
+          "$ref": "#/definitions/S3BucketName"
         },
-        "Body": {
-          "type": "string"
+        "Key": {
+          "$ref": "#/definitions/S3ObjectKey"
         }
       },
-      "additionalProperties": false
+      "required": [
+        "Bucket",
+        "Key"
+      ]
+    },
+    "S3BucketName": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 63,
+      "pattern": "[a-z0-9][\\.\\-a-z0-9]{1,61}[a-z0-9]"
+    },
+    "S3ObjectKey": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "FaqName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "[a-zA-Z0-9][a-zA-Z0-9_-]*"
     }
   },
   "properties": {
-    "TPSCode": {
-      "description": "A TPS Code is automatically generated on creation and assigned as the unique identifier.",
+    "Id": {
       "type": "string",
-      "pattern": "^[A-Z]{3,5}[0-9]{8}-[0-9]{4}$"
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "[a-zA-Z0-9][a-zA-Z0-9_-]*\\"
     },
-    "Title": {
-      "description": "The title of the TPS report is a mandatory element.",
+    "IndexId": {
+      "$ref": "#/definitions/S3BucketName"
+    },
+    "Name": {
+      "$ref": "#/definitions/FaqName"
+    },
+    "Description": {
+      "$ref": "#/definitions/Description"
+    },
+    "S3Path": {
+      "$ref": "#/definitions/S3Path"
+    },
+    "RoleArn": {
+      "description": "Role ARN",
       "type": "string",
-      "minLength": 20,
-      "maxLength": 250
-    },
-    "CoverSheetIncluded": {
-      "description": "Required for all TPS Reports submitted after 2/19/1999",
-      "type": "boolean"
-    },
-    "DueDate": {
-      "$ref": "#/definitions/InitechDateFormat"
-    },
-    "ApprovalDate": {
-      "$ref": "#/definitions/InitechDateFormat"
-    },
-    "Memo": {
-      "$ref": "#/definitions/Memo"
-    },
-    "SecondCopyOfMemo": {
-      "description": "In case you didn't get the first one.",
-      "$ref": "#/definitions/Memo"
-    },
-    "TestCode": {
-      "type": "string",
-      "enum": [
-        "NOT_STARTED",
-        "CANCELLED"
-      ]
-    },
-    "Authors": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
+      "minLength": 1,
+      "maxLength": 1284,
+      "pattern": "arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}"
     }
   },
   "additionalProperties": false,
   "required": [
-    "TestCode",
-    "Title"
+    "IndexId",
+    "Name",
+    "S3Path",
+    "RoleArn"
   ],
   "readOnlyProperties": [
-    "/properties/TPSCode"
+    "/properties/Id"
+  ],
+  "createOnlyProperties": [
+    "/properties/IndexId",
+    "/properties/Name",
+    "/properties/S3Path",
+    "/properties/RoleArn",
+    "/properties/Description"
   ],
   "primaryIdentifier": [
-    "/properties/TPSCode"
+    "/properties/Id"
   ],
   "handlers": {
     "create": {
       "permissions": [
         "initech:CreateReport"
-      ]
-    },
-    "read": {
-      "permissions": [
-        "initech:DescribeReport"
-      ]
-    },
-    "update": {
-      "permissions": [
-        "initech:UpdateReport"
-      ]
-    },
-    "delete": {
-      "permissions": [
-        "initech:DeleteReport"
-      ]
-    },
-    "list": {
-      "permissions": [
-        "initech:ListReports"
       ]
     }
   }
