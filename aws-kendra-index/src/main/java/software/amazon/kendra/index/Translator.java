@@ -161,6 +161,7 @@ public class Translator {
             .roleArn(model.getRoleArn())
             .name(model.getName())
             .documentMetadataConfigurationUpdates(translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations()))
+            .description(model.getDescription())
             .build();
     return updateIndexRequest;
   }
