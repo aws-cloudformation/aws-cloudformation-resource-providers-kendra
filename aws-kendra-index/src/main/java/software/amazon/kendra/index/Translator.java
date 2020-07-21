@@ -11,6 +11,7 @@ import software.amazon.awssdk.services.kendra.model.ListIndicesRequest;
 import software.amazon.awssdk.services.kendra.model.ListIndicesResponse;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
+import software.amazon.awssdk.services.kendra.model.ServerSideEncryptionConfiguration;
 import software.amazon.awssdk.services.kendra.model.Tag;
 import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
@@ -48,6 +49,14 @@ public class Translator {
       builder.tags(model.getTags().stream().map(
               x -> Tag.builder().key(x.getKey()).value(x.getValue()).build())
               .collect(Collectors.toList()));
+    }
+    if (model.getServerSideEncryptionConfiguration() != null
+            && (model.getServerSideEncryptionConfiguration().getKmsKeyId() != null)) {
+      builder.serverSideEncryptionConfiguration(
+              ServerSideEncryptionConfiguration
+                      .builder()
+                      .kmsKeyId(model.getServerSideEncryptionConfiguration().getKmsKeyId())
+                      .build());
     }
     return builder.build();
   }
@@ -102,6 +111,13 @@ public class Translator {
             .name(describeIndexResponse.name())
             .roleArn(describeIndexResponse.roleArn())
             .edition(describeIndexResponse.edition().toString());
+    if (describeIndexResponse.serverSideEncryptionConfiguration() != null) {
+      builder.serverSideEncryptionConfiguration(
+              software.amazon.kendra.index.ServerSideEncryptionConfiguration
+                      .builder()
+                      .kmsKeyId(describeIndexResponse.serverSideEncryptionConfiguration().kmsKeyId())
+                      .build());
+    }
     if (listTagsForResourceResponse.tags() != null && !listTagsForResourceResponse.tags().isEmpty()) {
       List<software.amazon.kendra.index.Tag> tags = listTagsForResourceResponse.tags().stream()
               .map(x -> software.amazon.kendra.index.Tag.builder().key(x.key()).value(x.value()).build())
