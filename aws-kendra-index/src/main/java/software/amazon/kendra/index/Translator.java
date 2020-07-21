@@ -4,6 +4,9 @@ import software.amazon.awssdk.services.kendra.model.CreateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DeleteIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
+import software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration;
+import software.amazon.awssdk.services.kendra.model.Relevance;
+import software.amazon.awssdk.services.kendra.model.Search;
 import software.amazon.awssdk.services.kendra.model.ListIndicesRequest;
 import software.amazon.awssdk.services.kendra.model.ListIndicesResponse;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
@@ -13,6 +16,7 @@ import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -49,10 +53,10 @@ public class Translator {
   }
 
   static ListTagsForResourceRequest translateToListTagsRequest(final String arn) {
-      return ListTagsForResourceRequest
-              .builder()
-              .resourceARN(arn)
-              .build();
+    return ListTagsForResourceRequest
+            .builder()
+            .resourceARN(arn)
+            .build();
   }
 
   static UntagResourceRequest translateToUntagResourceRequest(Set<software.amazon.kendra.index.Tag> tags, String arn) {
@@ -72,8 +76,8 @@ public class Translator {
   }
 
   /**
-     * Request to read a resource
-     * @param model resource model
+   * Request to read a resource
+   * @param model resource model
    * @return describeIndexRequest the aws service request to describe a resource
    */
   static DescribeIndexRequest translateToReadRequest(final ResourceModel model) {
@@ -104,6 +108,11 @@ public class Translator {
               .collect(Collectors.toList());
       builder.tags(tags);
     }
+    List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList =
+            translateFromSdkDocumentMetadataConfigurationList(describeIndexResponse.documentMetadataConfigurations());
+    if (!modelDocumentMetadataConfigurationList.isEmpty()) {
+      builder.documentMetadataConfigurations(modelDocumentMetadataConfigurationList);
+    }
 
     return builder.build();
   }
@@ -126,12 +135,13 @@ public class Translator {
    * @param model resource model
    * @return updateIndexRequest the aws service request to modify a resource
    */
-  static UpdateIndexRequest translateToFirstUpdateRequest(final ResourceModel model) {
+  static UpdateIndexRequest translateToUpdateRequest(final ResourceModel model) {
     final UpdateIndexRequest updateIndexRequest = UpdateIndexRequest
             .builder()
             .id(model.getId())
             .roleArn(model.getRoleArn())
             .name(model.getName())
+            .documentMetadataConfigurationUpdates(translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations()))
             .build();
     return updateIndexRequest;
   }
@@ -141,13 +151,120 @@ public class Translator {
    * @param model resource model
    * @return updateIndexRequest the aws service request to modify a resource
    */
-  static UpdateIndexRequest translateToSecondUpdateRequest(final ResourceModel model) {
-    final UpdateIndexRequest updateIndexRequest = UpdateIndexRequest.builder()
+  static UpdateIndexRequest translateToPostCreateUpdateRequest(final ResourceModel model) {
+    // We only need to update attributes we couldn't set during create.
+    final UpdateIndexRequest.Builder updateIndexBuilder = UpdateIndexRequest
+            .builder()
             .id(model.getId())
-            .name(model.getName())
-            .roleArn(model.getRoleArn())
-            .build();
-    return updateIndexRequest;
+            .documentMetadataConfigurationUpdates(
+                    translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations()));
+    return updateIndexBuilder.build();
+  }
+
+  static List<DocumentMetadataConfiguration> translateToSdkDocumentMetadataConfigurationList(List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList) {
+    List<DocumentMetadataConfiguration> sdkDocumentMetadataConfigurationList = new ArrayList<>();
+    if (modelDocumentMetadataConfigurationList != null && !modelDocumentMetadataConfigurationList.isEmpty()) {
+      sdkDocumentMetadataConfigurationList = new ArrayList<>();
+      for (software.amazon.kendra.index.DocumentMetadataConfiguration modelDocumentMetadataConfiguration : modelDocumentMetadataConfigurationList) {
+        DocumentMetadataConfiguration.Builder sdkDocumentMetadataConfigurationBuilder = DocumentMetadataConfiguration.builder();
+        sdkDocumentMetadataConfigurationBuilder.name(modelDocumentMetadataConfiguration.getName());
+        sdkDocumentMetadataConfigurationBuilder.type(modelDocumentMetadataConfiguration.getType());
+        Relevance sdkRelevance = translateToSdkRelevance(modelDocumentMetadataConfiguration.getRelevance());
+        if (sdkRelevance != null) {
+          sdkDocumentMetadataConfigurationBuilder.relevance(sdkRelevance);
+        }
+        Search sdkSearch = translateToSdkSearch(modelDocumentMetadataConfiguration.getSearch());
+        if (sdkSearch != null) {
+          sdkDocumentMetadataConfigurationBuilder.search(sdkSearch);
+        }
+        sdkDocumentMetadataConfigurationList.add(sdkDocumentMetadataConfigurationBuilder.build());
+      }
+    }
+    return sdkDocumentMetadataConfigurationList;
+  }
+
+  private static Relevance translateToSdkRelevance(software.amazon.kendra.index.Relevance modelRelevance) {
+    if (modelRelevance != null) {
+      Relevance.Builder sdkRelevanceBuilder = Relevance.builder();
+      sdkRelevanceBuilder.freshness(modelRelevance.getFreshness());
+      sdkRelevanceBuilder.importance(modelRelevance.getImportance());
+      sdkRelevanceBuilder.duration(modelRelevance.getDuration());
+      sdkRelevanceBuilder.rankOrder(modelRelevance.getRankOrder());
+      sdkRelevanceBuilder.valueImportanceMap(modelRelevance.getValueImportanceItems().stream()
+              .collect(Collectors.toMap(ValueImportanceItem::getKey, ValueImportanceItem::getValue)));
+      return sdkRelevanceBuilder.build();
+    } else {
+      return null;
+    }
+  }
+
+  private static Search translateToSdkSearch(software.amazon.kendra.index.Search modelSearch) {
+    if (modelSearch != null) {
+      Search.Builder sdkSearchBuilder = Search.builder();
+      sdkSearchBuilder.displayable(modelSearch.getDisplayable());
+      sdkSearchBuilder.facetable(modelSearch.getFacetable());
+      sdkSearchBuilder.searchable(modelSearch.getSearchable());
+      return sdkSearchBuilder.build();
+    } else {
+      return null;
+    }
+  }
+
+
+  static List<software.amazon.kendra.index.DocumentMetadataConfiguration> translateFromSdkDocumentMetadataConfigurationList(
+          List<DocumentMetadataConfiguration> sdkDocumentMetadataConfigurationList) {
+    List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList =
+            new ArrayList<>();
+    if (sdkDocumentMetadataConfigurationList != null && !sdkDocumentMetadataConfigurationList.isEmpty()) {
+      modelDocumentMetadataConfigurationList = new ArrayList<>();
+      for (DocumentMetadataConfiguration sdkDocumentMetadataConfiguration : sdkDocumentMetadataConfigurationList) {
+        software.amazon.kendra.index.DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder
+                modelDocumentMetadataConfigurationBuilder = software.amazon.kendra.index.DocumentMetadataConfiguration.builder();
+        modelDocumentMetadataConfigurationBuilder.name(sdkDocumentMetadataConfiguration.name());
+        modelDocumentMetadataConfigurationBuilder.type(sdkDocumentMetadataConfiguration.typeAsString());
+        software.amazon.kendra.index.Relevance modelRelevance =
+                translateFromSdkRelevance(sdkDocumentMetadataConfiguration.relevance());
+        if (modelRelevance != null) {
+          modelDocumentMetadataConfigurationBuilder.relevance(modelRelevance);
+        }
+        software.amazon.kendra.index.Search modelSearch = translateFromSdkSearch(sdkDocumentMetadataConfiguration.search());
+        if (modelSearch != null) {
+          modelDocumentMetadataConfigurationBuilder.search(modelSearch);
+        }
+        modelDocumentMetadataConfigurationList.add(modelDocumentMetadataConfigurationBuilder.build());
+      }
+    }
+    return modelDocumentMetadataConfigurationList;
+  }
+
+  private static software.amazon.kendra.index.Relevance translateFromSdkRelevance(Relevance sdkRelevance) {
+    if (sdkRelevance != null) {
+      software.amazon.kendra.index.Relevance.RelevanceBuilder modelRelevanceBuilder =
+              software.amazon.kendra.index.Relevance.builder();
+      modelRelevanceBuilder.importance(sdkRelevance.importance());
+      modelRelevanceBuilder.freshness(sdkRelevance.freshness());
+      modelRelevanceBuilder.duration(sdkRelevance.duration());
+      modelRelevanceBuilder.rankOrder(sdkRelevance.rankOrderAsString());
+      modelRelevanceBuilder.valueImportanceItems(sdkRelevance.valueImportanceMap().entrySet()
+              .stream().map(entry -> ValueImportanceItem.builder().key(entry.getKey()).value(entry.getValue()).build())
+              .collect(Collectors.toList()));
+      return modelRelevanceBuilder.build();
+    } else {
+      return null;
+    }
+  }
+
+  private static software.amazon.kendra.index.Search translateFromSdkSearch(Search sdkSearch) {
+    if (sdkSearch != null) {
+      software.amazon.kendra.index.Search.SearchBuilder modelSearchBuilder =
+              software.amazon.kendra.index.Search.builder();
+      modelSearchBuilder.searchable(sdkSearch.searchable());
+      modelSearchBuilder.facetable(sdkSearch.facetable());
+      modelSearchBuilder.displayable(sdkSearch.displayable());
+      return modelSearchBuilder.build();
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -179,7 +296,7 @@ public class Translator {
 
   private static <T> Stream<T> streamOfOrEmpty(final Collection<T> collection) {
     return Optional.ofNullable(collection)
-        .map(Collection::stream)
-        .orElseGet(Stream::empty);
+            .map(Collection::stream)
+            .orElseGet(Stream::empty);
   }
 }

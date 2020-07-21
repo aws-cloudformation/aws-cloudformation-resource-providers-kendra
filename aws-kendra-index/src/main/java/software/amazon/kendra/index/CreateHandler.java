@@ -13,8 +13,8 @@ import software.amazon.awssdk.services.kendra.model.UpdateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
+import software.amazon.cloudformation.exceptions.CfnNotStabilizedException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
-import software.amazon.cloudformation.exceptions.CfnServiceInternalErrorException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -38,86 +38,67 @@ public class CreateHandler extends BaseHandlerStd {
         indexArnBuilder = new IndexArn();
     }
 
+    // Used for testing.
     public CreateHandler(IndexArnBuilder indexArnBuilder) {
         super();
         this.indexArnBuilder = indexArnBuilder;
     }
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
-        final AmazonWebServicesClientProxy proxy,
-        final ResourceHandlerRequest<ResourceModel> request,
-        final CallbackContext callbackContext,
-        final ProxyClient<KendraClient> proxyClient,
-        final Logger logger) {
+            final AmazonWebServicesClientProxy proxy,
+            final ResourceHandlerRequest<ResourceModel> request,
+            final CallbackContext callbackContext,
+            final ProxyClient<KendraClient> proxyClient,
+            final Logger logger) {
 
         this.logger = logger;
-
-        final ResourceModel model = request.getDesiredResourceState();
 
         // TODO: Adjust Progress Chain according to your implementation
         // https://github.com/aws-cloudformation/cloudformation-cli-java-plugin/blob/master/src/main/java/software/amazon/cloudformation/proxy/CallChain.java
 
-        return ProgressEvent.progress(model, callbackContext)
+        return ProgressEvent.progress(request.getDesiredResourceState(), callbackContext)
 
-            // STEP 1 [check if resource already exists]
-            // if target API does not support 'ResourceAlreadyExistsException' then following check is required
-            // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
-            //.then(progress -> checkForPreCreateResourceExistence(proxy, request, progress))
+                // STEP 1 [check if resource already exists]
+                // if target API does not support 'ResourceAlreadyExistsException' then following check is required
+                // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
+                //.then(progress -> checkForPreCreateResourceExistence(proxy, request, progress))
 
-            // STEP 2 [create progress chain - required for resource creation]
-            .then(progress ->
-                // If your service API throws 'ResourceAlreadyExistsException' for create requests then CreateHandler can return just proxy.initiate construction
-                // STEP 2.0 [initialize a proxy context]
-                proxy.initiate("AWS-Kendra-Index::Create", proxyClient, model, callbackContext)
-                    .translateToServiceRequest(Translator::translateToCreateRequest)
-                    .makeServiceCall(this::createIndex)
-                    .done((createIndexRequest1, createIndexResponse1, proxyInvocation1, model1, context1) -> {
-                        model1.setId(createIndexResponse1.id());
-                        return ProgressEvent.defaultInProgressHandler(context1, 0, model1);
-                    })
-            )
-             // stabilize
-            .then(progress -> stabilize(proxy, proxyClient, progress))
-             // STEP 3 [TODO: post create and stabilize update]
-            .then(progress ->
-                // If your resource is provisioned through multiple API calls, you will need to apply each subsequent update
-                // STEP 3.0 [initialize a proxy context]
-                proxy.initiate("AWS-Kendra-Index::postCreate", proxyClient, model, callbackContext)
-                    // STEP 3.1 [TODO: construct a body of a request]
-                    .translateToServiceRequest(Translator::translateToSecondUpdateRequest)
-                    // STEP 3.2 [TODO: make an api call]
-                    .makeServiceCall(this::postCreate)
-                    .progress()
+                // STEP 2 [create progress chain - required for resource creation]
+                .then(progress ->
+                        // If your service API throws 'ResourceAlreadyExistsException' for create requests then CreateHandler can return just proxy.initiate construction
+                        // STEP 2.0 [initialize a proxy context]
+                        proxy.initiate("AWS-Kendra-Index::Create", proxyClient, request.getDesiredResourceState(), callbackContext)
+                                .translateToServiceRequest(Translator::translateToCreateRequest)
+                                .makeServiceCall(this::createIndex)
+                                .done(this::setId)
                 )
-            // STEP 4 [TODO: describe call/chain to return the resource model]
-            .then(progress -> new ReadHandler(indexArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
+                // stabilize
+                .then(progress -> stabilize(proxy, proxyClient, progress))
+                // STEP 3 [TODO: post create and stabilize update]
+                .then(progress ->
+                        // If your resource is provisioned through multiple API calls, you will need to apply each subsequent update
+                        // STEP 3.0 [initialize a proxy context]
+                        proxy.initiate("AWS-Kendra-Index::PostCreateUpdate", proxyClient, request.getDesiredResourceState(), callbackContext)
+                                // STEP 3.1 [TODO: construct a body of a request]
+                                .translateToServiceRequest(Translator::translateToPostCreateUpdateRequest)
+                                // STEP 3.2 [TODO: make an api call]
+                                .makeServiceCall(this::postCreate)
+                                .progress()
+                )
+                // STEP 4 [TODO: describe call/chain to return the resource model]
+                .then(progress -> new ReadHandler(indexArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
     }
 
-    /**
-     * If your service API is not idempotent, meaning it does not distinguish duplicate create requests against some identifier (e.g; resource Name)
-     * and instead returns a 200 even though a resource already exists, you must first check if the resource exists here
-     * NOTE: If your service API throws 'ResourceAlreadyExistsException' for create requests this method is not necessary
-     * @param proxy Amazon webservice proxy to inject credentials correctly.
-     * @param request incoming resource handler request
-     * @param progressEvent event of the previous state indicating success, in progress with delay callback or failed state
-     * @return progressEvent indicating success, in progress with delay callback or failed state
-     */
-    /*
-    private ProgressEvent<ResourceModel, CallbackContext> checkForPreCreateResourceExistence(
-        final AmazonWebServicesClientProxy proxy,
-        final ResourceHandlerRequest<ResourceModel> request,
-        final ProgressEvent<ResourceModel, CallbackContext> progressEvent) {
-        final ResourceModel model = progressEvent.getResourceModel();
-        final CallbackContext callbackContext = progressEvent.getCallbackContext();
-        try {
-            new ReadHandler().handleRequest(proxy, request, callbackContext, logger);
-            throw new CfnAlreadyExistsException(ResourceModel.TYPE_NAME, Objects.toString(model.getPrimaryIdentifier()));
-        } catch (CfnNotFoundException e) {
-            logger.log(model.getPrimaryIdentifier() + " does not exist; creating the resource.");
-            return ProgressEvent.progress(model, callbackContext);
-        }
+    private ProgressEvent<ResourceModel, CallbackContext> setId(CreateIndexRequest createIndexRequest,
+                                                                CreateIndexResponse createIndexResponse,
+                                                                ProxyClient<KendraClient> proxyClient,
+                                                                ResourceModel resourceModel,
+                                                                CallbackContext callbackContext) {
+
+        resourceModel.setId(createIndexResponse.id());
+        return ProgressEvent.progress(resourceModel, callbackContext);
     }
-     */
+
 
     /**
      * Implement client invocation of the create request through the proxyClient, which is already initialised with
@@ -143,7 +124,7 @@ public class CreateHandler extends BaseHandlerStd {
              * Each BaseHandlerException maps to a specific error code, and you should map service exceptions as closely as possible
              * to more specific error codes
              */
-            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e);
+            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME + e.getMessage(), e);
         }
 
         logger.log(String.format("%s successfully created.", ResourceModel.TYPE_NAME));
@@ -158,12 +139,14 @@ public class CreateHandler extends BaseHandlerStd {
      * @return updateIndexResponse create resource response
      */
     private UpdateIndexResponse postCreate(
-        final UpdateIndexRequest updateIndexRequest,
-        final ProxyClient<KendraClient> proxyClient) {
+            final UpdateIndexRequest updateIndexRequest,
+            final ProxyClient<KendraClient> proxyClient) {
         UpdateIndexResponse updateIndexResponse;
         try {
             updateIndexResponse = proxyClient.injectCredentialsAndInvokeV2(updateIndexRequest,
                     proxyClient.client()::updateIndex);
+        } catch (ValidationException e) {
+            throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME + e.getMessage(), e);
         } catch (final AwsServiceException e) {
             /*
              * While the handler contract states that the handler must always return a progress event,
@@ -182,11 +165,11 @@ public class CreateHandler extends BaseHandlerStd {
             final AmazonWebServicesClientProxy proxy,
             final ProxyClient<KendraClient> proxyClient,
             final ProgressEvent<ResourceModel, CallbackContext> progress) {
-        return proxy.initiate("AWS-Kendra-Index::stabilize", proxyClient, progress.getResourceModel(),
+        return proxy.initiate("AWS-Kendra-Index::PostCreateStabilize", proxyClient, progress.getResourceModel(),
                 progress.getCallbackContext())
                 .translateToServiceRequest(Function.identity())
                 .makeServiceCall(EMPTY_CALL)
-                .stabilize((resourceModel, response, proxyInvocation, model, callbackContext) ->
+                .stabilize((request, response, proxyInvocation, model, callbackContext) ->
                         isStabilized(proxyInvocation, model)).progress();
 
     }
@@ -199,7 +182,7 @@ public class CreateHandler extends BaseHandlerStd {
                 proxyClient.client()::describeIndex);
         IndexStatus indexStatus = describeIndexResponse.status();
         if (indexStatus.equals(IndexStatus.FAILED)) {
-            throw new CfnServiceInternalErrorException(String.format("Index %s failed to get created.", model.getId()));
+            throw new CfnNotStabilizedException(ResourceModel.TYPE_NAME, model.getId());
         }
         return indexStatus.equals(IndexStatus.ACTIVE);
     }

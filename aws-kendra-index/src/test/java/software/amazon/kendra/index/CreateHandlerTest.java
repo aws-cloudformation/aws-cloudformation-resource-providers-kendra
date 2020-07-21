@@ -20,8 +20,8 @@ import software.amazon.awssdk.services.kendra.model.UpdateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
+import software.amazon.cloudformation.exceptions.CfnNotStabilizedException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
-import software.amazon.cloudformation.exceptions.CfnServiceInternalErrorException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -271,7 +271,7 @@ public class CreateHandlerTest extends AbstractTestBase {
                         .status(IndexStatus.FAILED.toString())
                         .build());
 
-        assertThrows(CfnServiceInternalErrorException.class, () -> {
+        assertThrows(CfnNotStabilizedException.class, () -> {
             handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
         });
     }

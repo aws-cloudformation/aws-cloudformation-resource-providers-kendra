@@ -2,6 +2,7 @@ package software.amazon.kendra.index;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import software.amazon.awssdk.services.kendra.KendraClient;
@@ -14,8 +15,8 @@ import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.kendra.model.ResourceInUseException;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.kendra.model.Tag;
+import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
-import software.amazon.cloudformation.exceptions.CfnNotStabilizedException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -220,10 +221,77 @@ public class ReadHandlerTest extends AbstractTestBase {
                 .desiredResourceState(model)
                 .build();
 
-        assertThrows(CfnNotStabilizedException.class, () -> {
+        assertThrows(CfnGeneralServiceException.class, () -> {
             handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
         });
 
         verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
+    }
+
+    @Test
+    public void handleRequest_DocumentMetadata() {
+        final ReadHandler handler = new ReadHandler(testIndexArnBuilder);
+
+        String id = "testId";
+        String name = "testName";
+        String roleArn = "testRoleArn";
+        String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
+        String documentMetadataConfigurationName = "documentMetadataConfigurationName";
+        String documentMetadataConfigurationType = "documentMetadataConfigurationType";
+
+        List<software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration> sdkDocumentMetadataConfigurationList =
+                Arrays.asList(software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration
+                        .builder().name(documentMetadataConfigurationName).type(documentMetadataConfigurationType).build());
+        when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
+                .thenReturn(DescribeIndexResponse.builder()
+                        .id(id)
+                        .name(name)
+                        .roleArn(roleArn)
+                        .edition(indexEdition)
+                        .status(IndexStatus.ACTIVE.toString())
+                        .documentMetadataConfigurations(sdkDocumentMetadataConfigurationList)
+                        .build());
+
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
+                .thenReturn(ListTagsForResourceResponse.builder().build());
+
+        List<DocumentMetadataConfiguration> documentMetadataConfigurationList =
+                Arrays.asList(DocumentMetadataConfiguration
+                        .builder()
+                        .name(documentMetadataConfigurationName)
+                        .type(documentMetadataConfigurationType)
+                        .build());
+
+        final ResourceModel model = ResourceModel
+                .builder()
+                .id(id)
+                .documentMetadataConfigurations(documentMetadataConfigurationList)
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        final ResourceModel expected = ResourceModel
+                .builder()
+                .id(id)
+                .arn(testIndexArnBuilder.build(request))
+                .name(name)
+                .roleArn(roleArn)
+                .edition(indexEdition)
+                .documentMetadataConfigurations(documentMetadataConfigurationList)
+                .build();
+        assertThat(response.getResourceModel()).isEqualTo(expected);
+        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getMessage()).isNull();
+        assertThat(response.getErrorCode()).isNull();
+
+        verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
     }
 }

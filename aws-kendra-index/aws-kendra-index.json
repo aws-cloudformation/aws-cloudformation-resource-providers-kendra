@@ -33,6 +33,125 @@
       "items": {
         "$ref": "#/definitions/Tag"
       }
+    },
+    "Importance": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10
+    },
+    "Freshness": {
+      "type": "boolean"
+    },
+    "Duration": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 10,
+      "pattern": "[0-9]+[s]"
+    },
+    "Order": {
+      "type": "string",
+      "enum": [
+        "ASCENDING",
+        "DESCENDING"
+      ]
+    },
+    "Relevance": {
+      "type": "object",
+      "properties": {
+        "Freshness": {
+          "$ref": "#/definitions/Freshness"
+        },
+        "Importance": {
+          "$ref": "#/definitions/Importance"
+        },
+        "Duration": {
+          "$ref": "#/definitions/Duration"
+        },
+        "RankOrder": {
+          "$ref": "#/definitions/Order"
+        },
+        "ValueImportanceItems": {
+          "$ref": "#/definitions/ValueImportanceItems"
+        }
+      }
+    },
+    "ValueImportanceItems": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ValueImportanceItem"
+      }
+    },
+    "ValueImportanceItem": {
+      "type": "object",
+      "properties": {
+        "Key": {
+          "$ref": "#/definitions/ValueImportanceItemKey"
+        },
+        "Value": {
+          "$ref": "#/definitions/Importance"
+        }
+      }
+    },
+    "ValueImportanceItemKey": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50
+    },
+    "Search": {
+      "type": "object",
+      "properties": {
+        "Facetable": {
+          "type": "boolean"
+        },
+        "Searchable": {
+          "type": "boolean"
+        },
+        "Displayable": {
+          "type": "boolean"
+        }
+      }
+    },
+    "DocumentMetadataConfigurationName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 30
+    },
+    "DocumentAttributeValueType": {
+      "type": "string",
+      "enum": [
+        "STRING_VALUE",
+        "STRING_LIST_VALUE",
+        "LONG_VALUE",
+        "DATE_VALUE"
+      ]
+    },
+    "DocumentMetadataConfiguration": {
+      "type": "object",
+      "properties": {
+        "Name": {
+          "$ref": "#/definitions/DocumentMetadataConfigurationName"
+        },
+        "Type": {
+          "$ref": "#/definitions/DocumentAttributeValueType"
+        },
+        "Relevance": {
+          "$ref": "#/definitions/Relevance"
+        },
+        "Search": {
+          "$ref": "#/definitions/Search"
+        }
+      },
+      "required": [
+        "Name",
+        "Type"
+      ]
+    },
+    "DocumentMetadataConfigurationList": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "$ref": "#/definitions/DocumentMetadataConfiguration"
+      }
     }
   },
   "properties": {
@@ -71,6 +190,10 @@
         "DEVELOPER_EDITION",
         "ENTERPRISE_EDITION"
       ]
+    },
+    "DocumentMetadataConfigurations": {
+      "description": "Document metadata configurations",
+      "$ref": "#/definitions/DocumentMetadataConfigurationList"
     }
   },
   "required": [
@@ -83,6 +206,7 @@
       "permissions": [
         "kendra:CreateIndex",
         "kendra:DescribeIndex",
+        "kendra:UpdateIndex",
         "kendra:ListTagsForResource",
         "iam:PassRole"
       ],

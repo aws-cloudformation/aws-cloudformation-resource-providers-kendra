@@ -20,11 +20,11 @@ public class DeleteHandler extends BaseHandlerStd {
     private Logger logger;
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
-        final AmazonWebServicesClientProxy proxy,
-        final ResourceHandlerRequest<ResourceModel> request,
-        final CallbackContext callbackContext,
-        final ProxyClient<KendraClient> proxyClient,
-        final Logger logger) {
+            final AmazonWebServicesClientProxy proxy,
+            final ResourceHandlerRequest<ResourceModel> request,
+            final CallbackContext callbackContext,
+            final ProxyClient<KendraClient> proxyClient,
+            final Logger logger) {
 
         this.logger = logger;
 
@@ -35,27 +35,24 @@ public class DeleteHandler extends BaseHandlerStd {
 
         return ProgressEvent.progress(model, callbackContext)
 
-            // STEP 1 [check if resource already exists]
-            // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
-            // if target API does not support 'ResourceNotFoundException' then following check is required
-            //.then(progress -> checkForPreDeleteResourceExistence(proxy, proxyClient, request, progress))
+                // STEP 1 [check if resource already exists]
+                // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
+                // if target API does not support 'ResourceNotFoundException' then following check is required
+                //.then(progress -> checkForPreDeleteResourceExistence(proxy, proxyClient, request, progress))
 
-            // STEP 2.0 [delete/stabilize progress chain - required for resource deletion]
-            .then(progress ->
-                // If your service API throws 'ResourceNotFoundException' for delete requests then DeleteHandler can return just proxy.initiate construction
-                // STEP 2.0 [initialize a proxy context]
-                proxy.initiate("AWS-Kendra-Index::Delete", proxyClient, model, callbackContext)
-
-                    // STEP 2.1 [TODO: construct a body of a request]
-                    .translateToServiceRequest(Translator::translateToDeleteRequest)
-
-                    // STEP 2.2 [TODO: make an api call]
-                    .makeServiceCall(this::deleteIndex)
-
-                    // STEP 2.3 [TODO: stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]
-                    // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
-                    .stabilize(this::stabilizedOnDelete)
-                    .success());
+                // STEP 2.0 [delete/stabilize progress chain - required for resource deletion]
+                .then(progress ->
+                        // If your service API throws 'ResourceNotFoundException' for delete requests then DeleteHandler can return just proxy.initiate construction
+                        // STEP 2.0 [initialize a proxy context]
+                        proxy.initiate("AWS-Kendra-Index::Delete", proxyClient, model, callbackContext)
+                                // STEP 2.1 [TODO: construct a body of a request]
+                                .translateToServiceRequest(Translator::translateToDeleteRequest)
+                                // STEP 2.2 [TODO: make an api call]
+                                .makeServiceCall(this::deleteIndex)
+                                // STEP 2.3 [TODO: stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]
+                                // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
+                                .stabilize(this::stabilizedOnDelete)
+                                .success());
     }
 
     /**
@@ -66,8 +63,8 @@ public class DeleteHandler extends BaseHandlerStd {
      * @return delete resource response
      */
     private DeleteIndexResponse deleteIndex(
-        final DeleteIndexRequest deleteIndexRequest,
-        final ProxyClient<KendraClient> proxyClient) {
+            final DeleteIndexRequest deleteIndexRequest,
+            final ProxyClient<KendraClient> proxyClient) {
         DeleteIndexResponse deleteIndexResponse;
         try {
             deleteIndexResponse = proxyClient.injectCredentialsAndInvokeV2(deleteIndexRequest, proxyClient.client()::deleteIndex);
@@ -82,7 +79,7 @@ public class DeleteHandler extends BaseHandlerStd {
              * Each BaseHandlerException maps to a specific error code, and you should map service exceptions as closely as possible
              * to more specific error codes
              */
-            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e);
+            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME + e.getMessage(), e);
         }
 
         logger.log(String.format("%s successfully deleted.", ResourceModel.TYPE_NAME));
@@ -100,11 +97,11 @@ public class DeleteHandler extends BaseHandlerStd {
      * @return boolean state of stabilized or not
      */
     private boolean stabilizedOnDelete(
-        final DeleteIndexRequest deleteIndexRequest,
-        final DeleteIndexResponse deleteIndexResponse,
-        final ProxyClient<KendraClient> proxyClient,
-        final ResourceModel model,
-        final CallbackContext callbackContext) {
+            final DeleteIndexRequest deleteIndexRequest,
+            final DeleteIndexResponse deleteIndexResponse,
+            final ProxyClient<KendraClient> proxyClient,
+            final ResourceModel model,
+            final CallbackContext callbackContext) {
 
         DescribeIndexRequest describeIndexRequest = DescribeIndexRequest.builder()
                 .id(model.getId())
