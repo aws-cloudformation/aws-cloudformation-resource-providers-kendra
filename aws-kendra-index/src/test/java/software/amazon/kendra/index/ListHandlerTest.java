@@ -59,15 +59,9 @@ public class ListHandlerTest extends AbstractTestBase {
         final ListHandler handler = new ListHandler();
 
         String id = "id";
-        String name = "name";
-        String roleArn = "roleArn";
-        String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
         final ResourceModel model = ResourceModel
                 .builder()
                 .id(id)
-                .name(name)
-                .roleArn(roleArn)
-                .edition(indexEdition)
                 .build();
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()

@@ -265,7 +265,6 @@ public class ReadHandlerTest extends AbstractTestBase {
         final ResourceModel model = ResourceModel
                 .builder()
                 .id(id)
-                .documentMetadataConfigurations(documentMetadataConfigurationList)
                 .build();
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
