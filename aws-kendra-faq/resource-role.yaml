@@ -23,7 +23,10 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                - "initech:CreateReport"
+                - "kendra:CreateFaq"
+                - "kendra:DeleteFaq"
+                - "kendra:DescribeFaq"
+                - "kendra:ListFaqs"
                 Resource: "*"
 Outputs:
   ExecutionRoleArn:

@@ -95,12 +95,29 @@
     "/properties/Description"
   ],
   "primaryIdentifier": [
-    "/properties/Id"
+    "/properties/Id",
+    "/properties/IndexId"
   ],
   "handlers": {
     "create": {
       "permissions": [
-        "initech:CreateReport"
+        "kendra:CreateFaq",
+        "kendra:DescribeFaq"
+      ]
+    },
+    "read": {
+      "permissions": [
+        "kendra:DescribeFaq"
+      ]
+    },
+    "delete": {
+      "permissions": [
+        "kendra:DeleteFaq"
+      ]
+    },
+    "list": {
+      "permissions": [
+        "kendra:ListFaqs"
       ]
     }
   }
