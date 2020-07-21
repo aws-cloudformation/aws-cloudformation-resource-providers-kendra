@@ -44,6 +44,7 @@ public class Translator {
             .builder()
             .name(model.getName())
             .roleArn(model.getRoleArn())
+            .description(model.getDescription())
             .edition(model.getEdition());
     if (model.getTags() != null && !model.getTags().isEmpty()) {
       builder.tags(model.getTags().stream().map(
@@ -110,8 +111,10 @@ public class Translator {
             .arn(arn)
             .name(describeIndexResponse.name())
             .roleArn(describeIndexResponse.roleArn())
+            .description(describeIndexResponse.description())
             .edition(describeIndexResponse.edition().toString());
-    if (describeIndexResponse.serverSideEncryptionConfiguration() != null) {
+    if (describeIndexResponse.serverSideEncryptionConfiguration() != null
+            && (describeIndexResponse.serverSideEncryptionConfiguration().kmsKeyId() != null)) {
       builder.serverSideEncryptionConfiguration(
               software.amazon.kendra.index.ServerSideEncryptionConfiguration
                       .builder()

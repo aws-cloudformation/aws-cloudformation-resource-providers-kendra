@@ -11,6 +11,12 @@
         }
       }
     },
+    "Description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000,
+      "pattern": "^\\P{C}*$"
+    },
     "KmsKeyId": {
       "type": "string",
       "minLength": 1,
@@ -177,6 +183,9 @@
     },
     "Arn": {
       "type": "string"
+    },
+    "Description": {
+      "$ref": "#/definitions/Description"
     },
     "ServerSideEncryptionConfiguration": {
       "description": "Server side encryption configuration",

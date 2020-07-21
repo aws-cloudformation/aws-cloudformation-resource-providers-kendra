@@ -77,11 +77,13 @@ public class CreateHandlerTest extends AbstractTestBase {
         String name = "testName";
         String roleArn = "testRoleArn";
         String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
+        String description = "description";
         final ResourceModel model = ResourceModel
                 .builder()
                 .name(name)
                 .roleArn(roleArn)
                 .edition(indexEdition)
+                .description(description)
                 .build();
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
@@ -98,6 +100,7 @@ public class CreateHandlerTest extends AbstractTestBase {
                         .roleArn(roleArn)
                         .edition(indexEdition)
                         .status(IndexStatus.ACTIVE.toString())
+                        .description(description)
                         .build());
         when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
                 .thenReturn(ListTagsForResourceResponse.builder().build());
@@ -116,6 +119,7 @@ public class CreateHandlerTest extends AbstractTestBase {
                 .name(name)
                 .roleArn(roleArn)
                 .edition(indexEdition)
+                .description(description)
                 .build();
         assertThat(response.getResourceModel()).isEqualTo(expectedResourceModel);
         assertThat(response.getResourceModels()).isNull();
