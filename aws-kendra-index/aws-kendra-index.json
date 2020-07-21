@@ -12,6 +12,7 @@
       }
     },
     "Description": {
+      "description": "A description for the index",
       "type": "string",
       "minLength": 1,
       "maxLength": 1000,
