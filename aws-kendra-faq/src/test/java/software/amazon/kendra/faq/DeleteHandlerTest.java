@@ -2,6 +2,7 @@ package software.amazon.kendra.faq;
 
 import java.time.Duration;
 
+import org.junit.jupiter.api.AfterEach;
 import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.services.kendra.model.DeleteFaqRequest;
 import software.amazon.awssdk.services.kendra.model.DeleteFaqResponse;
@@ -20,7 +21,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,13 +38,19 @@ public class DeleteHandlerTest extends AbstractTestBase {
     private ProxyClient<KendraClient> proxyClient;
 
     @Mock
-    KendraClient sdkClient;
+    KendraClient kendraClient;
 
     @BeforeEach
     public void setup() {
         proxy = new AmazonWebServicesClientProxy(logger, MOCK_CREDENTIALS, () -> Duration.ofSeconds(600).toMillis());
-        sdkClient = mock(KendraClient.class);
-        proxyClient = MOCK_PROXY(proxy, sdkClient);
+        kendraClient = mock(KendraClient.class);
+        proxyClient = MOCK_PROXY(proxy, kendraClient);
+    }
+
+    @AfterEach
+    public void post_execute() {
+        verify(kendraClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(kendraClient);
     }
 
     @Test
@@ -73,5 +84,8 @@ public class DeleteHandlerTest extends AbstractTestBase {
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
+
+        verify(proxyClient.client(), times(1)).deleteFaq(any(DeleteFaqRequest.class));
+        verify(proxyClient.client(), times(1)).describeFaq(any(DescribeFaqRequest.class));
     }
 }

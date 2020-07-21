@@ -38,20 +38,8 @@ public class CreateHandler extends BaseHandlerStd {
 
         final ResourceModel model = request.getDesiredResourceState();
 
-        // TODO: Adjust Progress Chain according to your implementation
-        // https://github.com/aws-cloudformation/cloudformation-cli-java-plugin/blob/master/src/main/java/software/amazon/cloudformation/proxy/CallChain.java
-
         return ProgressEvent.progress(model, callbackContext)
-
-                // STEP 1 [check if resource already exists]
-                // if target API does not support 'ResourceAlreadyExistsException' then following check is required
-                // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
-                //.then(progress -> checkForPreCreateResourceExistence(proxy, request, progress))
-
-                // STEP 2 [create/stabilize progress chain - required for resource creation]
                 .then(progress ->
-                        // If your service API throws 'ResourceAlreadyExistsException' for create requests then CreateHandler can return just proxy.initiate construction
-                        // STEP 2.0 [initialize a proxy context]
                         proxy.initiate("AWS-Kendra-Faq::Create", proxyClient, model, callbackContext)
                                 // STEP 2.1 [TODO: construct a body of a request]
                                 .translateToServiceRequest(Translator::translateToCreateRequest)
@@ -59,7 +47,6 @@ public class CreateHandler extends BaseHandlerStd {
                                 .done(this::setId)
                 )
                 .then(progress -> stabilize(proxy, proxyClient, progress))
-                // STEP 4 [TODO: describe call/chain to return the resource model]
                 .then(progress -> new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, logger));
     }
 

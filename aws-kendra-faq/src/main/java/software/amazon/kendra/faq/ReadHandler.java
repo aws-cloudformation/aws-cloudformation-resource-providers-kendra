@@ -54,7 +54,8 @@ public class ReadHandler extends BaseHandlerStd {
             final ProxyClient<KendraClient> proxyClient) {
         DescribeFaqResponse describeFaqResponse;
         try {
-            describeFaqResponse = proxyClient.injectCredentialsAndInvokeV2(describeFaqRequest, proxyClient.client()::describeFaq);
+            describeFaqResponse = proxyClient.injectCredentialsAndInvokeV2(
+                    describeFaqRequest, proxyClient.client()::describeFaq);
         } catch (final AwsServiceException e) { // ResourceNotFoundException
             /*
              * While the handler contract states that the handler must always return a progress event,
