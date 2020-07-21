@@ -22,8 +22,8 @@ public class AbstractTestBase {
     logger = new LoggerProxy();
   }
   static ProxyClient<KendraClient> MOCK_PROXY(
-    final AmazonWebServicesClientProxy proxy,
-    final KendraClient sdkClient) {
+          final AmazonWebServicesClientProxy proxy,
+          final KendraClient sdkClient) {
     return new ProxyClient<KendraClient>() {
       @Override
       public <RequestT extends AwsRequest, ResponseT extends AwsResponse> ResponseT

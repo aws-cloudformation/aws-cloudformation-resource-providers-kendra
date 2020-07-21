@@ -8,7 +8,9 @@ import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqResponse;
+import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
+import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -19,11 +21,11 @@ public class ReadHandler extends BaseHandlerStd {
     private Logger logger;
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
-        final AmazonWebServicesClientProxy proxy,
-        final ResourceHandlerRequest<ResourceModel> request,
-        final CallbackContext callbackContext,
-        final ProxyClient<KendraClient> proxyClient,
-        final Logger logger) {
+            final AmazonWebServicesClientProxy proxy,
+            final ResourceHandlerRequest<ResourceModel> request,
+            final CallbackContext callbackContext,
+            final ProxyClient<KendraClient> proxyClient,
+            final Logger logger) {
 
         this.logger = logger;
 
@@ -56,6 +58,8 @@ public class ReadHandler extends BaseHandlerStd {
         try {
             describeFaqResponse = proxyClient.injectCredentialsAndInvokeV2(
                     describeFaqRequest, proxyClient.client()::describeFaq);
+        } catch (ResourceNotFoundException e) {
+            throw new CfnNotFoundException(ResourceModel.TYPE_NAME, describeFaqRequest.id(), e);
         } catch (final AwsServiceException e) { // ResourceNotFoundException
             /*
              * While the handler contract states that the handler must always return a progress event,

@@ -3,11 +3,14 @@ package software.amazon.kendra.faq;
 import java.time.Duration;
 
 import org.junit.jupiter.api.AfterEach;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.services.kendra.model.DeleteFaqRequest;
 import software.amazon.awssdk.services.kendra.model.DeleteFaqResponse;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqRequest;
+import software.amazon.awssdk.services.kendra.model.DescribeFaqResponse;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
+import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -20,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -66,12 +70,13 @@ public class DeleteHandlerTest extends AbstractTestBase {
                 .build();
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-            .desiredResourceState(model)
-            .build();
+                .desiredResourceState(model)
+                .build();
 
         when(proxyClient.client().deleteFaq(any(DeleteFaqRequest.class)))
                 .thenReturn(DeleteFaqResponse.builder().build());
         when(proxyClient.client().describeFaq(any(DescribeFaqRequest.class)))
+                .thenReturn(DescribeFaqResponse.builder().build())
                 .thenThrow(ResourceNotFoundException.builder().build());
 
         final ProgressEvent<ResourceModel, CallbackContext> response =
@@ -86,6 +91,30 @@ public class DeleteHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).deleteFaq(any(DeleteFaqRequest.class));
-        verify(proxyClient.client(), times(1)).describeFaq(any(DescribeFaqRequest.class));
+        verify(proxyClient.client(), times(2)).describeFaq(any(DescribeFaqRequest.class));
+    }
+
+    @Test
+    public void handleRequest_ServiceError() {
+        final DeleteHandler handler = new DeleteHandler();
+
+        String indexId = "indexId";
+        String id = "id";
+        final ResourceModel model = ResourceModel
+                .builder()
+                .id(id)
+                .indexId(indexId)
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        when(proxyClient.client().deleteFaq(any(DeleteFaqRequest.class)))
+                .thenThrow(AwsServiceException.builder().build());
+
+        assertThrows(CfnGeneralServiceException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
     }
 }

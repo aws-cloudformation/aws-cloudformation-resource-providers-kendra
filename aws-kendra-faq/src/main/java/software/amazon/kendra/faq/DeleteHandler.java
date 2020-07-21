@@ -20,11 +20,11 @@ public class DeleteHandler extends BaseHandlerStd {
     private Logger logger;
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
-        final AmazonWebServicesClientProxy proxy,
-        final ResourceHandlerRequest<ResourceModel> request,
-        final CallbackContext callbackContext,
-        final ProxyClient<KendraClient> proxyClient,
-        final Logger logger) {
+            final AmazonWebServicesClientProxy proxy,
+            final ResourceHandlerRequest<ResourceModel> request,
+            final CallbackContext callbackContext,
+            final ProxyClient<KendraClient> proxyClient,
+            final Logger logger) {
 
         this.logger = logger;
 
@@ -35,27 +35,27 @@ public class DeleteHandler extends BaseHandlerStd {
 
         return ProgressEvent.progress(model, callbackContext)
 
-            // STEP 1 [check if resource already exists]
-            // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
-            // if target API does not support 'ResourceNotFoundException' then following check is required
-            // STEP 2.0 [delete/stabilize progress chain - required for resource deletion]
-            .then(progress ->
-                // If your service API throws 'ResourceNotFoundException' for delete requests then DeleteHandler can return just proxy.initiate construction
-                // STEP 2.0 [initialize a proxy context]
-                proxy.initiate("AWS-Kendra-Faq::Delete", proxyClient, model, callbackContext)
-                    // STEP 2.1 [TODO: construct a body of a request]
-                    .translateToServiceRequest(Translator::translateToDeleteRequest)
-                    // STEP 2.2 [TODO: make an api call]
-                    .makeServiceCall(this::deleteResource)
-                    // STEP 2.3 [TODO: stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]
-                    // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
-                    .stabilize(this::stabilizedOnDelete)
-                    .success());
+                // STEP 1 [check if resource already exists]
+                // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
+                // if target API does not support 'ResourceNotFoundException' then following check is required
+                // STEP 2.0 [delete/stabilize progress chain - required for resource deletion]
+                .then(progress ->
+                        // If your service API throws 'ResourceNotFoundException' for delete requests then DeleteHandler can return just proxy.initiate construction
+                        // STEP 2.0 [initialize a proxy context]
+                        proxy.initiate("AWS-Kendra-Faq::Delete", proxyClient, model, callbackContext)
+                                // STEP 2.1 [TODO: construct a body of a request]
+                                .translateToServiceRequest(Translator::translateToDeleteRequest)
+                                // STEP 2.2 [TODO: make an api call]
+                                .makeServiceCall(this::deleteResource)
+                                // STEP 2.3 [TODO: stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]
+                                // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
+                                .stabilize(this::stabilizedOnDelete)
+                                .success());
     }
 
     private DeleteFaqResponse deleteResource(
-        final DeleteFaqRequest deleteFaqRequest,
-        final ProxyClient<KendraClient> proxyClient) {
+            final DeleteFaqRequest deleteFaqRequest,
+            final ProxyClient<KendraClient> proxyClient) {
         DeleteFaqResponse deleteFaqResponse;
         try {
             deleteFaqResponse = proxyClient.injectCredentialsAndInvokeV2(
@@ -85,11 +85,11 @@ public class DeleteHandler extends BaseHandlerStd {
      * @return boolean state of stabilized or not
      */
     private boolean stabilizedOnDelete(
-        final DeleteFaqRequest deleteFaqRequest,
-        final DeleteFaqResponse deleteFaqResponse,
-        final ProxyClient<KendraClient> proxyClient,
-        final ResourceModel model,
-        final CallbackContext callbackContext) {
+            final DeleteFaqRequest deleteFaqRequest,
+            final DeleteFaqResponse deleteFaqResponse,
+            final ProxyClient<KendraClient> proxyClient,
+            final ResourceModel model,
+            final CallbackContext callbackContext) {
 
         DescribeFaqRequest describeFaqRequest = DescribeFaqRequest
                 .builder()

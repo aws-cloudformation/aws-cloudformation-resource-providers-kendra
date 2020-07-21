@@ -34,7 +34,7 @@ public class ListHandler extends BaseHandlerStd {
         // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/master/aws-logs-loggroup/src/main/java/software/amazon/logs/loggroup/ListHandler.java#L19-L21
 
         return ProgressEvent.<ResourceModel, CallbackContext>builder()
-                .resourceModels(models)
+                .resourceModels(Translator.translateFromListResponse(listFaqsResponse))
                 .nextToken(nextToken)
                 .status(OperationStatus.SUCCESS)
                 .build();

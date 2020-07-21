@@ -6,7 +6,9 @@ import org.junit.jupiter.api.AfterEach;
 import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqResponse;
+import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.kendra.model.S3Path;
+import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -19,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -111,5 +114,30 @@ public class ReadHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).describeFaq(any(DescribeFaqRequest.class));
+    }
+
+    @Test
+    public void handleRequest_NotFound() {
+        final ReadHandler handler = new ReadHandler();
+
+        String id = "id";
+        String indexId = "indexId";
+        final ResourceModel model = ResourceModel
+                .builder()
+                .indexId(indexId)
+                .id(id)
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        when(proxyClient.client().describeFaq(any(DescribeFaqRequest.class)))
+                .thenThrow(ResourceNotFoundException.builder().build());
+
+        assertThrows(CfnNotFoundException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
+
     }
 }

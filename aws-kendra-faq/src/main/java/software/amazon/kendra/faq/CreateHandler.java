@@ -10,7 +10,9 @@ import software.amazon.awssdk.services.kendra.model.CreateFaqResponse;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqResponse;
 import software.amazon.awssdk.services.kendra.model.FaqStatus;
+import software.amazon.awssdk.services.kendra.model.ValidationException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
+import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnNotStabilizedException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
@@ -99,6 +101,8 @@ public class CreateHandler extends BaseHandlerStd {
         CreateFaqResponse createFaqResponse;
         try {
             createFaqResponse = proxyClient.injectCredentialsAndInvokeV2(createFaqRequest, proxyClient.client()::createFaq);
+        } catch (ValidationException e) {
+            throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME + e.getMessage(), e);
         } catch (final AwsServiceException e) {
             /*
              * While the handler contract states that the handler must always return a progress event,
