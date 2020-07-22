@@ -483,6 +483,8 @@ class TranslatorTest {
         assertThat(actual.getRoleArn()).isEqualTo(roleArn);
         assertThat(actual.getEdition()).isEqualTo(edition);
         assertThat(actual.getDocumentMetadataConfigurations().size()).isEqualTo(1);
+        assertThat(actual.getDocumentMetadataConfigurations().get(0).getName()).isEqualTo(metadataName);
+        assertThat(actual.getDocumentMetadataConfigurations().get(0).getType()).isEqualTo(metadataType);
         assertThat(actual.getCapacityUnits().getQueryCapacityUnits()).isEqualTo(queryCapacityUnits);
         assertThat(actual.getCapacityUnits().getStorageCapacityUnits()).isEqualTo(storageCapacityUnits);
         assertThat(actual.getTags().size()).isEqualTo(1);
