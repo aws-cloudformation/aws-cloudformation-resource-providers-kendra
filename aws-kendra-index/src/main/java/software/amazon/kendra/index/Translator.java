@@ -198,15 +198,9 @@ public class Translator {
     final UpdateIndexRequest.Builder updateIndexBuilder = UpdateIndexRequest
             .builder()
             .id(model.getId())
+            .capacityUnits(translateToCapacityUnitsConfiguration(model.getCapacityUnits()))
             .documentMetadataConfigurationUpdates(
                     translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations()));
-    if (model.getCapacityUnits() != null) {
-      updateIndexBuilder.capacityUnits(CapacityUnitsConfiguration
-              .builder()
-              .storageCapacityUnits(model.getCapacityUnits().getStorageCapacityUnits())
-              .queryCapacityUnits(model.getCapacityUnits().getQueryCapacityUnits())
-              .build());
-    }
     return updateIndexBuilder.build();
   }
 
