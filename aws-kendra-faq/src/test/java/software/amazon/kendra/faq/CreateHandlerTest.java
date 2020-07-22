@@ -313,7 +313,7 @@ public class CreateHandlerTest extends AbstractTestBase {
     }
 
     @Test
-    public void handleRequest_InvalidException() {
+    public void handleRequest_ValidationException() {
         final CreateHandler handler = new CreateHandler();
 
         String indexId = "indexId";
