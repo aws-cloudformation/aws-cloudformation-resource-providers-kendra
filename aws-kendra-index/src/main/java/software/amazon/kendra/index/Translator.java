@@ -1,5 +1,6 @@
 package software.amazon.kendra.index;
 
+import software.amazon.awssdk.services.kendra.model.CapacityUnitsConfiguration;
 import software.amazon.awssdk.services.kendra.model.CreateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DeleteIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
@@ -121,6 +122,13 @@ public class Translator {
                       .kmsKeyId(describeIndexResponse.serverSideEncryptionConfiguration().kmsKeyId())
                       .build());
     }
+    if (describeIndexResponse.capacityUnits() != null) {
+      builder.capacityUnits(software.amazon.kendra.index.CapacityUnitsConfiguration
+              .builder()
+              .storageCapacityUnits(describeIndexResponse.capacityUnits().storageCapacityUnits())
+              .queryCapacityUnits(describeIndexResponse.capacityUnits().queryCapacityUnits())
+              .build());
+    }
     if (listTagsForResourceResponse.tags() != null && !listTagsForResourceResponse.tags().isEmpty()) {
       List<software.amazon.kendra.index.Tag> tags = listTagsForResourceResponse.tags().stream()
               .map(x -> software.amazon.kendra.index.Tag.builder().key(x.key()).value(x.value()).build())
@@ -178,6 +186,13 @@ public class Translator {
             .id(model.getId())
             .documentMetadataConfigurationUpdates(
                     translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations()));
+    if (model.getCapacityUnits() != null) {
+      updateIndexBuilder.capacityUnits(CapacityUnitsConfiguration
+              .builder()
+              .storageCapacityUnits(model.getCapacityUnits().getStorageCapacityUnits())
+              .queryCapacityUnits(model.getCapacityUnits().getQueryCapacityUnits())
+              .build());
+    }
     return updateIndexBuilder.build();
   }
 

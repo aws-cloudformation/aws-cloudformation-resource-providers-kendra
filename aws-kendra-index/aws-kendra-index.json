@@ -171,6 +171,29 @@
       "items": {
         "$ref": "#/definitions/DocumentMetadataConfiguration"
       }
+    },
+    "StorageCapacityUnits": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "QueryCapacityUnits": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "CapacityUnitsConfiguration": {
+      "type": "object",
+      "properties": {
+        "StorageCapacityUnits": {
+          "$ref": "#/definitions/StorageCapacityUnits"
+        },
+        "QueryCapacityUnits": {
+          "$ref": "#/definitions/QueryCapacityUnits"
+        }
+      },
+      "required": [
+        "StorageCapacityUnits",
+        "QueryCapacityUnits"
+      ]
     }
   },
   "properties": {
@@ -221,6 +244,10 @@
     "DocumentMetadataConfigurations": {
       "description": "Document metadata configurations",
       "$ref": "#/definitions/DocumentMetadataConfigurationList"
+    },
+    "CapacityUnits": {
+      "description": "Capacity units",
+      "$ref": "#/definitions/CapacityUnitsConfiguration"
     }
   },
   "required": [

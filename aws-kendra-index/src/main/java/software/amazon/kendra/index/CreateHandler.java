@@ -35,7 +35,7 @@ public class CreateHandler extends BaseHandlerStd {
 
     public CreateHandler() {
         super();
-        indexArnBuilder = new IndexArn();
+        indexArnBuilder = new CfnTestIndexArnBuilder();
     }
 
     // Used for testing.

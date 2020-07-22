@@ -321,22 +321,36 @@ class TranslatorTest {
     void testTranslateToPostCreateUpdateRequest() {
         String id = "id";
         String name = "name";
+        String type = DocumentAttributeValueType.STRING_VALUE.toString();
         DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder =
                 DocumentMetadataConfiguration.builder();
-        documentMetadataConfigurationBuilder.name(name);
+        documentMetadataConfigurationBuilder.name(name).type(type);
         // roleArn should not be updated
-        String roleArn = "roleArn";
+        Integer queryCapacityUnits = 1;
+        Integer storageCapacityUnits = 2;
         ResourceModel resourceModel = ResourceModel
                 .builder()
                 .id(id)
-                .roleArn(roleArn)
+                .roleArn("roleArn")
+                .name("name")
+                .description("description")
                 .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                .capacityUnits(CapacityUnitsConfiguration.builder()
+                        .queryCapacityUnits(queryCapacityUnits)
+                        .storageCapacityUnits(storageCapacityUnits)
+                        .build())
                 .build();
 
         UpdateIndexRequest updateIndexRequest = Translator.translateToPostCreateUpdateRequest(resourceModel);
         assertThat(updateIndexRequest.roleArn()).isNull();
+        assertThat(updateIndexRequest.description()).isNull();
+        assertThat(updateIndexRequest.name()).isNull();
         assertThat(updateIndexRequest.id()).isEqualTo(id);
-        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates()).isNotEmpty();
+        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates().size()).isEqualTo(1);
+        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates().get(0).name()).isEqualTo(name);
+        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates().get(0).type().toString()).isEqualTo(type);
+        assertThat(updateIndexRequest.capacityUnits().queryCapacityUnits()).isEqualTo(queryCapacityUnits);
+        assertThat(updateIndexRequest.capacityUnits().storageCapacityUnits()).isEqualTo(storageCapacityUnits);
     }
 
     @Test
@@ -433,6 +447,8 @@ class TranslatorTest {
                         .name(metadataName)
                         .type(metadataType)
                         .build();
+        Integer queryCapacityUnits = 1;
+        Integer storageCapacityUnits = 2;
         DescribeIndexResponse describeIndexResponse = DescribeIndexResponse
                 .builder()
                 .id(id)
@@ -442,6 +458,11 @@ class TranslatorTest {
                 .description(description)
                 .serverSideEncryptionConfiguration(serverSideEncryptionConfiguration)
                 .documentMetadataConfigurations(Arrays.asList(documentMetadataConfiguration))
+                .capacityUnits(software.amazon.awssdk.services.kendra.model.CapacityUnitsConfiguration
+                        .builder()
+                        .queryCapacityUnits(queryCapacityUnits)
+                        .storageCapacityUnits(storageCapacityUnits)
+                        .build())
                 .build();
         String tagKey = "tagKey";
         String tagValue = "tagValue";
@@ -462,6 +483,8 @@ class TranslatorTest {
         assertThat(actual.getRoleArn()).isEqualTo(roleArn);
         assertThat(actual.getEdition()).isEqualTo(edition);
         assertThat(actual.getDocumentMetadataConfigurations().size()).isEqualTo(1);
+        assertThat(actual.getCapacityUnits().getQueryCapacityUnits()).isEqualTo(queryCapacityUnits);
+        assertThat(actual.getCapacityUnits().getStorageCapacityUnits()).isEqualTo(storageCapacityUnits);
         assertThat(actual.getTags().size()).isEqualTo(1);
     }
 
