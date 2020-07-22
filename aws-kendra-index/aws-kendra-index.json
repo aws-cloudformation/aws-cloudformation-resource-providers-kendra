@@ -3,6 +3,25 @@
   "description": "A Kendra index",
   "sourceUrl": "https://docs.aws.amazon.com/kendra/latest/dg/hiw-index.html",
   "definitions": {
+    "ServerSideEncryptionConfiguration": {
+      "type": "object",
+      "properties": {
+        "KmsKeyId": {
+          "$ref": "#/definitions/KmsKeyId"
+        }
+      }
+    },
+    "Description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000,
+      "pattern": "^\\P{C}*$"
+    },
+    "KmsKeyId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048
+    },
     "Tag": {
       "description": "A label for tagging Kendra resources",
       "type": "object",
@@ -165,6 +184,14 @@
     "Arn": {
       "type": "string"
     },
+    "Description": {
+      "description": "A description for the index",
+      "$ref": "#/definitions/Description"
+    },
+    "ServerSideEncryptionConfiguration": {
+      "description": "Server side encryption configuration",
+      "$ref": "#/definitions/ServerSideEncryptionConfiguration"
+    },
     "Tags": {
       "description": "Tags for labeling the index",
       "$ref": "#/definitions/TagList"
@@ -251,6 +278,7 @@
     "/properties/Arn"
   ],
   "createOnlyProperties": [
-    "/properties/Edition"
+    "/properties/Edition",
+    "/properties/ServerSideEncryptionConfiguration"
   ]
 }

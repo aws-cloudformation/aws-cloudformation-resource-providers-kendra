@@ -77,11 +77,13 @@ public class CreateHandlerTest extends AbstractTestBase {
         String name = "testName";
         String roleArn = "testRoleArn";
         String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
+        String description = "description";
         final ResourceModel model = ResourceModel
                 .builder()
                 .name(name)
                 .roleArn(roleArn)
                 .edition(indexEdition)
+                .description(description)
                 .build();
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
@@ -98,6 +100,7 @@ public class CreateHandlerTest extends AbstractTestBase {
                         .roleArn(roleArn)
                         .edition(indexEdition)
                         .status(IndexStatus.ACTIVE.toString())
+                        .description(description)
                         .build());
         when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
                 .thenReturn(ListTagsForResourceResponse.builder().build());
@@ -116,6 +119,7 @@ public class CreateHandlerTest extends AbstractTestBase {
                 .name(name)
                 .roleArn(roleArn)
                 .edition(indexEdition)
+                .description(description)
                 .build();
         assertThat(response.getResourceModel()).isEqualTo(expectedResourceModel);
         assertThat(response.getResourceModels()).isNull();
@@ -353,6 +357,74 @@ public class CreateHandlerTest extends AbstractTestBase {
                 .roleArn(roleArn)
                 .edition(indexEdition)
                 .tags(Arrays.asList(Tag.builder().key(key).value(value).build()))
+                .build();
+        assertThat(response.getResourceModel()).isEqualTo(expectedResourceModel);
+        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getMessage()).isNull();
+        assertThat(response.getErrorCode()).isNull();
+
+        verify(proxyClient.client(), times(1)).createIndex(any(CreateIndexRequest.class));
+        verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
+    }
+
+    @Test
+    public void handleRequest_ServerSideEncryption() {
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+
+        String name = "testName";
+        String roleArn = "testRoleArn";
+        String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
+        String kmsKeyId = "kmsKeyId";
+        ServerSideEncryptionConfiguration serverSideEncryptionConfiguration =
+                ServerSideEncryptionConfiguration.builder().kmsKeyId(kmsKeyId).build();
+        final ResourceModel model = ResourceModel
+                .builder()
+                .name(name)
+                .roleArn(roleArn)
+                .edition(indexEdition)
+                .serverSideEncryptionConfiguration(serverSideEncryptionConfiguration)
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        String id = "testId";
+        when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
+                .thenReturn(CreateIndexResponse.builder().id(id).build());
+        when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
+                .thenReturn(DescribeIndexResponse.builder()
+                        .id(id)
+                        .name(name)
+                        .roleArn(roleArn)
+                        .edition(indexEdition)
+                        .status(IndexStatus.ACTIVE.toString())
+                        .serverSideEncryptionConfiguration(
+                                software.amazon.awssdk.services.kendra.model.ServerSideEncryptionConfiguration
+                                        .builder()
+                                        .kmsKeyId(kmsKeyId)
+                                        .build())
+                        .build());
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
+                .thenReturn(ListTagsForResourceResponse.builder().build());
+        when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
+                .thenReturn(UpdateIndexResponse.builder().build());
+
+        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        ResourceModel expectedResourceModel = ResourceModel
+                .builder()
+                .id(id)
+                .arn(testIndexArnBuilder.build(request))
+                .name(name)
+                .roleArn(roleArn)
+                .edition(indexEdition)
+                .serverSideEncryptionConfiguration(serverSideEncryptionConfiguration)
                 .build();
         assertThat(response.getResourceModel()).isEqualTo(expectedResourceModel);
         assertThat(response.getResourceModels()).isNull();

@@ -1,9 +1,25 @@
 package software.amazon.kendra.index;
 
 import org.junit.jupiter.api.Test;
+import software.amazon.awssdk.services.kendra.model.CreateIndexRequest;
+import software.amazon.awssdk.services.kendra.model.DeleteIndexRequest;
+import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
+import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
+import software.amazon.awssdk.services.kendra.model.DocumentAttributeValueType;
+import software.amazon.awssdk.services.kendra.model.IndexConfigurationSummary;
+import software.amazon.awssdk.services.kendra.model.IndexEdition;
+import software.amazon.awssdk.services.kendra.model.ListIndicesRequest;
+import software.amazon.awssdk.services.kendra.model.ListIndicesResponse;
+import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
+import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
+import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
+import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -215,6 +231,267 @@ class TranslatorTest {
         assertThat(modelDocumentMetadataConfiguration.getName()).isNull();
         assertThat(modelDocumentMetadataConfiguration.getType()).isNull();
         assertThat(modelDocumentMetadataConfiguration.getRelevance()).isNull();
+    }
+
+    @Test
+    void testTranslateToCreateRequestNameRoleDescriptionEdition() {
+        String name = "name";
+        String description = "description";
+        String roleArn = "roleArn";
+        String edition = IndexEdition.ENTERPRISE_EDITION.toString();
+        ResourceModel resourceModel = ResourceModel
+                .builder()
+                .name(name)
+                .description(description)
+                .roleArn(roleArn)
+                .edition(edition)
+                .build();
+        CreateIndexRequest actualCreateIndexRequest = Translator.translateToCreateRequest(resourceModel);
+        assertThat(actualCreateIndexRequest.description()).isEqualTo(description);
+        assertThat(actualCreateIndexRequest.name()).isEqualTo(name);
+        assertThat(actualCreateIndexRequest.editionAsString()).isEqualTo(edition);
+        assertThat(actualCreateIndexRequest.roleArn()).isEqualTo(roleArn);
+    }
+
+    @Test
+    void testTranslateToCreateRequestTags() {
+        String key = "key";
+        String value = "value";
+        Tag tag = Tag.builder().key(key).value(value).build();
+        ResourceModel resourceModel = ResourceModel
+                .builder()
+                .tags(Arrays.asList(tag))
+                .build();
+        CreateIndexRequest actualCreateIndexRequest = Translator.translateToCreateRequest(resourceModel);
+        assertThat(actualCreateIndexRequest.tags().size()).isEqualTo(1);
+        assertThat(actualCreateIndexRequest.tags().get(0).key()).isEqualTo(key);
+        assertThat(actualCreateIndexRequest.tags().get(0).value()).isEqualTo(value);
+    }
+
+    @Test
+    void testTranslateToCreateRequestServerSideEncryptionConfiguration() {
+        String kmsKeyId = "kmsKeyId";
+        ServerSideEncryptionConfiguration serverSideEncryptionConfiguration = ServerSideEncryptionConfiguration
+                .builder()
+                .kmsKeyId(kmsKeyId)
+                .build();
+        ResourceModel resourceModel = ResourceModel
+                .builder()
+                .serverSideEncryptionConfiguration(serverSideEncryptionConfiguration)
+                .build();
+        CreateIndexRequest actualCreateIndexRequest = Translator.translateToCreateRequest(resourceModel);
+        assertThat(actualCreateIndexRequest.serverSideEncryptionConfiguration().kmsKeyId()).isEqualTo(kmsKeyId);
+    }
+
+    @Test
+    void testTranslateToCreateRequestServerSideEncryptionConfigurationNullKmsKeyId() {
+        ServerSideEncryptionConfiguration serverSideEncryptionConfiguration = ServerSideEncryptionConfiguration
+                .builder()
+                .build();
+        ResourceModel resourceModel = ResourceModel
+                .builder()
+                .serverSideEncryptionConfiguration(serverSideEncryptionConfiguration)
+                .build();
+        CreateIndexRequest actualCreateIndexRequest = Translator.translateToCreateRequest(resourceModel);
+        assertThat(actualCreateIndexRequest.serverSideEncryptionConfiguration()).isNull();
+    }
+
+    @Test
+    void testTranslateToReadRequest() {
+        String id = "id";
+        ResourceModel resourceModel = ResourceModel
+                .builder()
+                .id(id)
+                .build();
+        DescribeIndexRequest describeIndexRequest = Translator.translateToReadRequest(resourceModel);
+        assertThat(describeIndexRequest.id()).isEqualTo(id);
+    }
+
+    @Test
+    void testTranslateToDeleteRequest() {
+        String id = "id";
+        ResourceModel resourceModel = ResourceModel
+                .builder()
+                .id(id)
+                .build();
+        DeleteIndexRequest deleteIndexRequest = Translator.translateToDeleteRequest(resourceModel);
+        assertThat(deleteIndexRequest.id()).isEqualTo(id);
+    }
+    @Test
+    void testTranslateToPostCreateUpdateRequest() {
+        String id = "id";
+        String name = "name";
+        DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder =
+                DocumentMetadataConfiguration.builder();
+        documentMetadataConfigurationBuilder.name(name);
+        // roleArn should not be updated
+        String roleArn = "roleArn";
+        ResourceModel resourceModel = ResourceModel
+                .builder()
+                .id(id)
+                .roleArn(roleArn)
+                .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                .build();
+
+        UpdateIndexRequest updateIndexRequest = Translator.translateToPostCreateUpdateRequest(resourceModel);
+        assertThat(updateIndexRequest.roleArn()).isNull();
+        assertThat(updateIndexRequest.id()).isEqualTo(id);
+        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates()).isNotEmpty();
+    }
+
+    @Test
+    void testTranslateToUpdateRequest() {
+        String metadataName = "metadataName";
+        DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder =
+                DocumentMetadataConfiguration.builder();
+        documentMetadataConfigurationBuilder.name(metadataName);
+        String name = "name";
+        String description = "description";
+        String roleArn = "roleArn";
+        String id = "id";
+        ResourceModel resourceModel = ResourceModel
+                .builder()
+                .name(name)
+                .id(id)
+                .description(description)
+                .roleArn(roleArn)
+                .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                .build();
+        UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel);
+        assertThat(updateIndexRequest.id()).isEqualTo(id);
+        assertThat(updateIndexRequest.description()).isEqualTo(description);
+        assertThat(updateIndexRequest.name()).isEqualTo(name);
+        assertThat(updateIndexRequest.roleArn()).isEqualTo(roleArn);
+        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates().size()).isEqualTo(1);
+    }
+    @Test
+    void testTranslateToListTagsRequest() {
+        String arn = "arn";
+        ListTagsForResourceRequest actual = Translator.translateToListTagsRequest(arn);
+        ListTagsForResourceRequest expected = ListTagsForResourceRequest
+                .builder()
+                .resourceARN(arn)
+                .build();
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void testTranslateToUntagResourceRequest() {
+        String arn = "arn";
+        String key = "key";
+        String value = "value";
+        Tag tag = Tag.builder().key(key).value(value).build();
+        HashSet<Tag> tags = new HashSet<>();
+        tags.add(tag);
+        UntagResourceRequest actual = Translator.translateToUntagResourceRequest(tags, arn);
+        UntagResourceRequest expected = UntagResourceRequest
+                .builder()
+                .resourceARN(arn)
+                .tagKeys(Arrays.asList(key))
+                .build();
+        assertThat(actual).isEqualTo(expected);
+    }
+    @Test
+    void testTranslateToTagResourceRequest() {
+        String arn = "arn";
+        String key = "key";
+        String value = "value";
+        Tag tag = Tag.builder().key(key).value(value).build();
+        HashSet<Tag> tags = new HashSet<>();
+        tags.add(tag);
+        TagResourceRequest actual = Translator.translateToTagResourceRequest(tags, arn);
+        TagResourceRequest expected = TagResourceRequest
+                .builder()
+                .resourceARN(arn)
+                .tags(Arrays.asList(software.amazon.awssdk.services.kendra.model.Tag
+                        .builder()
+                        .key(key)
+                        .value(value)
+                        .build()))
+                .build();
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void testTranslateFromReadResponse() {
+        String id = "id";
+        String name = "name";
+        String description = "description";
+        String roleArn = "roleArn";
+        String edition = IndexEdition.ENTERPRISE_EDITION.toString();
+        String kmsKeyId = "kmsKeyId";
+        software.amazon.awssdk.services.kendra.model.ServerSideEncryptionConfiguration serverSideEncryptionConfiguration =
+                software.amazon.awssdk.services.kendra.model.ServerSideEncryptionConfiguration
+                        .builder()
+                        .kmsKeyId(kmsKeyId)
+                        .build();
+        String metadataName = "metadataName";
+        String metadataType = DocumentAttributeValueType.STRING_VALUE.toString();
+        software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration documentMetadataConfiguration =
+                software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration
+                        .builder()
+                        .name(metadataName)
+                        .type(metadataType)
+                        .build();
+        DescribeIndexResponse describeIndexResponse = DescribeIndexResponse
+                .builder()
+                .id(id)
+                .name(name)
+                .roleArn(roleArn)
+                .edition(edition)
+                .description(description)
+                .serverSideEncryptionConfiguration(serverSideEncryptionConfiguration)
+                .documentMetadataConfigurations(Arrays.asList(documentMetadataConfiguration))
+                .build();
+        String tagKey = "tagKey";
+        String tagValue = "tagValue";
+        ListTagsForResourceResponse listTagsForResourceResponse = ListTagsForResourceResponse
+                .builder()
+                .tags(Arrays.asList(software.amazon.awssdk.services.kendra.model.Tag
+                        .builder()
+                        .key(tagKey)
+                        .value(tagValue)
+                        .build()))
+                .build();
+        String arn = "arn";
+        ResourceModel actual = Translator.translateFromReadResponse(describeIndexResponse, listTagsForResourceResponse, arn);
+        assertThat(actual.getArn()).isEqualTo(arn);
+        assertThat(actual.getId()).isEqualTo(id);
+        assertThat(actual.getDescription()).isEqualTo(description);
+        assertThat(actual.getName()).isEqualTo(name);
+        assertThat(actual.getRoleArn()).isEqualTo(roleArn);
+        assertThat(actual.getEdition()).isEqualTo(edition);
+        assertThat(actual.getDocumentMetadataConfigurations().size()).isEqualTo(1);
+        assertThat(actual.getTags().size()).isEqualTo(1);
+    }
+
+    @Test
+    void testTranslateToListRequest() {
+        String nextToken = "nextToken";
+        ListIndicesRequest actual = Translator.translateToListRequest(nextToken);
+        ListIndicesRequest expected = ListIndicesRequest.builder().nextToken(nextToken).build();
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void testTranslateFromListResponse() {
+        String id1 = "id1";
+        String id2 = "id2";
+        ListIndicesResponse listIndicesResponse = ListIndicesResponse
+                .builder()
+                .indexConfigurationSummaryItems(Arrays.asList(IndexConfigurationSummary
+                        .builder()
+                        .id(id1)
+                        .build(),
+                        IndexConfigurationSummary
+                                .builder()
+                                .id(id2)
+                                .build()))
+                .build();
+        List<ResourceModel> actual = Translator.translateFromListResponse(listIndicesResponse);
+        assertThat(actual.size()).isEqualTo(2);
+        assertThat(actual.get(0).getId()).isEqualTo(id1);
+        assertThat(actual.get(1).getId()).isEqualTo(id2);
     }
 
 }
