@@ -35,7 +35,7 @@ public class CreateHandler extends BaseHandlerStd {
 
     public CreateHandler() {
         super();
-        indexArnBuilder = new IndexArn();
+        indexArnBuilder = new CfnTestIndexArnBuilder();
     }
 
     // Used for testing.
@@ -73,7 +73,7 @@ public class CreateHandler extends BaseHandlerStd {
                                 .done(this::setId)
                 )
                 // stabilize
-                .then(progress -> stabilize(proxy, proxyClient, progress))
+                .then(progress -> stabilize(proxy, proxyClient, progress, "AWS-Kendra-Index::PostCreateStabilize"))
                 // STEP 3 [TODO: post create and stabilize update]
                 .then(progress ->
                         // If your resource is provisioned through multiple API calls, you will need to apply each subsequent update
@@ -85,6 +85,8 @@ public class CreateHandler extends BaseHandlerStd {
                                 .makeServiceCall(this::postCreate)
                                 .progress()
                 )
+                // stabilize
+                .then(progress -> stabilize(proxy, proxyClient, progress, "AWS-Kendra-Index::PostCreateUpdateStabilize"))
                 // STEP 4 [TODO: describe call/chain to return the resource model]
                 .then(progress -> new ReadHandler(indexArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
     }
@@ -164,8 +166,9 @@ public class CreateHandler extends BaseHandlerStd {
     private ProgressEvent<ResourceModel, CallbackContext> stabilize(
             final AmazonWebServicesClientProxy proxy,
             final ProxyClient<KendraClient> proxyClient,
-            final ProgressEvent<ResourceModel, CallbackContext> progress) {
-        return proxy.initiate("AWS-Kendra-Index::PostCreateStabilize", proxyClient, progress.getResourceModel(),
+            final ProgressEvent<ResourceModel, CallbackContext> progress,
+            String callGraph) {
+        return proxy.initiate(callGraph, proxyClient, progress.getResourceModel(),
                 progress.getCallbackContext())
                 .translateToServiceRequest(Function.identity())
                 .makeServiceCall(EMPTY_CALL)

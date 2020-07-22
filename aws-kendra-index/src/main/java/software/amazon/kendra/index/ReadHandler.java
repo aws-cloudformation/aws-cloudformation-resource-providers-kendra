@@ -24,7 +24,7 @@ public class ReadHandler extends BaseHandlerStd {
 
     public ReadHandler() {
         super();
-        indexArnBuilder = new IndexArn();
+        indexArnBuilder = new CfnTestIndexArnBuilder();
     }
 
     public ReadHandler(IndexArnBuilder indexArnBuilder) {

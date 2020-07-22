@@ -35,7 +35,7 @@ public class UpdateHandler extends BaseHandlerStd {
 
     public UpdateHandler() {
         super();
-        indexArnBuilder = new IndexArn();
+        indexArnBuilder = new CfnTestIndexArnBuilder();
     }
 
     public UpdateHandler(IndexArnBuilder indexArnBuilder) {
