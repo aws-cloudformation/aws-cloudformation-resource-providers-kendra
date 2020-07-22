@@ -24,8 +24,8 @@ import java.util.stream.Stream;
 public class Translator {
 
   static CreateFaqRequest translateToCreateRequest(final ResourceModel model) {
-    CreateFaqRequest.Builder builder = CreateFaqRequest.builder();
-    builder.indexId(model.getIndexId())
+    CreateFaqRequest.Builder builder = CreateFaqRequest.builder()
+            .indexId(model.getIndexId())
             .description(model.getDescription())
             .name(model.getName())
             .roleArn(model.getRoleArn())

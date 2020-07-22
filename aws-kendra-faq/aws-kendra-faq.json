@@ -48,6 +48,12 @@
       "minLength": 1,
       "maxLength": 100,
       "pattern": "[a-zA-Z0-9][a-zA-Z0-9_-]*"
+    },
+    "RoleArn": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1284,
+      "pattern": "arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}"
     }
   },
   "properties": {
@@ -58,7 +64,7 @@
       "pattern": "[a-zA-Z0-9][a-zA-Z0-9_-]*\\"
     },
     "IndexId": {
-      "$ref": "#/definitions/S3BucketName"
+      "$ref": "#/definitions/IndexId"
     },
     "Name": {
       "$ref": "#/definitions/FaqName"
@@ -70,11 +76,8 @@
       "$ref": "#/definitions/S3Path"
     },
     "RoleArn": {
-      "description": "Role ARN",
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 1284,
-      "pattern": "arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}"
+      "description": "Role Arn",
+      "$ref": "#/definitions/RoleArn"
     }
   },
   "additionalProperties": false,
@@ -112,7 +115,8 @@
     },
     "delete": {
       "permissions": [
-        "kendra:DeleteFaq"
+        "kendra:DeleteFaq",
+        "kendra:DescribeFaq"
       ]
     },
     "list": {

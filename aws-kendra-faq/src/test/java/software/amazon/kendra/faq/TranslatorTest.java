@@ -5,6 +5,12 @@ import software.amazon.awssdk.services.kendra.model.CreateFaqRequest;
 import software.amazon.awssdk.services.kendra.model.DeleteFaqRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqResponse;
+import software.amazon.awssdk.services.kendra.model.FaqSummary;
+import software.amazon.awssdk.services.kendra.model.ListFaqsRequest;
+import software.amazon.awssdk.services.kendra.model.ListFaqsResponse;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -120,6 +126,41 @@ class TranslatorTest {
                         .build())
                 .build();
         assertThat(Translator.translateFromReadResponse(describeFaqResponse)).isEqualTo(resourceModel);
+    }
+    @Test
+    void testTranslateToListRequest() {
+        String indexId = "indexId";
+        ResourceModel resourceModel = ResourceModel
+                .builder()
+                .indexId(indexId)
+                .build();
+        String nextToken = "nextToken";
+
+        ListFaqsRequest listFaqsRequest = Translator.translateToListRequest(resourceModel, nextToken);
+        assertThat(listFaqsRequest.indexId()).isEqualTo(indexId);
+        assertThat(listFaqsRequest.nextToken()).isEqualTo(nextToken);
+    }
+
+    @Test
+    void testTranslateFromListResponse() {
+        String id1 = "id1";
+        FaqSummary faqSummary1 = FaqSummary
+                .builder()
+                .id(id1)
+                .build();
+        String id2 = "id2";
+        FaqSummary faqSummary2 = FaqSummary
+                .builder()
+                .id(id2)
+                .build();
+        ListFaqsResponse listFaqsResponse = ListFaqsResponse
+                .builder()
+                .faqSummaryItems(Arrays.asList(faqSummary1, faqSummary2))
+                .build();
+        List<ResourceModel> resourceModelList = Translator.translateFromListResponse(listFaqsResponse);
+        assertThat(resourceModelList.size()).isEqualTo(2);
+        assertThat(resourceModelList.get(0).getId()).isEqualTo(id1);
+        assertThat(resourceModelList.get(1).getId()).isEqualTo(id2);
     }
 
 }
