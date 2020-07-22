@@ -98,10 +98,7 @@ public class DeleteHandler extends BaseHandlerStd {
             final ResourceModel model,
             final CallbackContext callbackContext) {
 
-        DescribeFaqRequest describeFaqRequest = DescribeFaqRequest
-                .builder()
-                .id(model.getId())
-                .build();
+        DescribeFaqRequest describeFaqRequest = Translator.translateToReadRequest(model);
         boolean stabilized;
         try {
             proxyClient.injectCredentialsAndInvokeV2(describeFaqRequest, proxyClient.client()::describeFaq);

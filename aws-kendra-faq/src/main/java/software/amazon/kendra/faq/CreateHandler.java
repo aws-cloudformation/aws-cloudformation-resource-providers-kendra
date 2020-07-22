@@ -78,9 +78,7 @@ public class CreateHandler extends BaseHandlerStd {
     }
 
     private boolean isStabilized(final ProxyClient<KendraClient> proxyClient, final ResourceModel model) {
-        DescribeFaqRequest describeFaqRequest = DescribeFaqRequest.builder()
-                .id(model.getId())
-                .build();
+        DescribeFaqRequest describeFaqRequest = Translator.translateToReadRequest(model);
         DescribeFaqResponse describeFaqResponse = proxyClient.injectCredentialsAndInvokeV2(describeFaqRequest,
                 proxyClient.client()::describeFaq);
         FaqStatus faqStatus = describeFaqResponse.status();
