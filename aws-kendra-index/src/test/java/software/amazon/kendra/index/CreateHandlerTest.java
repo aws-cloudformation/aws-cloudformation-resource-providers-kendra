@@ -15,11 +15,9 @@ import software.amazon.awssdk.services.kendra.model.IndexEdition;
 import software.amazon.awssdk.services.kendra.model.IndexStatus;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
-import software.amazon.awssdk.services.kendra.model.ResourceAlreadyExistException;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
-import software.amazon.cloudformation.exceptions.CfnAlreadyExistsException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnNotStabilizedException;
@@ -243,29 +241,6 @@ public class CreateHandlerTest extends AbstractTestBase {
                 .build();
 
         assertThrows(CfnGeneralServiceException.class, () -> {
-            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
-        });
-    }
-
-    @Test
-    public void handleRequest_FailWith_AlreadyExists() {
-        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
-
-        when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
-                .thenThrow(ResourceAlreadyExistException.builder().build());
-
-        final ResourceModel model = ResourceModel
-                .builder()
-                .name("name")
-                .roleArn("role")
-                .edition(IndexEdition.ENTERPRISE_EDITION.toString())
-                .build();
-
-        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-                .desiredResourceState(model)
-                .build();
-
-        assertThrows(CfnAlreadyExistsException.class, () -> {
             handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
         });
     }

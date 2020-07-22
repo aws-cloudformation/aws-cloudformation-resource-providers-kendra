@@ -8,11 +8,9 @@ import software.amazon.awssdk.services.kendra.model.CreateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
 import software.amazon.awssdk.services.kendra.model.IndexStatus;
-import software.amazon.awssdk.services.kendra.model.ResourceAlreadyExistException;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
-import software.amazon.cloudformation.exceptions.CfnAlreadyExistsException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnNotStabilizedException;
@@ -117,8 +115,6 @@ public class CreateHandler extends BaseHandlerStd {
             createIndexResponse = proxyClient.injectCredentialsAndInvokeV2(createIndexRequest, proxyClient.client()::createIndex);
         } catch (ValidationException e) {
             throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME + e.getMessage(), e);
-        } catch (ResourceAlreadyExistException e) {
-            throw new CfnAlreadyExistsException(e);
         } catch (ConflictException e) {
             throw new CfnResourceConflictException(e);
         } catch (final AwsServiceException e) {
