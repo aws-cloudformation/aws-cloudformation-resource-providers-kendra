@@ -87,7 +87,7 @@ public class CreateHandler extends BaseHandlerStd {
                                 .makeServiceCall(this::postCreate)
                                 .progress()
                 )
-                // stabilize
+                // stabilize again because updating VCU changes can cause the index to enter UPDATING state
                 .then(progress -> stabilize(proxy, proxyClient, progress, "AWS-Kendra-Index::PostCreateUpdateStabilize"))
                 // STEP 4 [TODO: describe call/chain to return the resource model]
                 .then(progress -> new ReadHandler(indexArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
