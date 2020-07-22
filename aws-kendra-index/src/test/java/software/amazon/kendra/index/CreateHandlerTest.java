@@ -436,4 +436,72 @@ public class CreateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
     }
+
+    @Test
+    public void handleRequest_PostCreateUpdateIndexThrowsValidationException() {
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+
+        String roleArn = "testRoleArn";
+        String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
+        final ResourceModel model = ResourceModel
+                .builder()
+                .roleArn(roleArn)
+                .edition(indexEdition)
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        String id = "testId";
+        when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
+                .thenReturn(CreateIndexResponse.builder().id(id).build());
+        when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
+                .thenReturn(DescribeIndexResponse.builder()
+                        .id(id)
+                        .roleArn(roleArn)
+                        .edition(indexEdition)
+                        .status(IndexStatus.ACTIVE.toString())
+                        .build());
+        when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
+                .thenThrow(ValidationException.builder().build());
+
+        assertThrows(CfnInvalidRequestException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
+    }
+
+    @Test
+    public void handleRequest_PostCreateUpdateIndexThrowsGeneralServiceException() {
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+
+        String roleArn = "testRoleArn";
+        String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
+        final ResourceModel model = ResourceModel
+                .builder()
+                .roleArn(roleArn)
+                .edition(indexEdition)
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        String id = "testId";
+        when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
+                .thenReturn(CreateIndexResponse.builder().id(id).build());
+        when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
+                .thenReturn(DescribeIndexResponse.builder()
+                        .id(id)
+                        .roleArn(roleArn)
+                        .edition(indexEdition)
+                        .status(IndexStatus.ACTIVE.toString())
+                        .build());
+        when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
+                .thenThrow(AwsServiceException.builder().build());
+
+        assertThrows(CfnGeneralServiceException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
+    }
 }
