@@ -13,6 +13,7 @@ import software.amazon.awssdk.services.kendra.model.IndexEdition;
 import software.amazon.awssdk.services.kendra.model.IndexStatus;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
+import software.amazon.awssdk.services.kendra.model.ServiceQuotaExceededException;
 import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.TagResourceResponse;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
@@ -22,6 +23,7 @@ import software.amazon.awssdk.services.kendra.model.UpdateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
+import software.amazon.cloudformation.exceptions.CfnServiceLimitExceededException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -548,5 +550,29 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
         verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
+    }
+
+    @Test
+    public void handleRequest_FailWith_QuotaException() {
+        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder);
+
+        when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
+                .thenThrow(ServiceQuotaExceededException.builder().build());
+
+        final ResourceModel model = ResourceModel
+                .builder()
+                .name("name")
+                .roleArn("role")
+                .edition(IndexEdition.ENTERPRISE_EDITION.toString())
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        assertThrows(CfnServiceLimitExceededException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
+        verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
     }
 }
