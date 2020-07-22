@@ -84,11 +84,12 @@ public class Translator {
    * @param awsResponse the aws service describe resource response
    * @return list of resource models
    */
-  static List<ResourceModel> translateFromListResponse(final ListFaqsResponse listFaqsResponse) {
+  static List<ResourceModel> translateFromListResponse(final ListFaqsResponse listFaqsResponse, String indexId) {
     // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/2077c92299aeb9a68ae8f4418b5e932b12a8b186/aws-logs-loggroup/src/main/java/com/aws/logs/loggroup/Translator.java#L75-L82
     return streamOfOrEmpty(listFaqsResponse.faqSummaryItems())
-            .map(resource -> ResourceModel.builder()
-                    .id(resource.id())
+            .map(summary -> ResourceModel.builder()
+                    .id(summary.id())
+                    .indexId(indexId)
                     .build())
             .collect(Collectors.toList());
   }

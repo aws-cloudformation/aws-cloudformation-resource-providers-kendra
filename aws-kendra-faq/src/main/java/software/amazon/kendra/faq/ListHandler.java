@@ -10,9 +10,6 @@ import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class ListHandler extends BaseHandlerStd {
 
     @Override
@@ -23,9 +20,9 @@ public class ListHandler extends BaseHandlerStd {
             final ProxyClient<KendraClient> proxyClient,
             final Logger logger) {
 
-        final List<ResourceModel> models = new ArrayList<>();
+        ResourceModel resourceModel = request.getDesiredResourceState();
         // STEP 1 [TODO: construct a body of a request]
-        final ListFaqsRequest listFaqsRequest = Translator.translateToListRequest(request.getDesiredResourceState(), request.getNextToken());
+        final ListFaqsRequest listFaqsRequest = Translator.translateToListRequest(resourceModel, request.getNextToken());
         // STEP 2 [TODO: make an api call]
         ListFaqsResponse listFaqsResponse = proxy.injectCredentialsAndInvokeV2(listFaqsRequest, proxyClient.client()::listFaqs);
         // STEP 3 [TODO: get a token for the next page]
@@ -34,7 +31,7 @@ public class ListHandler extends BaseHandlerStd {
         // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/master/aws-logs-loggroup/src/main/java/software/amazon/logs/loggroup/ListHandler.java#L19-L21
 
         return ProgressEvent.<ResourceModel, CallbackContext>builder()
-                .resourceModels(Translator.translateFromListResponse(listFaqsResponse))
+                .resourceModels(Translator.translateFromListResponse(listFaqsResponse, resourceModel.getIndexId()))
                 .nextToken(nextToken)
                 .status(OperationStatus.SUCCESS)
                 .build();

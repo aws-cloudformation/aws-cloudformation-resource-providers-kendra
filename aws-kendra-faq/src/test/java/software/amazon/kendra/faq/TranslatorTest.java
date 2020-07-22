@@ -157,10 +157,12 @@ class TranslatorTest {
                 .builder()
                 .faqSummaryItems(Arrays.asList(faqSummary1, faqSummary2))
                 .build();
-        List<ResourceModel> resourceModelList = Translator.translateFromListResponse(listFaqsResponse);
+        String indexId = "indexId";
+        List<ResourceModel> resourceModelList = Translator.translateFromListResponse(listFaqsResponse, indexId);
         assertThat(resourceModelList.size()).isEqualTo(2);
         assertThat(resourceModelList.get(0).getId()).isEqualTo(id1);
-        assertThat(resourceModelList.get(1).getId()).isEqualTo(id2);
+        assertThat(resourceModelList.get(0).getIndexId()).isEqualTo(indexId);
+        assertThat(resourceModelList.get(1).getIndexId()).isEqualTo(indexId);
     }
 
 }
