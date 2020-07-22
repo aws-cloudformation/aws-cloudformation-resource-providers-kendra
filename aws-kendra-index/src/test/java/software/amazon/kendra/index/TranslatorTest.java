@@ -363,6 +363,8 @@ class TranslatorTest {
         String description = "description";
         String roleArn = "roleArn";
         String id = "id";
+        Integer queryCapacityUnits = 1;
+        Integer storageCapacityUnits = 2;
         ResourceModel resourceModel = ResourceModel
                 .builder()
                 .name(name)
@@ -370,6 +372,11 @@ class TranslatorTest {
                 .description(description)
                 .roleArn(roleArn)
                 .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                .capacityUnits(CapacityUnitsConfiguration
+                        .builder()
+                        .queryCapacityUnits(queryCapacityUnits)
+                        .storageCapacityUnits(storageCapacityUnits)
+                        .build())
                 .build();
         UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel);
         assertThat(updateIndexRequest.id()).isEqualTo(id);
@@ -377,7 +384,10 @@ class TranslatorTest {
         assertThat(updateIndexRequest.name()).isEqualTo(name);
         assertThat(updateIndexRequest.roleArn()).isEqualTo(roleArn);
         assertThat(updateIndexRequest.documentMetadataConfigurationUpdates().size()).isEqualTo(1);
+        assertThat(updateIndexRequest.capacityUnits().queryCapacityUnits()).isEqualTo(queryCapacityUnits);
+        assertThat(updateIndexRequest.capacityUnits().storageCapacityUnits()).isEqualTo(storageCapacityUnits);
     }
+
     @Test
     void testTranslateToListTagsRequest() {
         String arn = "arn";

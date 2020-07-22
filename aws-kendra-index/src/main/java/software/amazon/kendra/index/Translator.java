@@ -168,10 +168,24 @@ public class Translator {
             .id(model.getId())
             .roleArn(model.getRoleArn())
             .name(model.getName())
-            .documentMetadataConfigurationUpdates(translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations()))
             .description(model.getDescription())
+            .documentMetadataConfigurationUpdates(translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations()))
+            .capacityUnits(translateToCapacityUnitsConfiguration(model.getCapacityUnits()))
             .build();
     return updateIndexRequest;
+  }
+
+  private static CapacityUnitsConfiguration translateToCapacityUnitsConfiguration(
+          software.amazon.kendra.index.CapacityUnitsConfiguration modelCapacityUnitsConfiguration) {
+    if (modelCapacityUnitsConfiguration != null) {
+      return CapacityUnitsConfiguration
+              .builder()
+              .storageCapacityUnits(modelCapacityUnitsConfiguration.getStorageCapacityUnits())
+              .queryCapacityUnits(modelCapacityUnitsConfiguration.getQueryCapacityUnits())
+              .build();
+    } else {
+      return null;
+    }
   }
 
   /**
