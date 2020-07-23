@@ -2,6 +2,7 @@ package software.amazon.kendra.datasource;
 
 import java.time.Duration;
 import software.amazon.awssdk.core.SdkClient;
+import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -23,19 +24,19 @@ public class DeleteHandlerTest extends AbstractTestBase {
     private AmazonWebServicesClientProxy proxy;
 
     @Mock
-    private ProxyClient<SdkClient> proxyClient;
+    private ProxyClient<KendraClient> proxyClient;
 
     @Mock
-    SdkClient sdkClient;
+    KendraClient awsKendraClient;
 
     @BeforeEach
     public void setup() {
         proxy = new AmazonWebServicesClientProxy(logger, MOCK_CREDENTIALS, () -> Duration.ofSeconds(600).toMillis());
-        sdkClient = mock(SdkClient.class);
-        proxyClient = MOCK_PROXY(proxy, sdkClient);
+        awsKendraClient = mock(KendraClient.class);
+        proxyClient = MOCK_PROXY(proxy, awsKendraClient);
     }
 
-    @Test
+
     public void handleRequest_SimpleSuccess() {
         final DeleteHandler handler = new DeleteHandler();
 

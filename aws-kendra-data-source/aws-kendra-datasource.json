@@ -96,9 +96,6 @@
         "InclusionPrefixes": {
           "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
         },
-        "InclusionPatterns": {
-          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
-        },
         "ExclusionPatterns": {
           "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
         },
@@ -121,6 +118,9 @@
       "minLength": 1,
       "maxLength": 100,
       "pattern": "[a-zA-Z0-9][a-zA-Z0-9_-]*"
+    },
+    "Arn": {
+      "type": "string"
     },
     "Name": {
       "description": "Name of Data Source",
@@ -180,7 +180,7 @@
     "Name",
     "IndexId",
     "Type",
-    "Configuration",
+    "DataSourceConfiguration",
     "RoleArn"
   ],
   "handlers": {
@@ -192,10 +192,12 @@
   },
   "additionalProperties": false,
   "primaryIdentifier": [
-    "/properties/Id"
+    "/properties/Id",
+    "/properties/IndexId"
   ],
   "readOnlyProperties": [
-    "/properties/Id"
+    "/properties/Id",
+    "/properties/Arn"
   ],
   "createOnlyProperties": [
     "/properties/Tags",

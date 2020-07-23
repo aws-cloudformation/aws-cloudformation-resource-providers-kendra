@@ -7,6 +7,7 @@ import software.amazon.awssdk.awscore.AwsRequest;
 import software.amazon.awssdk.awscore.AwsResponse;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.SdkClient;
+import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
@@ -21,7 +22,7 @@ public class UpdateHandler extends BaseHandlerStd {
         final AmazonWebServicesClientProxy proxy,
         final ResourceHandlerRequest<ResourceModel> request,
         final CallbackContext callbackContext,
-        final ProxyClient<SdkClient> proxyClient,
+        final ProxyClient<KendraClient> proxyClient,
         final Logger logger) {
 
         this.logger = logger;
@@ -75,7 +76,7 @@ public class UpdateHandler extends BaseHandlerStd {
      */
     private AwsResponse updateResource(
         final AwsRequest awsRequest,
-        final ProxyClient<SdkClient> proxyClient) {
+        final ProxyClient<KendraClient> proxyClient) {
         AwsResponse awsResponse = null;
         try {
 
@@ -108,7 +109,7 @@ public class UpdateHandler extends BaseHandlerStd {
     private boolean stabilizedOnFirstUpdate(
         final AwsRequest awsRequest,
         final AwsResponse awsResponse,
-        final ProxyClient<SdkClient> proxyClient,
+        final ProxyClient<KendraClient> proxyClient,
         final ResourceModel model,
         final CallbackContext callbackContext) {
 
@@ -129,7 +130,7 @@ public class UpdateHandler extends BaseHandlerStd {
      */
     private AwsResponse secondUpdate(
         final AwsRequest awsRequest,
-        final ProxyClient<SdkClient> proxyClient) {
+        final ProxyClient<KendraClient> proxyClient) {
         AwsResponse awsResponse = null;
         try {
 
