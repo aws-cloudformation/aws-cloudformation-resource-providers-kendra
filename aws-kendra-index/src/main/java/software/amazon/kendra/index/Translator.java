@@ -246,8 +246,10 @@ public class Translator {
       sdkRelevanceBuilder.importance(modelRelevance.getImportance());
       sdkRelevanceBuilder.duration(modelRelevance.getDuration());
       sdkRelevanceBuilder.rankOrder(modelRelevance.getRankOrder());
-      sdkRelevanceBuilder.valueImportanceMap(modelRelevance.getValueImportanceItems().stream()
-              .collect(Collectors.toMap(ValueImportanceItem::getKey, ValueImportanceItem::getValue)));
+      if (modelRelevance.getValueImportanceItems() != null) {
+        sdkRelevanceBuilder.valueImportanceMap(modelRelevance.getValueImportanceItems().stream()
+                .collect(Collectors.toMap(ValueImportanceItem::getKey, ValueImportanceItem::getValue)));
+      }
       return sdkRelevanceBuilder.build();
     } else {
       // Null equivalent.
