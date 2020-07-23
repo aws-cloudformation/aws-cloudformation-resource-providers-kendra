@@ -405,6 +405,22 @@ class TranslatorTest {
     }
 
     @Test
+    void testTranslateToPostCreateUpdateRequestUnsetInCloudFormation() {
+        String id = "id";
+        ResourceModel resourceModel = ResourceModel
+                .builder()
+                .id(id)
+                .build();
+        UpdateIndexRequest updateIndexRequest = Translator.translateToPostCreateUpdateRequest(resourceModel);
+        assertThat(updateIndexRequest.description()).isNull();
+        assertThat(updateIndexRequest.name()).isNull();
+        assertThat(updateIndexRequest.roleArn()).isNull();
+        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates()).isEmpty();
+        assertThat(updateIndexRequest.capacityUnits().queryCapacityUnits()).isEqualTo(0);
+        assertThat(updateIndexRequest.capacityUnits().storageCapacityUnits()).isEqualTo(0);
+    }
+
+    @Test
     void testTranslateToListTagsRequest() {
         String arn = "arn";
         ListTagsForResourceRequest actual = Translator.translateToListTagsRequest(arn);
