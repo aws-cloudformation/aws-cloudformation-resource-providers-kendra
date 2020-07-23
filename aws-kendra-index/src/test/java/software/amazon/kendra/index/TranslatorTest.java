@@ -399,6 +399,7 @@ class TranslatorTest {
         assertThat(updateIndexRequest.description()).isEqualTo("");
         assertThat(updateIndexRequest.name()).isEqualTo("");
         assertThat(updateIndexRequest.roleArn()).isEqualTo("");
+        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates()).isEmpty();
         assertThat(updateIndexRequest.capacityUnits().queryCapacityUnits()).isEqualTo(0);
         assertThat(updateIndexRequest.capacityUnits().storageCapacityUnits()).isEqualTo(0);
     }
