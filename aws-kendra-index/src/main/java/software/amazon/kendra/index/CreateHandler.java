@@ -8,6 +8,7 @@ import software.amazon.awssdk.services.kendra.model.CreateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
 import software.amazon.awssdk.services.kendra.model.IndexStatus;
+import software.amazon.awssdk.services.kendra.model.ServiceQuotaExceededException;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
@@ -15,6 +16,7 @@ import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnNotStabilizedException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
+import software.amazon.cloudformation.exceptions.CfnServiceLimitExceededException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -73,7 +75,7 @@ public class CreateHandler extends BaseHandlerStd {
                                 .done(this::setId)
                 )
                 // stabilize
-                .then(progress -> stabilize(proxy, proxyClient, progress))
+                .then(progress -> stabilize(proxy, proxyClient, progress, "AWS-Kendra-Index::PostCreateStabilize"))
                 // STEP 3 [TODO: post create and stabilize update]
                 .then(progress ->
                         // If your resource is provisioned through multiple API calls, you will need to apply each subsequent update
@@ -85,6 +87,8 @@ public class CreateHandler extends BaseHandlerStd {
                                 .makeServiceCall(this::postCreate)
                                 .progress()
                 )
+                // stabilize again because VCU changes can cause the index to enter UPDATING state
+                .then(progress -> stabilize(proxy, proxyClient, progress, "AWS-Kendra-Index::PostCreateUpdateStabilize"))
                 // STEP 4 [TODO: describe call/chain to return the resource model]
                 .then(progress -> new ReadHandler(indexArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
     }
@@ -117,6 +121,8 @@ public class CreateHandler extends BaseHandlerStd {
             throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME + e.getMessage(), e);
         } catch (ConflictException e) {
             throw new CfnResourceConflictException(e);
+        } catch (ServiceQuotaExceededException e) {
+            throw new CfnServiceLimitExceededException(ResourceModel.TYPE_NAME, e.getMessage(), e.getCause());
         } catch (final AwsServiceException e) {
             /*
              * While the handler contract states that the handler must always return a progress event,
@@ -147,6 +153,8 @@ public class CreateHandler extends BaseHandlerStd {
                     proxyClient.client()::updateIndex);
         } catch (ValidationException e) {
             throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME + e.getMessage(), e);
+        } catch (ServiceQuotaExceededException e) {
+            throw new CfnServiceLimitExceededException(ResourceModel.TYPE_NAME, e.getMessage(), e.getCause());
         } catch (final AwsServiceException e) {
             /*
              * While the handler contract states that the handler must always return a progress event,
@@ -164,8 +172,9 @@ public class CreateHandler extends BaseHandlerStd {
     private ProgressEvent<ResourceModel, CallbackContext> stabilize(
             final AmazonWebServicesClientProxy proxy,
             final ProxyClient<KendraClient> proxyClient,
-            final ProgressEvent<ResourceModel, CallbackContext> progress) {
-        return proxy.initiate("AWS-Kendra-Index::PostCreateStabilize", proxyClient, progress.getResourceModel(),
+            final ProgressEvent<ResourceModel, CallbackContext> progress,
+            String callGraph) {
+        return proxy.initiate(callGraph, proxyClient, progress.getResourceModel(),
                 progress.getCallbackContext())
                 .translateToServiceRequest(Function.identity())
                 .makeServiceCall(EMPTY_CALL)

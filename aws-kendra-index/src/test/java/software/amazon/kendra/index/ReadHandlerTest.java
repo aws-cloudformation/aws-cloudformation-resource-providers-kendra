@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
@@ -292,5 +293,26 @@ public class ReadHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
+    }
+
+    @Test
+    public void handleRequest_HandlesGeneralServiceException() {
+        final ReadHandler handler = new ReadHandler(testIndexArnBuilder);
+
+        String id = "testId";
+        when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
+                .thenThrow(AwsServiceException.builder().build());
+
+        final ResourceModel model = ResourceModel
+                .builder()
+                .id(id)
+                .build();
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        assertThrows(CfnGeneralServiceException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
     }
 }

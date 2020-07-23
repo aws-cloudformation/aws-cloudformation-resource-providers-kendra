@@ -15,6 +15,7 @@ import software.amazon.awssdk.services.kendra.model.IndexEdition;
 import software.amazon.awssdk.services.kendra.model.IndexStatus;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
+import software.amazon.awssdk.services.kendra.model.ServiceQuotaExceededException;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
@@ -22,6 +23,7 @@ import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnNotStabilizedException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
+import software.amazon.cloudformation.exceptions.CfnServiceLimitExceededException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -127,7 +129,7 @@ public class CreateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).createIndex(any(CreateIndexRequest.class));
-        verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
     }
@@ -194,7 +196,7 @@ public class CreateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).createIndex(any(CreateIndexRequest.class));
-        verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(4)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
     }
@@ -364,7 +366,7 @@ public class CreateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).createIndex(any(CreateIndexRequest.class));
-        verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
     }
@@ -432,8 +434,133 @@ public class CreateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).createIndex(any(CreateIndexRequest.class));
-        verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
+    }
+
+    @Test
+    public void handleRequest_PostCreateUpdateIndexThrowsValidationException() {
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+
+        String roleArn = "testRoleArn";
+        String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
+        final ResourceModel model = ResourceModel
+                .builder()
+                .roleArn(roleArn)
+                .edition(indexEdition)
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        String id = "testId";
+        when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
+                .thenReturn(CreateIndexResponse.builder().id(id).build());
+        when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
+                .thenReturn(DescribeIndexResponse.builder()
+                        .id(id)
+                        .roleArn(roleArn)
+                        .edition(indexEdition)
+                        .status(IndexStatus.ACTIVE.toString())
+                        .build());
+        when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
+                .thenThrow(ValidationException.builder().build());
+
+        assertThrows(CfnInvalidRequestException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
+    }
+
+    @Test
+    public void handleRequest_PostCreateUpdateIndexThrowsGeneralServiceException() {
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+
+        String roleArn = "testRoleArn";
+        String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
+        final ResourceModel model = ResourceModel
+                .builder()
+                .roleArn(roleArn)
+                .edition(indexEdition)
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        String id = "testId";
+        when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
+                .thenReturn(CreateIndexResponse.builder().id(id).build());
+        when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
+                .thenReturn(DescribeIndexResponse.builder()
+                        .id(id)
+                        .roleArn(roleArn)
+                        .edition(indexEdition)
+                        .status(IndexStatus.ACTIVE.toString())
+                        .build());
+        when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
+                .thenThrow(AwsServiceException.builder().build());
+
+        assertThrows(CfnGeneralServiceException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
+    }
+
+    @Test
+    public void handleRequest_FailWith_QuoteException() {
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+
+        when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
+                .thenThrow(ServiceQuotaExceededException.builder().build());
+
+        final ResourceModel model = ResourceModel
+                .builder()
+                .name("name")
+                .roleArn("role")
+                .edition(IndexEdition.ENTERPRISE_EDITION.toString())
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        assertThrows(CfnServiceLimitExceededException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
+    }
+
+    @Test
+    public void handleRequest_PostCreateUpdateIndexThrowsQuotaException() {
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+
+        String roleArn = "testRoleArn";
+        String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
+        final ResourceModel model = ResourceModel
+                .builder()
+                .roleArn(roleArn)
+                .edition(indexEdition)
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        String id = "testId";
+        when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
+                .thenReturn(CreateIndexResponse.builder().id(id).build());
+        when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
+                .thenReturn(DescribeIndexResponse.builder()
+                        .id(id)
+                        .roleArn(roleArn)
+                        .edition(indexEdition)
+                        .status(IndexStatus.ACTIVE.toString())
+                        .build());
+        when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
+                .thenThrow(ServiceQuotaExceededException.builder().build());
+
+        assertThrows(CfnServiceLimitExceededException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
     }
 }
