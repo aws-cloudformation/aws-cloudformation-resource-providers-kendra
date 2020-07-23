@@ -13,7 +13,6 @@
     },
     "Description": {
       "type": "string",
-      "minLength": 1,
       "maxLength": 1000,
       "pattern": "^\\P{C}*$"
     },
