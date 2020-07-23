@@ -167,6 +167,7 @@ public class Translator {
    * @return updateIndexRequest the aws service request to modify a resource
    */
   static UpdateIndexRequest translateToUpdateRequest(final ResourceModel model) {
+    // Null equivalents for partial updates.
     String description = model.getDescription() == null ? "" : model.getDescription();
     String name = model.getName() == null ? "" : model.getName();
     String roleArn = model.getRoleArn() == null ? "" : model.getRoleArn();
@@ -191,6 +192,7 @@ public class Translator {
               .queryCapacityUnits(modelCapacityUnitsConfiguration.getQueryCapacityUnits())
               .build();
     } else {
+      // Null equivalent for partial updates.
       return CapacityUnitsConfiguration
               .builder()
               .queryCapacityUnits(0)
