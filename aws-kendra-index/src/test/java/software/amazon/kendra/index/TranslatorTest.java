@@ -389,6 +389,21 @@ class TranslatorTest {
     }
 
     @Test
+    void testTranslateToUpdateRequestUnsetInCloudFormation() {
+        String id = "id";
+        ResourceModel resourceModel = ResourceModel
+                .builder()
+                .id(id)
+                .build();
+        UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel);
+        assertThat(updateIndexRequest.description()).isEqualTo("");
+        assertThat(updateIndexRequest.name()).isEqualTo("");
+        assertThat(updateIndexRequest.roleArn()).isEqualTo("");
+        assertThat(updateIndexRequest.capacityUnits().queryCapacityUnits()).isEqualTo(0);
+        assertThat(updateIndexRequest.capacityUnits().storageCapacityUnits()).isEqualTo(0);
+    }
+
+    @Test
     void testTranslateToListTagsRequest() {
         String arn = "arn";
         ListTagsForResourceRequest actual = Translator.translateToListTagsRequest(arn);
@@ -527,6 +542,14 @@ class TranslatorTest {
         assertThat(actual.size()).isEqualTo(2);
         assertThat(actual.get(0).getId()).isEqualTo(id1);
         assertThat(actual.get(1).getId()).isEqualTo(id2);
+    }
+
+    @Test
+    void testTranslateToCapacityUnitsConfigurationUnset() {
+        software.amazon.awssdk.services.kendra.model.CapacityUnitsConfiguration
+                capacityUnitsConfiguration = Translator.translateToCapacityUnitsConfiguration(null);
+        assertThat(capacityUnitsConfiguration.queryCapacityUnits()).isEqualTo(0);
+        assertThat(capacityUnitsConfiguration.storageCapacityUnits()).isEqualTo(0);
     }
 
 }

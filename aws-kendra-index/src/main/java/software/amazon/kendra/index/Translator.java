@@ -167,19 +167,22 @@ public class Translator {
    * @return updateIndexRequest the aws service request to modify a resource
    */
   static UpdateIndexRequest translateToUpdateRequest(final ResourceModel model) {
+    String description = model.getDescription() == null ? "" : model.getDescription();
+    String name = model.getName() == null ? "" : model.getName();
+    String roleArn = model.getRoleArn() == null ? "" : model.getRoleArn();
     final UpdateIndexRequest updateIndexRequest = UpdateIndexRequest
             .builder()
             .id(model.getId())
-            .roleArn(model.getRoleArn())
-            .name(model.getName())
-            .description(model.getDescription())
+            .roleArn(roleArn)
+            .name(name)
+            .description(description)
             .documentMetadataConfigurationUpdates(translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations()))
             .capacityUnits(translateToCapacityUnitsConfiguration(model.getCapacityUnits()))
             .build();
     return updateIndexRequest;
   }
 
-  private static CapacityUnitsConfiguration translateToCapacityUnitsConfiguration(
+  static CapacityUnitsConfiguration translateToCapacityUnitsConfiguration(
           software.amazon.kendra.index.CapacityUnitsConfiguration modelCapacityUnitsConfiguration) {
     if (modelCapacityUnitsConfiguration != null) {
       return CapacityUnitsConfiguration
@@ -188,7 +191,11 @@ public class Translator {
               .queryCapacityUnits(modelCapacityUnitsConfiguration.getQueryCapacityUnits())
               .build();
     } else {
-      return null;
+      return CapacityUnitsConfiguration
+              .builder()
+              .queryCapacityUnits(0)
+              .storageCapacityUnits(0)
+              .build();
     }
   }
 
