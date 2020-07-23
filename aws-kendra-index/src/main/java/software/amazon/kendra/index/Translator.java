@@ -223,16 +223,16 @@ public class Translator {
       sdkDocumentMetadataConfigurationList = new ArrayList<>();
       for (software.amazon.kendra.index.DocumentMetadataConfiguration modelDocumentMetadataConfiguration : modelDocumentMetadataConfigurationList) {
         DocumentMetadataConfiguration.Builder sdkDocumentMetadataConfigurationBuilder = DocumentMetadataConfiguration.builder();
+
         sdkDocumentMetadataConfigurationBuilder.name(modelDocumentMetadataConfiguration.getName());
         sdkDocumentMetadataConfigurationBuilder.type(modelDocumentMetadataConfiguration.getType());
+
         Relevance sdkRelevance = translateToSdkRelevance(modelDocumentMetadataConfiguration.getRelevance());
-        if (sdkRelevance != null) {
-          sdkDocumentMetadataConfigurationBuilder.relevance(sdkRelevance);
-        }
+        sdkDocumentMetadataConfigurationBuilder.relevance(sdkRelevance);
+
         Search sdkSearch = translateToSdkSearch(modelDocumentMetadataConfiguration.getSearch());
-        if (sdkSearch != null) {
-          sdkDocumentMetadataConfigurationBuilder.search(sdkSearch);
-        }
+        sdkDocumentMetadataConfigurationBuilder.search(sdkSearch);
+
         sdkDocumentMetadataConfigurationList.add(sdkDocumentMetadataConfigurationBuilder.build());
       }
     }
@@ -250,7 +250,8 @@ public class Translator {
               .collect(Collectors.toMap(ValueImportanceItem::getKey, ValueImportanceItem::getValue)));
       return sdkRelevanceBuilder.build();
     } else {
-      return null;
+      // Null equivalent.
+      return Relevance.builder().build();
     }
   }
 
@@ -262,7 +263,8 @@ public class Translator {
       sdkSearchBuilder.searchable(modelSearch.getSearchable());
       return sdkSearchBuilder.build();
     } else {
-      return null;
+      // Null equivalent.
+      return Search.builder().build();
     }
   }
 
