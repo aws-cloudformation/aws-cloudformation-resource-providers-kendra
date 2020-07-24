@@ -167,19 +167,23 @@ public class Translator {
    * @return updateIndexRequest the aws service request to modify a resource
    */
   static UpdateIndexRequest translateToUpdateRequest(final ResourceModel model) {
+    // Null equivalents for partial updates.
+    String description = model.getDescription() == null ? "" : model.getDescription();
+    String name = model.getName() == null ? "" : model.getName();
+    String roleArn = model.getRoleArn() == null ? "" : model.getRoleArn();
     final UpdateIndexRequest updateIndexRequest = UpdateIndexRequest
             .builder()
             .id(model.getId())
-            .roleArn(model.getRoleArn())
-            .name(model.getName())
-            .description(model.getDescription())
+            .roleArn(roleArn)
+            .name(name)
+            .description(description)
             .documentMetadataConfigurationUpdates(translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations()))
             .capacityUnits(translateToCapacityUnitsConfiguration(model.getCapacityUnits()))
             .build();
     return updateIndexRequest;
   }
 
-  private static CapacityUnitsConfiguration translateToCapacityUnitsConfiguration(
+  static CapacityUnitsConfiguration translateToCapacityUnitsConfiguration(
           software.amazon.kendra.index.CapacityUnitsConfiguration modelCapacityUnitsConfiguration) {
     if (modelCapacityUnitsConfiguration != null) {
       return CapacityUnitsConfiguration
@@ -188,7 +192,12 @@ public class Translator {
               .queryCapacityUnits(modelCapacityUnitsConfiguration.getQueryCapacityUnits())
               .build();
     } else {
-      return null;
+      // Null equivalent for partial updates.
+      return CapacityUnitsConfiguration
+              .builder()
+              .queryCapacityUnits(0)
+              .storageCapacityUnits(0)
+              .build();
     }
   }
 
@@ -214,16 +223,16 @@ public class Translator {
       sdkDocumentMetadataConfigurationList = new ArrayList<>();
       for (software.amazon.kendra.index.DocumentMetadataConfiguration modelDocumentMetadataConfiguration : modelDocumentMetadataConfigurationList) {
         DocumentMetadataConfiguration.Builder sdkDocumentMetadataConfigurationBuilder = DocumentMetadataConfiguration.builder();
+
         sdkDocumentMetadataConfigurationBuilder.name(modelDocumentMetadataConfiguration.getName());
         sdkDocumentMetadataConfigurationBuilder.type(modelDocumentMetadataConfiguration.getType());
+
         Relevance sdkRelevance = translateToSdkRelevance(modelDocumentMetadataConfiguration.getRelevance());
-        if (sdkRelevance != null) {
-          sdkDocumentMetadataConfigurationBuilder.relevance(sdkRelevance);
-        }
+        sdkDocumentMetadataConfigurationBuilder.relevance(sdkRelevance);
+
         Search sdkSearch = translateToSdkSearch(modelDocumentMetadataConfiguration.getSearch());
-        if (sdkSearch != null) {
-          sdkDocumentMetadataConfigurationBuilder.search(sdkSearch);
-        }
+        sdkDocumentMetadataConfigurationBuilder.search(sdkSearch);
+
         sdkDocumentMetadataConfigurationList.add(sdkDocumentMetadataConfigurationBuilder.build());
       }
     }
@@ -237,11 +246,14 @@ public class Translator {
       sdkRelevanceBuilder.importance(modelRelevance.getImportance());
       sdkRelevanceBuilder.duration(modelRelevance.getDuration());
       sdkRelevanceBuilder.rankOrder(modelRelevance.getRankOrder());
-      sdkRelevanceBuilder.valueImportanceMap(modelRelevance.getValueImportanceItems().stream()
-              .collect(Collectors.toMap(ValueImportanceItem::getKey, ValueImportanceItem::getValue)));
+      if (modelRelevance.getValueImportanceItems() != null) {
+        sdkRelevanceBuilder.valueImportanceMap(modelRelevance.getValueImportanceItems().stream()
+                .collect(Collectors.toMap(ValueImportanceItem::getKey, ValueImportanceItem::getValue)));
+      }
       return sdkRelevanceBuilder.build();
     } else {
-      return null;
+      // Null equivalent.
+      return Relevance.builder().build();
     }
   }
 
@@ -253,7 +265,8 @@ public class Translator {
       sdkSearchBuilder.searchable(modelSearch.getSearchable());
       return sdkSearchBuilder.build();
     } else {
-      return null;
+      // Null equivalent.
+      return Search.builder().build();
     }
   }
 

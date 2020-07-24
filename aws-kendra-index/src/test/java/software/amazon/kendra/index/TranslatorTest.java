@@ -42,8 +42,15 @@ class TranslatorTest {
                 Translator.translateToSdkDocumentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build())).get(0);
         assertThat(sdkDocumentMetadataConfiguration.name()).isEqualTo(name);
         assertThat(sdkDocumentMetadataConfiguration.type()).isNull();
-        assertThat(sdkDocumentMetadataConfiguration.relevance()).isNull();
-        assertThat(sdkDocumentMetadataConfiguration.search()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.relevance()).isNotNull();
+        assertThat(sdkDocumentMetadataConfiguration.relevance().rankOrder()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.relevance().valueImportanceMap()).isEmpty();
+        assertThat(sdkDocumentMetadataConfiguration.relevance().importance()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.relevance().freshness()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.search()).isNotNull();
+        assertThat(sdkDocumentMetadataConfiguration.search().searchable()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.search().facetable()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.search().displayable()).isNull();
     }
 
     @Test
@@ -58,8 +65,15 @@ class TranslatorTest {
         assertThat(sdkDocumentMetadataConfiguration.typeAsString())
                 .isEqualTo(type);
         assertThat(sdkDocumentMetadataConfiguration.name()).isNull();
-        assertThat(sdkDocumentMetadataConfiguration.relevance()).isNull();
-        assertThat(sdkDocumentMetadataConfiguration.search()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.relevance()).isNotNull();
+        assertThat(sdkDocumentMetadataConfiguration.relevance().rankOrder()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.relevance().valueImportanceMap()).isEmpty();
+        assertThat(sdkDocumentMetadataConfiguration.relevance().importance()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.relevance().freshness()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.search()).isNotNull();
+        assertThat(sdkDocumentMetadataConfiguration.search().searchable()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.search().facetable()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.search().displayable()).isNull();
     }
 
     @Test
@@ -105,7 +119,7 @@ class TranslatorTest {
 
         assertThat(sdkDocumentMetadataConfiguration.name()).isNull();
         assertThat(sdkDocumentMetadataConfiguration.type()).isNull();
-        assertThat(sdkDocumentMetadataConfiguration.search()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.search()).isNotNull();
     }
 
     @Test
@@ -132,7 +146,12 @@ class TranslatorTest {
                 .isTrue();
         assertThat(sdkDocumentMetadataConfiguration.name()).isNull();
         assertThat(sdkDocumentMetadataConfiguration.type()).isNull();
-        assertThat(sdkDocumentMetadataConfiguration.relevance()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.relevance()).isNotNull();
+        assertThat(sdkDocumentMetadataConfiguration.relevance()).isNotNull();
+        assertThat(sdkDocumentMetadataConfiguration.relevance().rankOrder()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.relevance().valueImportanceMap()).isEmpty();
+        assertThat(sdkDocumentMetadataConfiguration.relevance().importance()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.relevance().freshness()).isNull();
     }
 
     @Test
@@ -389,6 +408,38 @@ class TranslatorTest {
     }
 
     @Test
+    void testTranslateToUpdateRequestUnsetInCloudFormation() {
+        String id = "id";
+        ResourceModel resourceModel = ResourceModel
+                .builder()
+                .id(id)
+                .build();
+        UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel);
+        assertThat(updateIndexRequest.description()).isEqualTo("");
+        assertThat(updateIndexRequest.name()).isEqualTo("");
+        assertThat(updateIndexRequest.roleArn()).isEqualTo("");
+        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates()).isEmpty();
+        assertThat(updateIndexRequest.capacityUnits().queryCapacityUnits()).isEqualTo(0);
+        assertThat(updateIndexRequest.capacityUnits().storageCapacityUnits()).isEqualTo(0);
+    }
+
+    @Test
+    void testTranslateToPostCreateUpdateRequestUnsetInCloudFormation() {
+        String id = "id";
+        ResourceModel resourceModel = ResourceModel
+                .builder()
+                .id(id)
+                .build();
+        UpdateIndexRequest updateIndexRequest = Translator.translateToPostCreateUpdateRequest(resourceModel);
+        assertThat(updateIndexRequest.description()).isNull();
+        assertThat(updateIndexRequest.name()).isNull();
+        assertThat(updateIndexRequest.roleArn()).isNull();
+        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates()).isEmpty();
+        assertThat(updateIndexRequest.capacityUnits().queryCapacityUnits()).isEqualTo(0);
+        assertThat(updateIndexRequest.capacityUnits().storageCapacityUnits()).isEqualTo(0);
+    }
+
+    @Test
     void testTranslateToListTagsRequest() {
         String arn = "arn";
         ListTagsForResourceRequest actual = Translator.translateToListTagsRequest(arn);
@@ -527,6 +578,14 @@ class TranslatorTest {
         assertThat(actual.size()).isEqualTo(2);
         assertThat(actual.get(0).getId()).isEqualTo(id1);
         assertThat(actual.get(1).getId()).isEqualTo(id2);
+    }
+
+    @Test
+    void testTranslateToCapacityUnitsConfigurationUnset() {
+        software.amazon.awssdk.services.kendra.model.CapacityUnitsConfiguration
+                capacityUnitsConfiguration = Translator.translateToCapacityUnitsConfiguration(null);
+        assertThat(capacityUnitsConfiguration.queryCapacityUnits()).isEqualTo(0);
+        assertThat(capacityUnitsConfiguration.storageCapacityUnits()).isEqualTo(0);
     }
 
 }
