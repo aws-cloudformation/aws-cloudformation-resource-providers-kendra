@@ -11,6 +11,7 @@ import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.Delay;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
@@ -18,6 +19,18 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 public class DeleteHandler extends BaseHandlerStd {
     private Logger logger;
+
+    private Delay delay;
+
+    public DeleteHandler() {
+        super();
+        delay = STABILIZATION_DELAY;
+    }
+
+    public DeleteHandler(Delay delay) {
+        super();
+        this.delay = delay;
+    }
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
             final AmazonWebServicesClientProxy proxy,
@@ -47,6 +60,7 @@ public class DeleteHandler extends BaseHandlerStd {
                         proxy.initiate("AWS-Kendra-Index::Delete", proxyClient, model, callbackContext)
                                 // STEP 2.1 [TODO: construct a body of a request]
                                 .translateToServiceRequest(Translator::translateToDeleteRequest)
+                                .backoffDelay(delay)
                                 // STEP 2.2 [TODO: make an api call]
                                 .makeServiceCall(this::deleteIndex)
                                 // STEP 2.3 [TODO: stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]

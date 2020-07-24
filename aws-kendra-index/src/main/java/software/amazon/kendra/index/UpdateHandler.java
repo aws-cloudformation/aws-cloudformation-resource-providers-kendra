@@ -19,6 +19,7 @@ import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
 import software.amazon.cloudformation.exceptions.CfnServiceLimitExceededException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.Delay;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
@@ -31,6 +32,8 @@ import java.util.stream.Collectors;
 
 public class UpdateHandler extends BaseHandlerStd {
 
+    private Delay delay;
+
     private Logger logger;
 
     private IndexArnBuilder indexArnBuilder;
@@ -38,11 +41,13 @@ public class UpdateHandler extends BaseHandlerStd {
     public UpdateHandler() {
         super();
         indexArnBuilder = new IndexArn();
+        delay = STABILIZATION_DELAY;
     }
 
-    public UpdateHandler(IndexArnBuilder indexArnBuilder) {
+    public UpdateHandler(IndexArnBuilder indexArnBuilder, Delay delay) {
         super();
         this.indexArnBuilder = indexArnBuilder;
+        this.delay = delay;
     }
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
@@ -67,6 +72,7 @@ public class UpdateHandler extends BaseHandlerStd {
                                 // STEP 1.1 [TODO: construct a body of a request]
                                 .translateToServiceRequest(Translator::translateToUpdateRequest)
                                 // STEP 1.2 [TODO: make an api call]
+                                .backoffDelay(delay)
                                 .makeServiceCall(this::updateIndex)
                                 // STEP 1.3 [TODO: stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]
                                 // stabilization step may or may not be needed after each API call

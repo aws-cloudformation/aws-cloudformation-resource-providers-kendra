@@ -25,6 +25,7 @@ import software.amazon.cloudformation.exceptions.CfnNotStabilizedException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
 import software.amazon.cloudformation.exceptions.CfnServiceLimitExceededException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.Delay;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
@@ -34,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import software.amazon.cloudformation.proxy.delay.Constant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -59,6 +61,8 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     TestIndexArnBuilder testIndexArnBuilder = new TestIndexArnBuilder();
 
+    Delay testDelay = Constant.of().timeout(Duration.ofMinutes(10)).delay(Duration.ofMillis(1L)).build();
+
     @BeforeEach
     public void setup() {
         proxy = new AmazonWebServicesClientProxy(logger, MOCK_CREDENTIALS, () -> Duration.ofSeconds(600).toMillis());
@@ -74,7 +78,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_SimpleSuccess() {
-        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder, testDelay);
 
         String name = "testName";
         String roleArn = "testRoleArn";
@@ -136,7 +140,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_SimpleSuccessTransitionsFromCreatingToActive() {
-        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder, testDelay);
 
         String name = "testName";
         String roleArn = "testRoleArn";
@@ -203,7 +207,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_FailWith_InvalidRoleArn() {
-        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder, testDelay);
 
         when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
                 .thenThrow(ValidationException.builder().build());
@@ -226,7 +230,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_FailWith_GeneralAwsServiceException() {
-        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder, testDelay);
 
         when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
                 .thenThrow(AwsServiceException.builder().build());
@@ -249,7 +253,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_CreateIndexFailedAsynchronously() {
-        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder, testDelay);
 
         String name = "testName";
         String roleArn = "testRoleArn";
@@ -284,7 +288,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_FailWith_ConflictException() {
-        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder, testDelay);
 
         when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
                 .thenThrow(ConflictException.builder().build());
@@ -307,7 +311,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_Tags() {
-        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder, testDelay);
 
         String name = "testName";
         String roleArn = "testRoleArn";
@@ -373,7 +377,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_ServerSideEncryption() {
-        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder, testDelay);
 
         String name = "testName";
         String roleArn = "testRoleArn";
@@ -441,7 +445,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_PostCreateUpdateIndexThrowsValidationException() {
-        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder, testDelay);
 
         String roleArn = "testRoleArn";
         String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
@@ -475,7 +479,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_PostCreateUpdateIndexThrowsGeneralServiceException() {
-        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder, testDelay);
 
         String roleArn = "testRoleArn";
         String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
@@ -509,7 +513,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_FailWith_QuoteException() {
-        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder, testDelay);
 
         when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
                 .thenThrow(ServiceQuotaExceededException.builder().build());
@@ -532,7 +536,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_PostCreateUpdateIndexThrowsQuotaException() {
-        final CreateHandler handler = new CreateHandler(testIndexArnBuilder);
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder, testDelay);
 
         String roleArn = "testRoleArn";
         String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();

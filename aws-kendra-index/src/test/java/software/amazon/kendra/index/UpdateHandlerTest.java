@@ -25,6 +25,7 @@ import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
 import software.amazon.cloudformation.exceptions.CfnServiceLimitExceededException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.Delay;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
@@ -34,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import software.amazon.cloudformation.proxy.delay.Constant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -59,6 +61,8 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
     TestIndexArnBuilder testIndexArnBuilder = new TestIndexArnBuilder();
 
+    Delay testDelay = Constant.of().timeout(Duration.ofMinutes(10)).delay(Duration.ofMillis(1L)).build();
+
     @BeforeEach
     public void setup() {
         proxy = new AmazonWebServicesClientProxy(logger, MOCK_CREDENTIALS, () -> Duration.ofSeconds(600).toMillis());
@@ -74,7 +78,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_SimpleSuccess() {
-        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder);
+        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder, testDelay);
 
         String roleArn = "roleArn";
         String name = "name";
@@ -133,7 +137,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_UpdatingToActive() {
-        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder);
+        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder, testDelay);
 
         String roleArn = "roleArn";
         String name = "name";
@@ -197,7 +201,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_FailWith_InvalidRoleArn() {
-        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder);
+        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder, testDelay);
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
                 .thenThrow(ValidationException.builder().build());
@@ -222,7 +226,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_FailWith_ConflictException() {
-        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder);
+        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder, testDelay);
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
                 .thenThrow(ConflictException.builder().build());
@@ -246,7 +250,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_AddNewTags() {
-        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder);
+        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder, testDelay);
 
         String roleArn = "roleArn";
         String name = "name";
@@ -315,7 +319,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_RemoveTags() {
-        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder);
+        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder, testDelay);
 
         String roleArn = "roleArn";
         String name = "name";
@@ -381,7 +385,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_AddAndRemoveTags() {
-        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder);
+        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder, testDelay);
 
         String roleArn = "roleArn";
         String name = "name";
@@ -458,7 +462,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_FailWith_TagResourceThrowsException() {
-        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder);
+        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder, testDelay);
 
         String roleArn = "roleArn";
         String name = "name";
@@ -505,7 +509,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_FailWith_UntagResourceThrowsException() {
-        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder);
+        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder, testDelay);
 
         String roleArn = "roleArn";
         String name = "name";
@@ -554,7 +558,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_FailWith_QuotaException() {
-        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder);
+        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder, testDelay);
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
                 .thenThrow(ServiceQuotaExceededException.builder().build());

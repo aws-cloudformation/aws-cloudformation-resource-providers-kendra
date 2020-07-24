@@ -18,6 +18,7 @@ import software.amazon.cloudformation.exceptions.CfnNotStabilizedException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
 import software.amazon.cloudformation.exceptions.CfnServiceLimitExceededException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.Delay;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
@@ -27,6 +28,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class CreateHandler extends BaseHandlerStd {
+
+    private Delay delay;
 
     protected static final BiFunction<ResourceModel, ProxyClient<KendraClient>, ResourceModel> EMPTY_CALL =
             (model, proxyClient) -> model;
@@ -38,12 +41,14 @@ public class CreateHandler extends BaseHandlerStd {
     public CreateHandler() {
         super();
         indexArnBuilder = new IndexArn();
+        delay = STABILIZATION_DELAY;
     }
 
     // Used for testing.
-    public CreateHandler(IndexArnBuilder indexArnBuilder) {
+    public CreateHandler(IndexArnBuilder indexArnBuilder, Delay delay) {
         super();
         this.indexArnBuilder = indexArnBuilder;
+        this.delay = delay;
     }
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
@@ -177,10 +182,10 @@ public class CreateHandler extends BaseHandlerStd {
         return proxy.initiate(callGraph, proxyClient, progress.getResourceModel(),
                 progress.getCallbackContext())
                 .translateToServiceRequest(Function.identity())
+                .backoffDelay(delay)
                 .makeServiceCall(EMPTY_CALL)
                 .stabilize((request, response, proxyInvocation, model, callbackContext) ->
                         isStabilized(proxyInvocation, model)).progress();
-
     }
 
     private boolean isStabilized(final ProxyClient<KendraClient> proxyClient, final ResourceModel model) {

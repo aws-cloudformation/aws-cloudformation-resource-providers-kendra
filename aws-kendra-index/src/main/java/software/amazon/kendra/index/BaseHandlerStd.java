@@ -6,10 +6,18 @@ import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
+import software.amazon.cloudformation.proxy.delay.Constant;
+
+import java.time.Duration;
 
 // Placeholder for the functionality that could be shared across Create/Read/Update/Delete/List Handlers
 
 public abstract class BaseHandlerStd extends BaseHandler<CallbackContext> {
+
+  protected static Constant STABILIZATION_DELAY = Constant.of()
+          .timeout(Duration.ofDays(100L))
+          .delay(Duration.ofSeconds(20L))
+          .build();
 
   @Override
   public final ProgressEvent<ResourceModel, CallbackContext> handleRequest(
