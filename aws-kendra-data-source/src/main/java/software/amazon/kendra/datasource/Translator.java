@@ -4,8 +4,11 @@ import com.google.common.collect.Lists;
 import software.amazon.awssdk.awscore.AwsRequest;
 import software.amazon.awssdk.awscore.AwsResponse;
 import software.amazon.awssdk.services.kendra.model.CreateDataSourceRequest;
+import software.amazon.awssdk.services.kendra.model.DeleteDataSourceRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeDataSourceRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeDataSourceResponse;
+import software.amazon.awssdk.services.kendra.model.ListDataSourcesRequest;
+import software.amazon.awssdk.services.kendra.model.ListDataSourcesResponse;
 
 
 import java.util.Collection;
@@ -81,11 +84,12 @@ public class Translator {
    * @param model resource model
    * @return awsRequest the aws service request to delete a resource
    */
-  static AwsRequest translateToDeleteRequest(final ResourceModel model) {
-    final AwsRequest awsRequest = null;
-    // TODO: construct a request
-    // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/2077c92299aeb9a68ae8f4418b5e932b12a8b186/aws-logs-loggroup/src/main/java/com/aws/logs/loggroup/Translator.java#L33-L37
-    return awsRequest;
+  static DeleteDataSourceRequest translateToDeleteRequest(final ResourceModel model) {
+    final DeleteDataSourceRequest deleteDataSourceRequest = DeleteDataSourceRequest.builder()
+      .id(model.getId())
+      .indexId(model.getIndexId())
+      .build();
+    return deleteDataSourceRequest;
   }
 
   /**
@@ -113,26 +117,31 @@ public class Translator {
 
   /**
    * Request to list resources
+   * @param indexId IndexId assoicated with the request
    * @param nextToken token passed to the aws service list resources request
    * @return awsRequest the aws service request to list resources within aws account
    */
-  static AwsRequest translateToListRequest(final String nextToken) {
-    final AwsRequest awsRequest = null;
-    // TODO: construct a request
-    // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/2077c92299aeb9a68ae8f4418b5e932b12a8b186/aws-logs-loggroup/src/main/java/com/aws/logs/loggroup/Translator.java#L26-L31
-    return awsRequest;
+  static ListDataSourcesRequest translateToListRequest(final String indexId, final String nextToken) {
+    final ListDataSourcesRequest listDataSourcesRequest = ListDataSourcesRequest.builder()
+      .indexId(indexId)
+      .nextToken(nextToken)
+      .build();
+    return listDataSourcesRequest;
   }
 
   /**
    * Translates resource objects from sdk into a resource model (primary identifier only)
-   * @param awsResponse the aws service describe resource response
+   * @param listDataSourcesResponse the aws service describe resource response
+   * @param indexId IndexId associated with the Data source
    * @return list of resource models
    */
-  static List<ResourceModel> translateFromListRequest(final AwsResponse awsResponse) {
+  static List<ResourceModel> translateFromListResponse(final ListDataSourcesResponse listDataSourcesResponse,
+    final String indexId) {
     // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/2077c92299aeb9a68ae8f4418b5e932b12a8b186/aws-logs-loggroup/src/main/java/com/aws/logs/loggroup/Translator.java#L75-L82
-    return streamOfOrEmpty(Lists.newArrayList())
+    return streamOfOrEmpty(listDataSourcesResponse.summaryItems())
         .map(resource -> ResourceModel.builder()
-            // include only primary identifier
+            .id(resource.id())
+            .indexId(indexId)
             .build())
         .collect(Collectors.toList());
   }

@@ -9,8 +9,7 @@ public class DataSourceRequestConverter {
     final DataSourceConfiguration dataSourceConfiguration, String dataSourceType) {
     if (DataSourceType.S3.toString().equals(dataSourceType)) {
       return getS3DataSourceConfiguration(dataSourceConfiguration.getS3Configuration());
-    }
-    else {
+    } else {
       return null;
     }
   }

@@ -3,6 +3,8 @@ package software.amazon.kendra.datasource;
 import com.google.common.collect.Sets;
 import software.amazon.awssdk.services.kendra.model.DataSourceType;
 
+import java.util.Arrays;
+
 public class DataSourceResponseConverter {
 
   static DataSourceConfiguration getDataSourceConfiguration(
@@ -21,8 +23,8 @@ public class DataSourceResponseConverter {
     return DataSourceConfiguration.builder()
       .s3Configuration(S3DataSourceConfiguration.builder()
       .bucketName(s3DataSourceConfiguration.bucketName())
-      .inclusionPrefixes(Sets.newHashSet(s3DataSourceConfiguration.inclusionPrefixes()))
-      .exclusionPatterns(Sets.newHashSet(s3DataSourceConfiguration.exclusionPatterns()))
+      .inclusionPrefixes(s3DataSourceConfiguration.inclusionPrefixes())
+      .exclusionPatterns(s3DataSourceConfiguration.exclusionPatterns())
       .accessControlListConfiguration(getAccessControlListConfiguration(s3DataSourceConfiguration.accessControlListConfiguration()))
       .documentsMetadataConfiguration(getDocumentsMetadataConfiguration(s3DataSourceConfiguration.documentsMetadataConfiguration()))
       .build()

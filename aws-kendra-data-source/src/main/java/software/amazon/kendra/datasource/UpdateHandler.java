@@ -25,46 +25,48 @@ public class UpdateHandler extends BaseHandlerStd {
         final ProxyClient<KendraClient> proxyClient,
         final Logger logger) {
 
-        this.logger = logger;
+//        this.logger = logger;
+//
+//        final ResourceModel model = request.getDesiredResourceState();
+//
+//        // TODO: Adjust Progress Chain according to your implementation
+//        // https://github.com/aws-cloudformation/cloudformation-cli-java-plugin/blob/master/src/main/java/software/amazon/cloudformation/proxy/CallChain.java
+//
+//        return ProgressEvent.progress(model, callbackContext)
+//            // STEP 1 [first update/stabilize progress chain - required for resource update]
+//            .then(progress ->
+//                // STEP 1.0 [initialize a proxy context]
+//                proxy.initiate("AWS-Kendra-DataSource::Update", proxyClient, model, callbackContext)
+//
+//                    // STEP 1.1 [TODO: construct a body of a request]
+//                    .translateToServiceRequest(Translator::translateToFirstUpdateRequest)
+//
+//                    // STEP 1.2 [TODO: make an api call]
+//                    .makeServiceCall(this::updateResource)
+//
+//                    // STEP 1.3 [TODO: stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]
+//                    // stabilization step may or may not be needed after each API call
+//                    // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
+//                    .stabilize(this::stabilizedOnFirstUpdate)
+//                    .progress())
+//
+//            // If your resource is provisioned through multiple API calls, then the following pattern is required (and might take as many postUpdate callbacks as necessary)
+//            // STEP 2 [second update/stabilize progress chain]
+//            .then(progress ->
+//                    // STEP 2.0 [initialize a proxy context]
+//                    proxy.initiate("AWS-Kendra-DataSource::Update", proxyClient, model, callbackContext)
+//
+//                    // STEP 2.1 [TODO: construct a body of a request]
+//                    .translateToServiceRequest(Translator::translateToSecondUpdateRequest)
+//
+//                    // STEP 2.2 [TODO: make an api call]
+//                    .makeServiceCall(this::secondUpdate)
+//                    .progress())
+//
+//            // STEP 3 [TODO: describe call/chain to return the resource model]
+//            .then(progress -> new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, logger));
 
-        final ResourceModel model = request.getDesiredResourceState();
-
-        // TODO: Adjust Progress Chain according to your implementation
-        // https://github.com/aws-cloudformation/cloudformation-cli-java-plugin/blob/master/src/main/java/software/amazon/cloudformation/proxy/CallChain.java
-
-        return ProgressEvent.progress(model, callbackContext)
-            // STEP 1 [first update/stabilize progress chain - required for resource update]
-            .then(progress ->
-                // STEP 1.0 [initialize a proxy context]
-                proxy.initiate("AWS-Kendra-DataSource::Update", proxyClient, model, callbackContext)
-
-                    // STEP 1.1 [TODO: construct a body of a request]
-                    .translateToServiceRequest(Translator::translateToFirstUpdateRequest)
-
-                    // STEP 1.2 [TODO: make an api call]
-                    .makeServiceCall(this::updateResource)
-
-                    // STEP 1.3 [TODO: stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]
-                    // stabilization step may or may not be needed after each API call
-                    // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
-                    .stabilize(this::stabilizedOnFirstUpdate)
-                    .progress())
-
-            // If your resource is provisioned through multiple API calls, then the following pattern is required (and might take as many postUpdate callbacks as necessary)
-            // STEP 2 [second update/stabilize progress chain]
-            .then(progress ->
-                    // STEP 2.0 [initialize a proxy context]
-                    proxy.initiate("AWS-Kendra-DataSource::Update", proxyClient, model, callbackContext)
-
-                    // STEP 2.1 [TODO: construct a body of a request]
-                    .translateToServiceRequest(Translator::translateToSecondUpdateRequest)
-
-                    // STEP 2.2 [TODO: make an api call]
-                    .makeServiceCall(this::secondUpdate)
-                    .progress())
-
-            // STEP 3 [TODO: describe call/chain to return the resource model]
-            .then(progress -> new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, logger));
+                return null;
     }
 
     /**

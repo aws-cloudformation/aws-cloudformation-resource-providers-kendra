@@ -10,33 +10,8 @@
       "maxLength": 36,
       "pattern": "[a-zA-Z0-9][a-zA-Z0-9-]*"
     },
-    "Tag": {
-      "description": "Tag type",
-      "type": "object",
-      "properties": {
-        "Key": {
-          "description": "A string used to identify this tag. You can specify a maximum of 128 characters for a tag key.",
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 128
-        },
-        "Value": {
-          "description": "A string containing the value for this tag. You can specify a maximum of 256 characters for a tag value.",
-          "type": "string",
-          "minLength": 0,
-          "maxLength": 256
-        }
-      },
-      "required": [
-        "Key",
-        "Value"
-      ],
-      "additionalProperties": false
-    },
     "DataSourceInclusionsExclusionsStrings": {
       "type": "array",
-      "uniqueItems": true,
-      "insertionOrder": false,
       "maxItems": 100,
       "items": {
         "type": "string",
@@ -87,7 +62,7 @@
       }
     },
     "S3DataSourceConfiguration": {
-      "description": "S3 Data Source configuration",
+      "description": "S3 data source configuration",
       "type": "object",
       "properties": {
         "BucketName": {
@@ -113,7 +88,7 @@
   },
   "properties": {
     "Id": {
-      "description": "ID of Data Source",
+      "description": "ID of data source",
       "type": "string",
       "minLength": 1,
       "maxLength": 100,
@@ -123,7 +98,7 @@
       "type": "string"
     },
     "Name": {
-      "description": "Name of Data Source",
+      "description": "Name of data source",
       "type": "string",
       "minLength": 1,
       "maxLength": 1000,
@@ -133,7 +108,7 @@
       "$ref": "#/definitions/IndexId"
     },
     "Type": {
-      "description": "Data Source type",
+      "description": "Data source type",
       "type": "string",
       "enum": [
         "S3"
@@ -148,7 +123,7 @@
       }
     },
     "Description": {
-      "description": "Description of Data Source",
+      "description": "Description of data source",
       "type": "string",
       "minLength": 1,
       "maxLength": 1000,
@@ -164,16 +139,6 @@
       "minLength": 1,
       "maxLength": 1284,
       "pattern": "arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}"
-    },
-    "Tags": {
-      "description": "Tags for Data Source.",
-      "type": "array",
-      "uniqueItems": true,
-      "insertionOrder": false,
-      "maxItems": 200,
-      "items": {
-        "$ref": "#/definitions/Tag"
-      }
     }
   },
   "required": [
@@ -186,7 +151,26 @@
   "handlers": {
     "create": {
       "permissions": [
-        "kendra:CreateDataSource"
+        "kendra:CreateDataSource",
+        "kendra:DescribeDataSource"
+      ],
+      "timeoutInMinutes": 60
+    },
+    "read": {
+      "permissions": [
+        "kendra:DescribeDataSource"
+      ]
+    },
+    "delete": {
+      "permissions": [
+        "kendra:DescribeDataSource",
+        "kendra:DeleteDataSource"
+      ],
+      "timeoutInMinutes": 720
+    },
+    "list": {
+      "permissions": [
+        "kendra:ListDataSources"
       ]
     }
   },
@@ -200,7 +184,7 @@
     "/properties/Arn"
   ],
   "createOnlyProperties": [
-    "/properties/Tags",
-    "/properties/Type"
+    "/properties/Type",
+    "/properties/DataSourceConfiguration"
   ]
 }

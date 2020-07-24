@@ -20,8 +20,8 @@ import software.amazon.cloudformation.exceptions.CfnAlreadyExistsException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
+import software.amazon.cloudformation.exceptions.CfnNotStabilizedException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
-import software.amazon.cloudformation.exceptions.CfnServiceInternalErrorException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -76,10 +76,7 @@ public class CreateHandler extends BaseHandlerStd {
                 proxy.initiate("AWS-Kendra-DataSource::Create", proxyClient, model, callbackContext)
                     .translateToServiceRequest(Translator::translateToCreateRequest)
                     .makeServiceCall(this::createDataSource)
-                    .done((createDataSourceRequest1, createDataSourceResponse1, proxyInvocation1, model1, context1) -> {
-                      model1.setId(createDataSourceResponse1.id());
-                      return ProgressEvent.defaultInProgressHandler(context1, 0, model1);
-                    })
+                    .done(this::setId)
                 )
             // stabilize
             .then(progress -> stabilize(proxy, proxyClient, progress))
@@ -163,9 +160,16 @@ public class CreateHandler extends BaseHandlerStd {
                 proxyClient.client()::describeDataSource);
         DataSourceStatus dataSourceStatus = describeDataSourceResponse.status();
         if (dataSourceStatus.equals(DataSourceStatus.FAILED)) {
-            throw new CfnServiceInternalErrorException(String.format("DataSource %s failed to get created.", model.getId()));
+            throw new CfnNotStabilizedException(ResourceModel.TYPE_NAME, model.getId());
         }
         return dataSourceStatus.equals(DataSourceStatus.ACTIVE);
+    }
+
+    private ProgressEvent<ResourceModel, CallbackContext> setId(CreateDataSourceRequest createDataRequest,
+        CreateDataSourceResponse createDataSourceResponse, ProxyClient<KendraClient> proxyClient, ResourceModel resourceModel,
+        CallbackContext callbackContext) {
+        resourceModel.setId(createDataSourceResponse.id());
+        return ProgressEvent.progress(resourceModel, callbackContext);
     }
 
     /**
