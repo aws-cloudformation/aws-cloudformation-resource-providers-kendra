@@ -48,7 +48,7 @@ public class DeleteHandlerTest extends AbstractTestBase {
     @Mock
     KendraClient sdkClient;
 
-    Delay testDelay = Constant.of().timeout(Duration.ofMinutes(10)).delay(Duration.ofMillis(1L)).build();
+    Delay testDelay = Constant.of().timeout(Duration.ofMinutes(1)).delay(Duration.ofMillis(1L)).build();
 
     @BeforeEach
     public void setup() {
