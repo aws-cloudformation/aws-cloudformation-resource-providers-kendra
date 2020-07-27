@@ -31,7 +31,7 @@ import java.util.function.Function;
 
 public class CreateHandler extends BaseHandlerStd {
 
-    private static Constant STABILIZATION_DELAY = Constant.of()
+    private static final Constant STABILIZATION_DELAY = Constant.of()
             // Set the timeout to something silly/way too high, because
             // we already set the timeout in the schema https://github.com/aws-cloudformation/aws-cloudformation-resource-schema
             .timeout(Duration.ofDays(365L))
