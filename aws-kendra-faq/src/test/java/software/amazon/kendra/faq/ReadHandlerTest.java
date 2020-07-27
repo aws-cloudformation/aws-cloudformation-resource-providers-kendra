@@ -1,13 +1,17 @@
 package software.amazon.kendra.faq;
 
 import java.time.Duration;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.AfterEach;
 import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqResponse;
+import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.kendra.model.S3Path;
+import software.amazon.awssdk.services.kendra.model.Tag;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
@@ -23,7 +27,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -42,6 +45,8 @@ public class ReadHandlerTest extends AbstractTestBase {
     @Mock
     KendraClient kendraClient;
 
+    FaqArnBuilder faqArnBuilder = new TestFaqArnBuilder();
+
     @BeforeEach
     public void setup() {
         proxy = new AmazonWebServicesClientProxy(logger, MOCK_CREDENTIALS, () -> Duration.ofSeconds(600).toMillis());
@@ -51,13 +56,12 @@ public class ReadHandlerTest extends AbstractTestBase {
 
     @AfterEach
     public void post_execute() {
-        verify(kendraClient, atLeastOnce()).serviceName();
         verifyNoMoreInteractions(kendraClient);
     }
 
     @Test
     public void handleRequest_SimpleSuccess() {
-        final ReadHandler handler = new ReadHandler();
+        final ReadHandler handler = new ReadHandler(faqArnBuilder);
 
         String id = "id";
         String indexId = "indexId";
@@ -90,6 +94,14 @@ public class ReadHandlerTest extends AbstractTestBase {
                         .roleArn(roleArn)
                         .build());
 
+        String tagKey = "key";
+        String tagValue = "value";
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
+                .thenReturn(ListTagsForResourceResponse
+                        .builder()
+                        .tags(Arrays.asList(Tag.builder().key(tagKey).value(tagValue).build()))
+                        .build());
+
         final ProgressEvent<ResourceModel, CallbackContext> response =
                 handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
 
@@ -104,9 +116,13 @@ public class ReadHandlerTest extends AbstractTestBase {
                 .roleArn(roleArn)
                 .name(name)
                 .s3Path(software.amazon.kendra.faq.S3Path.builder()
-                        .key(key)
+                        .key(tagKey)
                         .bucket(bucket)
                         .build())
+                .tags(Arrays.asList(software.amazon.kendra.faq.Tag
+                        .builder().key(tagKey)
+                        .value(tagValue)
+                        .build()))
                 .build();
         assertThat(response.getResourceModel()).isEqualTo(expectedResourceModel);
         assertThat(response.getResourceModels()).isNull();
@@ -118,7 +134,7 @@ public class ReadHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_NotFound() {
-        final ReadHandler handler = new ReadHandler();
+        final ReadHandler handler = new ReadHandler(faqArnBuilder);
 
         String id = "id";
         String indexId = "indexId";
