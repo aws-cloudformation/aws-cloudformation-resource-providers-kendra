@@ -1,9 +1,6 @@
 package software.amazon.kendra.datasource;
 
-import com.google.common.collect.Sets;
 import software.amazon.awssdk.services.kendra.model.DataSourceType;
-
-import java.util.Arrays;
 
 public class DataSourceResponseConverter {
 

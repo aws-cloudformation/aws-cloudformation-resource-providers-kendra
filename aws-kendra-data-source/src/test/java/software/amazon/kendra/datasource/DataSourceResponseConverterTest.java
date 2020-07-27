@@ -1,6 +1,5 @@
 package software.amazon.kendra.datasource;
 
-import com.google.common.collect.Sets;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -38,6 +37,37 @@ public class DataSourceResponseConverterTest {
       .documentsMetadataConfiguration(DocumentsMetadataConfiguration.builder()
         .s3Prefix("testS3Prefix")
         .build())
+      .build())
+    .build() ;
+
+    assertThat(DataSourceResponseConverter.getDataSourceConfiguration(dataSourceConfiguration, "S3"))
+      .isEqualTo(expectedDataSourceConfiguration);
+  }
+
+  @Test
+  public void testGetDataSourceConfiguration_WithInvalidType() {
+    DataSourceConfiguration dataSourceConfiguration = DataSourceConfiguration.builder().build();
+     assertThat(DataSourceRequestConverter.getDataSourceConfiguration(dataSourceConfiguration, "Invalid"))
+      .isEqualTo(null);
+  }
+
+  @Test
+  public void testGetDataSourceConfiguration_WithNullAclAndDocumentMetadataConfiguration() {
+
+   software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration =
+      software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
+        .s3Configuration(software.amazon.awssdk.services.kendra.model.S3DataSourceConfiguration.builder()
+          .bucketName("testBucket")
+          .inclusionPrefixes(Arrays.asList("testInclusionPrefix"))
+          .exclusionPatterns(Arrays.asList("testExclusionPatterns"))
+          .build())
+        .build();
+
+    DataSourceConfiguration expectedDataSourceConfiguration = DataSourceConfiguration.builder()
+    .s3Configuration(S3DataSourceConfiguration.builder()
+      .bucketName("testBucket")
+      .inclusionPrefixes(Arrays.asList("testInclusionPrefix"))
+      .exclusionPatterns(Arrays.asList("testExclusionPatterns"))
       .build())
     .build() ;
 
