@@ -28,7 +28,9 @@ Resources:
                 - "kendra:DeleteFaq"
                 - "kendra:DescribeFaq"
                 - "kendra:ListFaqs"
+                - "kendra:ListTagsForResource"
                 - "kendra:TagResource"
+                - "kendra:UntagResource"
                 Resource: "*"
 Outputs:
   ExecutionRoleArn:
