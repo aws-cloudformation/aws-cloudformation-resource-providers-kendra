@@ -14,6 +14,7 @@ import software.amazon.awssdk.services.kendra.model.IndexStatus;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.Delay;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import software.amazon.cloudformation.proxy.delay.Constant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -46,6 +48,8 @@ public class DeleteHandlerTest extends AbstractTestBase {
     @Mock
     KendraClient sdkClient;
 
+    Delay testDelay = Constant.of().timeout(Duration.ofMinutes(1)).delay(Duration.ofMillis(1L)).build();
+
     @BeforeEach
     public void setup() {
         proxy = new AmazonWebServicesClientProxy(logger, MOCK_CREDENTIALS, () -> Duration.ofSeconds(600).toMillis());
@@ -61,7 +65,7 @@ public class DeleteHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_SimpleSuccess() {
-        final DeleteHandler handler = new DeleteHandler();
+        final DeleteHandler handler = new DeleteHandler(testDelay);
 
         String roleArn = "roleArn";
         String name = "name";
@@ -102,7 +106,7 @@ public class DeleteHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_DeletingToNotFound() {
-        final DeleteHandler handler = new DeleteHandler();
+        final DeleteHandler handler = new DeleteHandler(testDelay);
 
         String roleArn = "roleArn";
         String name = "name";
@@ -147,7 +151,7 @@ public class DeleteHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_FailWith_ConflictException() {
-        final DeleteHandler handler = new DeleteHandler();
+        final DeleteHandler handler = new DeleteHandler(testDelay);
 
         when(proxyClient.client().deleteIndex(any(DeleteIndexRequest.class)))
                 .thenThrow(ConflictException.builder().build());

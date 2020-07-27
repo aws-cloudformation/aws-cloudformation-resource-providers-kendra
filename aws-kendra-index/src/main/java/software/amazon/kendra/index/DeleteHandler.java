@@ -11,13 +11,40 @@ import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.Delay;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
+import software.amazon.cloudformation.proxy.delay.Constant;
+
+import java.time.Duration;
 
 public class DeleteHandler extends BaseHandlerStd {
+
+    private static Constant STABILIZATION_DELAY = Constant.of()
+            // Set the timeout to something silly/way too high, because
+            // we already set the timeout in the schema https://github.com/aws-cloudformation/aws-cloudformation-resource-schema
+            .timeout(Duration.ofDays(365L))
+            // Set the delay to five minutes so the stabilization code only calls
+            // DescribeIndex every five minutes - delete can take hours
+            // so there's no need to check the index has been deleted more than every five minutes.
+            .delay(Duration.ofMinutes(5))
+            .build();
+
     private Logger logger;
+
+    private Delay delay;
+
+    public DeleteHandler() {
+        super();
+        delay = STABILIZATION_DELAY;
+    }
+
+    public DeleteHandler(Delay delay) {
+        super();
+        this.delay = delay;
+    }
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
             final AmazonWebServicesClientProxy proxy,
@@ -47,6 +74,7 @@ public class DeleteHandler extends BaseHandlerStd {
                         proxy.initiate("AWS-Kendra-Index::Delete", proxyClient, model, callbackContext)
                                 // STEP 2.1 [TODO: construct a body of a request]
                                 .translateToServiceRequest(Translator::translateToDeleteRequest)
+                                .backoffDelay(delay)
                                 // STEP 2.2 [TODO: make an api call]
                                 .makeServiceCall(this::deleteIndex)
                                 // STEP 2.3 [TODO: stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]

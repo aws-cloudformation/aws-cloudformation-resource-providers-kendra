@@ -19,17 +19,32 @@ import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
 import software.amazon.cloudformation.exceptions.CfnServiceLimitExceededException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.Delay;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
+import software.amazon.cloudformation.proxy.delay.Constant;
 
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class UpdateHandler extends BaseHandlerStd {
+
+    private static Constant STABILIZATION_DELAY = Constant.of()
+            // Set the timeout to something silly/way too high, because
+            // we already set the timeout in the schema https://github.com/aws-cloudformation/aws-cloudformation-resource-schema
+            .timeout(Duration.ofDays(365L))
+            // Set the delay to two minutes so the stabilization code only calls
+            // DescribeIndex every two minutes - update takes
+            // 30/45+ minutes so there's no need to check the index is active more than every couple minutes.
+            .delay(Duration.ofMinutes(2))
+            .build();
+
+    private Delay delay;
 
     private Logger logger;
 
@@ -38,11 +53,13 @@ public class UpdateHandler extends BaseHandlerStd {
     public UpdateHandler() {
         super();
         indexArnBuilder = new IndexArn();
+        delay = STABILIZATION_DELAY;
     }
 
-    public UpdateHandler(IndexArnBuilder indexArnBuilder) {
+    public UpdateHandler(IndexArnBuilder indexArnBuilder, Delay delay) {
         super();
         this.indexArnBuilder = indexArnBuilder;
+        this.delay = delay;
     }
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
@@ -67,6 +84,7 @@ public class UpdateHandler extends BaseHandlerStd {
                                 // STEP 1.1 [TODO: construct a body of a request]
                                 .translateToServiceRequest(Translator::translateToUpdateRequest)
                                 // STEP 1.2 [TODO: make an api call]
+                                .backoffDelay(delay)
                                 .makeServiceCall(this::updateIndex)
                                 // STEP 1.3 [TODO: stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]
                                 // stabilization step may or may not be needed after each API call

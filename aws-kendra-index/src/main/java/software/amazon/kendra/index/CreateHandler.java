@@ -18,17 +18,32 @@ import software.amazon.cloudformation.exceptions.CfnNotStabilizedException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
 import software.amazon.cloudformation.exceptions.CfnServiceLimitExceededException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.Delay;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
+import software.amazon.cloudformation.proxy.delay.Constant;
 
+import java.time.Duration;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class CreateHandler extends BaseHandlerStd {
 
-    protected static final BiFunction<ResourceModel, ProxyClient<KendraClient>, ResourceModel> EMPTY_CALL =
+    private static Constant STABILIZATION_DELAY = Constant.of()
+            // Set the timeout to something silly/way too high, because
+            // we already set the timeout in the schema https://github.com/aws-cloudformation/aws-cloudformation-resource-schema
+            .timeout(Duration.ofDays(365L))
+            // Set the delay to two minutes so the stabilization code only calls
+            // DescribeIndex every two minutes - create takes
+            // 30/45+ minutes so there's no need to check the index is active more than every couple minutes.
+            .delay(Duration.ofMinutes(2))
+            .build();
+
+    private Delay delay;
+
+    private static final BiFunction<ResourceModel, ProxyClient<KendraClient>, ResourceModel> EMPTY_CALL =
             (model, proxyClient) -> model;
 
     private Logger logger;
@@ -38,12 +53,14 @@ public class CreateHandler extends BaseHandlerStd {
     public CreateHandler() {
         super();
         indexArnBuilder = new IndexArn();
+        delay = STABILIZATION_DELAY;
     }
 
     // Used for testing.
-    public CreateHandler(IndexArnBuilder indexArnBuilder) {
+    public CreateHandler(IndexArnBuilder indexArnBuilder, Delay delay) {
         super();
         this.indexArnBuilder = indexArnBuilder;
+        this.delay = delay;
     }
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
@@ -177,10 +194,10 @@ public class CreateHandler extends BaseHandlerStd {
         return proxy.initiate(callGraph, proxyClient, progress.getResourceModel(),
                 progress.getCallbackContext())
                 .translateToServiceRequest(Function.identity())
+                .backoffDelay(delay)
                 .makeServiceCall(EMPTY_CALL)
                 .stabilize((request, response, proxyInvocation, model, callbackContext) ->
                         isStabilized(proxyInvocation, model)).progress();
-
     }
 
     private boolean isStabilized(final ProxyClient<KendraClient> proxyClient, final ResourceModel model) {
