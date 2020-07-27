@@ -81,7 +81,7 @@
       "$ref": "#/definitions/S3Path"
     },
     "RoleArn": {
-      "description": "FAQ role Arn",
+      "description": "FAQ role ARN",
       "$ref": "#/definitions/RoleArn"
     }
   },
