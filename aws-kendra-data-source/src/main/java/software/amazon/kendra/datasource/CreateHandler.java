@@ -1,13 +1,9 @@
 package software.amazon.kendra.datasource;
 
-import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import software.amazon.awssdk.awscore.AwsRequest;
-import software.amazon.awssdk.awscore.AwsResponse;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
-import software.amazon.awssdk.core.SdkClient;
 import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.services.kendra.model.ConflictException;
 import software.amazon.awssdk.services.kendra.model.CreateDataSourceRequest;
@@ -16,10 +12,8 @@ import software.amazon.awssdk.services.kendra.model.DataSourceStatus;
 import software.amazon.awssdk.services.kendra.model.DescribeDataSourceRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeDataSourceResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
-import software.amazon.cloudformation.exceptions.CfnAlreadyExistsException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
-import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnNotStabilizedException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
@@ -83,29 +77,6 @@ public class CreateHandler extends BaseHandlerStd {
             .then(progress -> new ReadHandler(dataSourceArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
     }
 
-    /**
-     * If your service API is not idempotent, meaning it does not distinguish duplicate create requests against some identifier (e.g; resource Name)
-     * and instead returns a 200 even though a resource already exists, you must first check if the resource exists here
-     * NOTE: If your service API throws 'ResourceAlreadyExistsException' for create requests this method is not necessary
-     * @param proxy Amazon webservice proxy to inject credentials correctly.
-     * @param request incoming resource handler request
-     * @param progressEvent event of the previous state indicating success, in progress with delay callback or failed state
-     * @return progressEvent indicating success, in progress with delay callback or failed state
-     */
-    private ProgressEvent<ResourceModel, CallbackContext> checkForPreCreateResourceExistence(
-        final AmazonWebServicesClientProxy proxy,
-        final ResourceHandlerRequest<ResourceModel> request,
-        final ProgressEvent<ResourceModel, CallbackContext> progressEvent) {
-        final ResourceModel model = progressEvent.getResourceModel();
-        final CallbackContext callbackContext = progressEvent.getCallbackContext();
-        try {
-            new ReadHandler().handleRequest(proxy, request, callbackContext, logger);
-            throw new CfnAlreadyExistsException(ResourceModel.TYPE_NAME, Objects.toString(model.getPrimaryIdentifier()));
-        } catch (CfnNotFoundException e) {
-            logger.log(model.getPrimaryIdentifier() + " does not exist; creating the resource.");
-            return ProgressEvent.progress(model, callbackContext);
-        }
-    }
 
     /**
      * Implement client invocation of the create request through the proxyClient, which is already initialised with
@@ -170,34 +141,5 @@ public class CreateHandler extends BaseHandlerStd {
         CallbackContext callbackContext) {
         resourceModel.setId(createDataSourceResponse.id());
         return ProgressEvent.progress(resourceModel, callbackContext);
-    }
-
-    /**
-     * If your resource is provisioned through multiple API calls, you will need to apply each subsequent update
-     * step in a discrete call/stabilize chain to ensure the entire resource is provisioned as intended.
-     * @param awsRequest the aws service request to create a resource
-     * @param proxyClient the aws service client to make the call
-     * @return awsResponse create resource response
-     */
-    private AwsResponse postCreate(
-        final AwsRequest awsRequest,
-        final ProxyClient<SdkClient> proxyClient) {
-        AwsResponse awsResponse = null;
-        try {
-
-            // TODO: put your post creation resource update code here
-
-        } catch (final AwsServiceException e) {
-            /*
-             * While the handler contract states that the handler must always return a progress event,
-             * you may throw any instance of BaseHandlerException, as the wrapper map it to a progress event.
-             * Each BaseHandlerException maps to a specific error code, and you should map service exceptions as closely as possible
-             * to more specific error codes
-             */
-            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e);
-        }
-
-        logger.log(String.format("%s successfully updated.", ResourceModel.TYPE_NAME));
-        return awsResponse;
     }
 }

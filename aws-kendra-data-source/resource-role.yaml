@@ -23,10 +23,12 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
+                - "iam:PassRole"
                 - "kendra:CreateDataSource"
                 - "kendra:DeleteDataSource"
                 - "kendra:DescribeDataSource"
                 - "kendra:ListDataSources"
+                - "kendra:UpdateDataSource"
                 Resource: "*"
 Outputs:
   ExecutionRoleArn:

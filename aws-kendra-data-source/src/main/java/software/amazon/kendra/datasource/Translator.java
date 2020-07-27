@@ -1,14 +1,13 @@
 package software.amazon.kendra.datasource;
 
-import com.google.common.collect.Lists;
-import software.amazon.awssdk.awscore.AwsRequest;
-import software.amazon.awssdk.awscore.AwsResponse;
 import software.amazon.awssdk.services.kendra.model.CreateDataSourceRequest;
+import software.amazon.awssdk.services.kendra.model.DataSourceConfiguration;
 import software.amazon.awssdk.services.kendra.model.DeleteDataSourceRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeDataSourceRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeDataSourceResponse;
 import software.amazon.awssdk.services.kendra.model.ListDataSourcesRequest;
 import software.amazon.awssdk.services.kendra.model.ListDataSourcesResponse;
+import software.amazon.awssdk.services.kendra.model.UpdateDataSourceRequest;
 
 
 import java.util.Collection;
@@ -97,22 +96,23 @@ public class Translator {
    * @param model resource model
    * @return awsRequest the aws service request to modify a resource
    */
-  static AwsRequest translateToFirstUpdateRequest(final ResourceModel model) {
-    final AwsRequest awsRequest = null;
-    // TODO: construct a request
-    // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/2077c92299aeb9a68ae8f4418b5e932b12a8b186/aws-logs-loggroup/src/main/java/com/aws/logs/loggroup/Translator.java#L45-L50
-    return awsRequest;
-  }
-
-  /**
-   * Request to update some other properties that could not be provisioned through first update request
-   * @param model resource model
-   * @return awsRequest the aws service request to modify a resource
-   */
-  static AwsRequest translateToSecondUpdateRequest(final ResourceModel model) {
-    final AwsRequest awsRequest = null;
-    // TODO: construct a request
-    return awsRequest;
+  static UpdateDataSourceRequest translateToUpdateRequest(final ResourceModel model) {
+    String description = model.getDescription() == null ? "" : model.getDescription();
+    String name = model.getName() == null ? "" : model.getName();
+    String roleArn = model.getRoleArn() == null ? "" : model.getRoleArn();
+    String schedule = model.getSchedule() == null ? "" : model.getSchedule();
+    DataSourceConfiguration dataSourceConfiguration = model.getDataSourceConfiguration() == null ?
+      DataSourceConfiguration.builder().build() : DataSourceRequestConverter.getDataSourceConfiguration(model.getDataSourceConfiguration(), model.getType());
+    final UpdateDataSourceRequest updateDataSourceRequest = UpdateDataSourceRequest.builder()
+      .id(model.getId())
+      .indexId(model.getIndexId())
+      .roleArn(roleArn)
+      .name(name)
+      .description(description)
+      .configuration(dataSourceConfiguration)
+      .schedule(schedule)
+      .build();
+    return updateDataSourceRequest;
   }
 
   /**

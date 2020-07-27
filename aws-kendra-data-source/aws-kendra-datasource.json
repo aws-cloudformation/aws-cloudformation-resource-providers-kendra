@@ -152,9 +152,9 @@
     "create": {
       "permissions": [
         "kendra:CreateDataSource",
-        "kendra:DescribeDataSource"
-      ],
-      "timeoutInMinutes": 60
+        "kendra:DescribeDataSource",
+        "iam:PassRole"
+      ]
     },
     "read": {
       "permissions": [
@@ -172,6 +172,13 @@
       "permissions": [
         "kendra:ListDataSources"
       ]
+    },
+    "update": {
+      "permissions": [
+        "kendra:DescribeDataSource",
+        "kendra:UpdateDataSource",
+        "iam:PassRole"
+      ]
     }
   },
   "additionalProperties": false,
@@ -184,7 +191,6 @@
     "/properties/Arn"
   ],
   "createOnlyProperties": [
-    "/properties/Type",
-    "/properties/DataSourceConfiguration"
+    "/properties/Type"
   ]
 }
