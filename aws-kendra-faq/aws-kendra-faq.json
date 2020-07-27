@@ -47,7 +47,7 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 100,
-      "pattern": "[a-zA-Z0-9][a-zA-Z0-9_-]*"
+      "pattern": "[a-zA-Z0-9][a-zA-Z0-9-]*"
     },
     "RoleArn": {
       "type": "string",
@@ -62,22 +62,26 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 100,
-      "pattern": "[a-zA-Z0-9][a-zA-Z0-9_-]*\\"
+      "pattern": "[a-zA-Z0-9][a-zA-Z0-9_-]*"
     },
     "IndexId": {
+      "description": "Index ID",
       "$ref": "#/definitions/IndexId"
     },
     "Name": {
+      "description": "FAQ name",
       "$ref": "#/definitions/FaqName"
     },
     "Description": {
+      "description": "FAQ description",
       "$ref": "#/definitions/Description"
     },
     "S3Path": {
+      "description": "FAQ S3 path",
       "$ref": "#/definitions/S3Path"
     },
     "RoleArn": {
-      "description": "Role Arn",
+      "description": "FAQ role Arn",
       "$ref": "#/definitions/RoleArn"
     }
   },
