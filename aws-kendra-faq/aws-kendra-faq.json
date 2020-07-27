@@ -3,37 +3,6 @@
   "description": "A Kendra FAQ resource",
   "sourceUrl": "https://docs.aws.amazon.com/kendra/latest/dg/in-creating-faq.html",
   "definitions": {
-    "Tag": {
-      "description": "A label for tagging Kendra resources",
-      "type": "object",
-      "properties": {
-        "Key": {
-          "description": "A string used to identify this tag",
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 128
-        },
-        "Value": {
-          "description": "A string containing the value for the tag",
-          "type": "string",
-          "minLength": 0,
-          "maxLength": 256
-        }
-      },
-      "required": [
-        "Key",
-        "Value"
-      ],
-      "additionalProperties": false
-    },
-    "TagList": {
-      "description": "List of tags",
-      "type": "array",
-      "maxItems": 200,
-      "items": {
-        "$ref": "#/definitions/Tag"
-      }
-    },
     "IndexId": {
       "description": "Unique ID of Index",
       "type": "string",
@@ -114,10 +83,6 @@
     "RoleArn": {
       "description": "FAQ role ARN",
       "$ref": "#/definitions/RoleArn"
-    },
-    "Tags": {
-      "description": "Tags for labeling the FAQ",
-      "$ref": "#/definitions/TagList"
     }
   },
   "required": [

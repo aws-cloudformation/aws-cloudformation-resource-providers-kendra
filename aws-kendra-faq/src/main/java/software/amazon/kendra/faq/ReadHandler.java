@@ -8,9 +8,6 @@ import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqResponse;
-import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
-import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
-import software.amazon.awssdk.services.kendra.model.ResourceInUseException;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
@@ -22,16 +19,6 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 public class ReadHandler extends BaseHandlerStd {
     private Logger logger;
-    private FaqArnBuilder faqArnBuilder;
-
-    public ReadHandler() {
-        super();
-        faqArnBuilder = new FaqArn();
-    }
-
-    public ReadHandler(FaqArnBuilder faqArnBuilder) {
-        this.faqArnBuilder = faqArnBuilder;
-    }
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
             final AmazonWebServicesClientProxy proxy,
@@ -47,18 +34,14 @@ public class ReadHandler extends BaseHandlerStd {
         // TODO: Adjust Progress Chain according to your implementation
         // https://github.com/aws-cloudformation/cloudformation-cli-java-plugin/blob/master/src/main/java/software/amazon/cloudformation/proxy/CallChain.java
 
-        DescribeFaqRequest describeFaqRequest = Translator.translateToReadRequest(model);
-        DescribeFaqResponse describeFaqResponse = readResource(describeFaqRequest, proxyClient);
-        String faqArn = faqArnBuilder.build(request);
-        final ListTagsForResourceRequest listTagsForResourceRequest = Translator.translateToListTagsRequest(faqArn);
-        ListTagsForResourceResponse listTagsForResourceResponse;
-        try {
-            listTagsForResourceResponse = proxyClient.injectCredentialsAndInvokeV2(listTagsForResourceRequest,
-                    proxyClient.client()::listTagsForResource);
-        } catch (ResourceInUseException e) {
-            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e);
-        }
-        return constructResourceModelFromResponse(describeFaqResponse, listTagsForResourceResponse);
+        // STEP 1 [initialize a proxy context]
+        return proxy.initiate("AWS-Kendra-Faq::Read", proxyClient, model, callbackContext)
+                // STEP 2 [TODO: construct a body of a request]
+                .translateToServiceRequest(Translator::translateToReadRequest)
+                // STEP 3 [TODO: make an api call]
+                .makeServiceCall((awsRequest, sdkProxyClient) -> readResource(awsRequest, sdkProxyClient))
+                // STEP 4 [TODO: gather all properties of the resource]
+                .done(this::constructResourceModelFromResponse);
     }
 
     /**
@@ -92,9 +75,7 @@ public class ReadHandler extends BaseHandlerStd {
     }
 
     private ProgressEvent<ResourceModel, CallbackContext> constructResourceModelFromResponse(
-            final DescribeFaqResponse describeFaqResponse,
-            final ListTagsForResourceResponse listTagsForResourceResponse) {
-        return ProgressEvent.defaultSuccessHandler(
-                Translator.translateFromReadResponse(describeFaqResponse, listTagsForResourceResponse));
+            final DescribeFaqResponse describeFaqResponse) {
+        return ProgressEvent.defaultSuccessHandler(Translator.translateFromReadResponse(describeFaqResponse));
     }
 }

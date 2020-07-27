@@ -10,8 +10,6 @@ import software.amazon.awssdk.services.kendra.model.CreateFaqResponse;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqResponse;
 import software.amazon.awssdk.services.kendra.model.FaqStatus;
-import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
-import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
@@ -49,8 +47,6 @@ public class CreateHandlerTest extends AbstractTestBase {
     @Mock
     KendraClient kendraClient;
 
-    FaqArnBuilder faqArnBuilder = new TestFaqArnBuilder();
-
     @BeforeEach
     public void setup() {
         proxy = new AmazonWebServicesClientProxy(logger, MOCK_CREDENTIALS, () -> Duration.ofSeconds(600).toMillis());
@@ -66,7 +62,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_SimpleSuccess() {
-        final CreateHandler handler = new CreateHandler(faqArnBuilder);
+        final CreateHandler handler = new CreateHandler();
 
         String indexId = "indexId";
         String roleArn = "roleArn";
@@ -111,8 +107,6 @@ public class CreateHandlerTest extends AbstractTestBase {
                                 .build())
                         .status(FaqStatus.ACTIVE)
                         .build());
-        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
-                .thenReturn(ListTagsForResourceResponse.builder().build());
 
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
 
@@ -142,7 +136,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_CreatingToActive() {
-        final CreateHandler handler = new CreateHandler(faqArnBuilder);
+        final CreateHandler handler = new CreateHandler();
 
         String indexId = "indexId";
         String roleArn = "roleArn";
@@ -201,8 +195,6 @@ public class CreateHandlerTest extends AbstractTestBase {
                                 .build())
                         .status(FaqStatus.ACTIVE)
                         .build());
-        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
-                .thenReturn(ListTagsForResourceResponse.builder().build());
 
         final ProgressEvent<ResourceModel, CallbackContext> response =
                 handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
@@ -233,7 +225,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_FailedCreate() {
-        final CreateHandler handler = new CreateHandler(faqArnBuilder);
+        final CreateHandler handler = new CreateHandler();
 
         String indexId = "indexId";
         String roleArn = "roleArn";
@@ -286,7 +278,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_ServiceError() {
-        final CreateHandler handler = new CreateHandler(faqArnBuilder);
+        final CreateHandler handler = new CreateHandler();
 
         String indexId = "indexId";
         String roleArn = "roleArn";
@@ -322,7 +314,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     @Test
     public void handleRequest_ValidationException() {
-        final CreateHandler handler = new CreateHandler(faqArnBuilder);
+        final CreateHandler handler = new CreateHandler();
 
         String indexId = "indexId";
         String roleArn = "roleArn";

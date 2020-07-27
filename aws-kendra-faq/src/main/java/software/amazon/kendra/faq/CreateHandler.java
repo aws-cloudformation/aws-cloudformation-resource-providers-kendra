@@ -31,17 +31,6 @@ public class CreateHandler extends BaseHandlerStd {
 
     private Logger logger;
 
-    private FaqArnBuilder faqArnBuilder;
-
-    public CreateHandler() {
-        super();
-        faqArnBuilder = new FaqArn();
-    }
-
-    public CreateHandler(FaqArnBuilder faqArnBuilder) {
-        this.faqArnBuilder = faqArnBuilder;
-    }
-
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
             final AmazonWebServicesClientProxy proxy,
             final ResourceHandlerRequest<ResourceModel> request,
@@ -62,7 +51,7 @@ public class CreateHandler extends BaseHandlerStd {
                                 .done(this::setId)
                 )
                 .then(progress -> stabilize(proxy, proxyClient, progress))
-                .then(progress -> new ReadHandler(faqArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
+                .then(progress -> new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, logger));
     }
 
     private ProgressEvent<ResourceModel, CallbackContext> setId(CreateFaqRequest createFaqRequest,

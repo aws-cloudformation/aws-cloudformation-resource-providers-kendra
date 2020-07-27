@@ -8,7 +8,6 @@ import software.amazon.awssdk.services.kendra.model.DescribeFaqResponse;
 import software.amazon.awssdk.services.kendra.model.FaqSummary;
 import software.amazon.awssdk.services.kendra.model.ListFaqsRequest;
 import software.amazon.awssdk.services.kendra.model.ListFaqsResponse;
-import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
 
 import java.util.Arrays;
 import java.util.List;
@@ -103,8 +102,6 @@ class TranslatorTest {
                 .key(s3Key)
                 .bucket(s3Bucket)
                 .build();
-        String key = "key";
-        String value = "value";
         ResourceModel resourceModel = ResourceModel
                 .builder()
                 .id(id)
@@ -113,7 +110,6 @@ class TranslatorTest {
                 .name(name)
                 .s3Path(s3Path)
                 .roleArn(roleArn)
-                .tags(Arrays.asList(Tag.builder().key(key).value(value).build()))
                 .build();
 
         DescribeFaqResponse describeFaqResponse = DescribeFaqResponse
@@ -129,18 +125,8 @@ class TranslatorTest {
                         .bucket(s3Bucket)
                         .build())
                 .build();
-        ListTagsForResourceResponse listTagsForResourceResponse = ListTagsForResourceResponse
-                .builder()
-                .tags(Arrays.asList(software.amazon.awssdk.services.kendra.model.Tag
-                        .builder()
-                        .key(key)
-                        .value(value)
-                        .build()))
-                .build();
-        assertThat(Translator.translateFromReadResponse(describeFaqResponse, listTagsForResourceResponse))
-                .isEqualTo(resourceModel);
+        assertThat(Translator.translateFromReadResponse(describeFaqResponse)).isEqualTo(resourceModel);
     }
-
     @Test
     void testTranslateToListRequest() {
         String indexId = "indexId";
