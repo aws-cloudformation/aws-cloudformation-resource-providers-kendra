@@ -1,8 +1,5 @@
 package software.amazon.kendra.faq;
 
-// TODO: replace all usage of SdkClient with your service client type, e.g; YourServiceAsyncClient
-// import software.amazon.awssdk.services.yourservice.YourServiceAsyncClient;
-
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 
 import software.amazon.awssdk.services.kendra.KendraClient;
