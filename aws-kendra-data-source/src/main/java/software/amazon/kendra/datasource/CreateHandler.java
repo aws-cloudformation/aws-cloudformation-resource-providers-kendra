@@ -1,16 +1,27 @@
 package software.amazon.kendra.datasource;
 
-// TODO: replace all usage of SdkClient with your service client type, e.g; YourServiceAsyncClient
-// import software.amazon.awssdk.services.yourservice.YourServiceAsyncClient;
-
 import java.util.Objects;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 import software.amazon.awssdk.awscore.AwsRequest;
 import software.amazon.awssdk.awscore.AwsResponse;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.SdkClient;
+import software.amazon.awssdk.services.kendra.KendraClient;
+import software.amazon.awssdk.services.kendra.model.ConflictException;
+import software.amazon.awssdk.services.kendra.model.CreateDataSourceRequest;
+import software.amazon.awssdk.services.kendra.model.CreateDataSourceResponse;
+import software.amazon.awssdk.services.kendra.model.DataSourceStatus;
+import software.amazon.awssdk.services.kendra.model.DescribeDataSourceRequest;
+import software.amazon.awssdk.services.kendra.model.DescribeDataSourceResponse;
+import software.amazon.awssdk.services.kendra.model.ValidationException;
 import software.amazon.cloudformation.exceptions.CfnAlreadyExistsException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
+import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
+import software.amazon.cloudformation.exceptions.CfnNotStabilizedException;
+import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -18,13 +29,30 @@ import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 public class CreateHandler extends BaseHandlerStd {
+
+    protected static final BiFunction<ResourceModel, ProxyClient<KendraClient>, ResourceModel> EMPTY_CALL =
+            (model, proxyClient) -> model;
+
     private Logger logger;
+
+    private DataSourceArnBuilder dataSourceArnBuilder;
+
+    public CreateHandler() {
+        super();
+        this.dataSourceArnBuilder = new DataSourceArn();
+    }
+
+    public CreateHandler(DataSourceArnBuilder dataSourceArnBuilder) {
+        super();
+        this.dataSourceArnBuilder = dataSourceArnBuilder;
+    }
+
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
         final AmazonWebServicesClientProxy proxy,
         final ResourceHandlerRequest<ResourceModel> request,
         final CallbackContext callbackContext,
-        final ProxyClient<SdkClient> proxyClient,
+        final ProxyClient<KendraClient> proxyClient,
         final Logger logger) {
 
         this.logger = logger;
@@ -46,34 +74,13 @@ public class CreateHandler extends BaseHandlerStd {
                 // If your service API throws 'ResourceAlreadyExistsException' for create requests then CreateHandler can return just proxy.initiate construction
                 // STEP 2.0 [initialize a proxy context]
                 proxy.initiate("AWS-Kendra-DataSource::Create", proxyClient, model, callbackContext)
-
-                    // STEP 2.1 [TODO: construct a body of a request]
                     .translateToServiceRequest(Translator::translateToCreateRequest)
-
-                    // STEP 2.2 [TODO: make an api call]
-                    .makeServiceCall(this::createResource)
-
-                    // STEP 2.3 [TODO: stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]
-                    // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
-                    .stabilize(this::stabilizedOnCreate)
-                    .progress())
-
-            // STEP 3 [TODO: post create/stabilize update]
-            .then(progress ->
-                // If your resource is provisioned through multiple API calls, you will need to apply each subsequent update
-                // STEP 3.0 [initialize a proxy context]
-                proxy.initiate("AWS-Kendra-DataSource::postCreate", proxyClient, model, callbackContext)
-
-                    // STEP 3.1 [TODO: construct a body of a request]
-                    .translateToServiceRequest(Translator::translateToSecondUpdateRequest)
-
-                    // STEP 3.2 [TODO: make an api call]
-                    .makeServiceCall(this::postCreate)
-                    .progress()
+                    .makeServiceCall(this::createDataSource)
+                    .done(this::setId)
                 )
-
-            // STEP 4 [TODO: describe call/chain to return the resource model]
-            .then(progress -> new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, logger));
+            // stabilize
+            .then(progress -> stabilize(proxy, proxyClient, progress))
+            .then(progress -> new ReadHandler(dataSourceArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
     }
 
     /**
@@ -103,18 +110,21 @@ public class CreateHandler extends BaseHandlerStd {
     /**
      * Implement client invocation of the create request through the proxyClient, which is already initialised with
      * caller credentials, correct region and retry settings
-     * @param awsRequest the aws service request to create a resource
+     * @param createDataSourceRequest the aws service request to create a resource
      * @param proxyClient the aws service client to make the call
-     * @return awsResponse create resource response
+     * @return createDataSourceResponse create resource response
      */
-    private AwsResponse createResource(
-        final AwsRequest awsRequest,
-        final ProxyClient<SdkClient> proxyClient) {
-        AwsResponse awsResponse = null;
+    private CreateDataSourceResponse createDataSource(
+        final CreateDataSourceRequest createDataSourceRequest,
+        final ProxyClient<KendraClient> proxyClient) {
+        CreateDataSourceResponse createDataSourceResponse;
         try {
-
-            // TODO: put your create resource code here
-
+            createDataSourceResponse = proxyClient.injectCredentialsAndInvokeV2(createDataSourceRequest,
+             proxyClient.client()::createDataSource);
+        } catch(final ValidationException e) {
+            throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME + e.getMessage(), e);
+        } catch (final ConflictException e) {
+            throw new CfnResourceConflictException(e);
         } catch (final AwsServiceException e) {
             /*
              * While the handler contract states that the handler must always return a progress event,
@@ -126,32 +136,40 @@ public class CreateHandler extends BaseHandlerStd {
         }
 
         logger.log(String.format("%s successfully created.", ResourceModel.TYPE_NAME));
-        return awsResponse;
+        return createDataSourceResponse;
     }
 
-    /**
-     * If your resource requires some form of stabilization (e.g. service does not provide strong consistency), you will need to ensure that your code
-     * accounts for any potential issues, so that a subsequent read/update requests will not cause any conflicts (e.g. NotFoundException/InvalidRequestException)
-     * for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
-     * @param awsRequest the aws service request to create a resource
-     * @param awsResponse the aws service response to create a resource
-     * @param proxyClient the aws service client to make the call
-     * @param model resource model
-     * @param callbackContext callback context
-     * @return boolean state of stabilized or not
-     */
-    private boolean stabilizedOnCreate(
-        final AwsRequest awsRequest,
-        final AwsResponse awsResponse,
-        final ProxyClient<SdkClient> proxyClient,
-        final ResourceModel model,
-        final CallbackContext callbackContext) {
+    private ProgressEvent<ResourceModel, CallbackContext> stabilize(
+            final AmazonWebServicesClientProxy proxy,
+            final ProxyClient<KendraClient> proxyClient,
+            final ProgressEvent<ResourceModel, CallbackContext> progress) {
+        return proxy.initiate("AWS-Kendra-DataSource::stabilize", proxyClient, progress.getResourceModel(),
+                progress.getCallbackContext())
+                .translateToServiceRequest(Function.identity())
+                .makeServiceCall(EMPTY_CALL)
+                .stabilize((resourceModel, response, proxyInvocation, model, callbackContext) ->
+                        isStabilized(proxyInvocation, model)).progress();
+    }
 
-        // TODO: put your stabilization code here
+    private boolean isStabilized(final ProxyClient<KendraClient> proxyClient, final ResourceModel model) {
+        DescribeDataSourceRequest describeDataSourceRequest = DescribeDataSourceRequest.builder()
+                .id(model.getId())
+                .indexId(model.getIndexId())
+                .build();
+        DescribeDataSourceResponse describeDataSourceResponse = proxyClient.injectCredentialsAndInvokeV2(describeDataSourceRequest,
+                proxyClient.client()::describeDataSource);
+        DataSourceStatus dataSourceStatus = describeDataSourceResponse.status();
+        if (dataSourceStatus.equals(DataSourceStatus.FAILED)) {
+            throw new CfnNotStabilizedException(ResourceModel.TYPE_NAME, model.getId());
+        }
+        return dataSourceStatus.equals(DataSourceStatus.ACTIVE);
+    }
 
-        final boolean stabilized = true;
-        logger.log(String.format("%s [%s] creation has stabilized: %s", ResourceModel.TYPE_NAME, model.getPrimaryIdentifier(), stabilized));
-        return stabilized;
+    private ProgressEvent<ResourceModel, CallbackContext> setId(CreateDataSourceRequest createDataRequest,
+        CreateDataSourceResponse createDataSourceResponse, ProxyClient<KendraClient> proxyClient, ResourceModel resourceModel,
+        CallbackContext callbackContext) {
+        resourceModel.setId(createDataSourceResponse.id());
+        return ProgressEvent.progress(resourceModel, callbackContext);
     }
 
     /**

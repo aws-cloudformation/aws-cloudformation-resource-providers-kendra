@@ -7,7 +7,7 @@ Resources:
   ExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      MaxSessionDuration: 8400
+      MaxSessionDuration: 43200
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -23,11 +23,10 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                - "initech:CreateReport"
-                - "initech:DeleteReport"
-                - "initech:DescribeReport"
-                - "initech:ListReports"
-                - "initech:UpdateReport"
+                - "kendra:CreateDataSource"
+                - "kendra:DeleteDataSource"
+                - "kendra:DescribeDataSource"
+                - "kendra:ListDataSources"
                 Resource: "*"
 Outputs:
   ExecutionRoleArn:
