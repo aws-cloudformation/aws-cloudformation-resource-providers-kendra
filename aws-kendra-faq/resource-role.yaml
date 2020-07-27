@@ -23,10 +23,12 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
+                - "iam:PassRole"
                 - "kendra:CreateFaq"
                 - "kendra:DeleteFaq"
                 - "kendra:DescribeFaq"
                 - "kendra:ListFaqs"
+                - "kendra:TagResource"
                 Resource: "*"
 Outputs:
   ExecutionRoleArn:

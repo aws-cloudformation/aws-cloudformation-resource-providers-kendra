@@ -95,7 +95,9 @@
     "create": {
       "permissions": [
         "kendra:CreateFaq",
-        "kendra:DescribeFaq"
+        "kendra:DescribeFaq",
+        "iam:PassRole",
+        "kendra:TagResource"
       ]
     },
     "read": {

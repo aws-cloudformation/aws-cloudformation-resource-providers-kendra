@@ -261,6 +261,7 @@
         "kendra:DescribeIndex",
         "kendra:UpdateIndex",
         "kendra:ListTagsForResource",
+        "kendra:TagResource",
         "iam:PassRole"
       ],
       "timeoutInMinutes": 240
