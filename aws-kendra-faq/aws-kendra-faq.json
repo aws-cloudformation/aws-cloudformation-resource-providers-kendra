@@ -1,7 +1,7 @@
 {
   "typeName": "AWS::Kendra::Faq",
   "description": "A Kendra FAQ resource",
-  "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-rpdk.git",
+  "sourceUrl": "https://aws.amazon.com/kendra/faqs/",
   "definitions": {
     "IndexId": {
       "description": "Unique ID of Index",
@@ -81,26 +81,11 @@
       "$ref": "#/definitions/RoleArn"
     }
   },
-  "additionalProperties": false,
   "required": [
     "IndexId",
     "Name",
     "S3Path",
     "RoleArn"
-  ],
-  "readOnlyProperties": [
-    "/properties/Id"
-  ],
-  "createOnlyProperties": [
-    "/properties/IndexId",
-    "/properties/Name",
-    "/properties/S3Path",
-    "/properties/RoleArn",
-    "/properties/Description"
-  ],
-  "primaryIdentifier": [
-    "/properties/Id",
-    "/properties/IndexId"
   ],
   "handlers": {
     "create": {
@@ -125,5 +110,20 @@
         "kendra:ListFaqs"
       ]
     }
-  }
+  },
+  "additionalProperties": false,
+  "readOnlyProperties": [
+    "/properties/Id"
+  ],
+  "createOnlyProperties": [
+    "/properties/IndexId",
+    "/properties/Name",
+    "/properties/S3Path",
+    "/properties/RoleArn",
+    "/properties/Description"
+  ],
+  "primaryIdentifier": [
+    "/properties/Id",
+    "/properties/IndexId"
+  ]
 }
