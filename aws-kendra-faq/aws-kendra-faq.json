@@ -1,7 +1,7 @@
 {
   "typeName": "AWS::Kendra::Faq",
   "description": "A Kendra FAQ resource",
-  "sourceUrl": "https://aws.amazon.com/kendra/faqs/",
+  "sourceUrl": "https://docs.aws.amazon.com/kendra/latest/dg/in-creating-faq.html",
   "definitions": {
     "IndexId": {
       "description": "Unique ID of Index",
