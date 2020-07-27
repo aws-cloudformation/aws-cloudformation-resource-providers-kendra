@@ -6,11 +6,17 @@ import software.amazon.awssdk.services.kendra.model.DescribeFaqRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqResponse;
 import software.amazon.awssdk.services.kendra.model.ListFaqsRequest;
 import software.amazon.awssdk.services.kendra.model.ListFaqsResponse;
+import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.kendra.model.S3Path;
+import software.amazon.awssdk.services.kendra.model.Tag;
+import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
+import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -44,8 +50,9 @@ public class Translator {
             .build();
   }
 
-  static ResourceModel translateFromReadResponse(final DescribeFaqResponse describeFaqResponse) {
-    return ResourceModel.builder()
+  static ResourceModel translateFromReadResponse(final DescribeFaqResponse describeFaqResponse,
+                                                 final ListTagsForResourceResponse listTagsForResourceResponse) {
+    ResourceModel.ResourceModelBuilder builder = ResourceModel.builder()
             .id(describeFaqResponse.id())
             .indexId(describeFaqResponse.indexId())
             .description(describeFaqResponse.description())
@@ -54,8 +61,17 @@ public class Translator {
             .s3Path(software.amazon.kendra.faq.S3Path.builder()
                     .key(describeFaqResponse.s3Path().key())
                     .bucket(describeFaqResponse.s3Path().bucket())
-                    .build())
-            .build();
+                    .build());
+    if (listTagsForResourceResponse.tags() != null
+            && !listTagsForResourceResponse.tags().isEmpty()) {
+      builder.tags(listTagsForResourceResponse.tags()
+              .stream().map(x -> software.amazon.kendra.faq.Tag
+                      .builder()
+                      .key(x.key())
+                      .value(x.value())
+                      .build()).collect(Collectors.toList()));
+    }
+    return builder.build();
   }
 
   static DeleteFaqRequest translateToDeleteRequest(final ResourceModel model) {
@@ -89,4 +105,32 @@ public class Translator {
             .map(Collection::stream)
             .orElseGet(Stream::empty);
   }
+
+  static ListTagsForResourceRequest translateToListTagsRequest(final String arn) {
+    return ListTagsForResourceRequest
+            .builder()
+            .resourceARN(arn)
+            .build();
+  }
+
+  static UntagResourceRequest translateToUntagResourceRequest(Set<software.amazon.kendra.faq.Tag> tags, String arn) {
+    return UntagResourceRequest
+            .builder()
+            .resourceARN(arn)
+            .tagKeys(tags.stream().map(x -> x.getKey()).collect(Collectors.toList()))
+            .build();
+  }
+
+  static TagResourceRequest translateToTagResourceRequest(Set<software.amazon.kendra.faq.Tag> tags, String arn) {
+    return TagResourceRequest
+            .builder()
+            .resourceARN(arn)
+            .tags(tags.stream().map(x -> Tag
+                    .builder()
+                    .key(x.getKey())
+                    .value(x.getValue()).build())
+                    .collect(Collectors.toList()))
+            .build();
+  }
+
 }
