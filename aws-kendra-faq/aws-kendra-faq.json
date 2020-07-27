@@ -1,6 +1,6 @@
 {
   "typeName": "AWS::Kendra::Faq",
-  "description": "An example resource schema demonstrating some basic constructs and validation rules.",
+  "description": "A Kendra FAQ resource",
   "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-rpdk.git",
   "definitions": {
     "IndexId": {
@@ -58,6 +58,7 @@
   },
   "properties": {
     "Id": {
+      "description": "Unique ID of the FAQ",
       "type": "string",
       "minLength": 1,
       "maxLength": 100,
