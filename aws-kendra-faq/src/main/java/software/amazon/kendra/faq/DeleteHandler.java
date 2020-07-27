@@ -49,14 +49,14 @@ public class DeleteHandler extends BaseHandlerStd {
                                 // STEP 2.1 [TODO: construct a body of a request]
                                 .translateToServiceRequest(Translator::translateToDeleteRequest)
                                 // STEP 2.2 [TODO: make an api call]
-                                .makeServiceCall(this::deleteResource)
+                                .makeServiceCall(this::deleteFaq)
                                 // STEP 2.3 [TODO: stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]
                                 // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
                                 .stabilize(this::stabilizedOnDelete)
                                 .success());
     }
 
-    private DeleteFaqResponse deleteResource(
+    private DeleteFaqResponse deleteFaq(
             final DeleteFaqRequest deleteFaqRequest,
             final ProxyClient<KendraClient> proxyClient) {
         DeleteFaqResponse deleteFaqResponse;

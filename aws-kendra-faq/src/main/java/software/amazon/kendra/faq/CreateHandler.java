@@ -47,7 +47,7 @@ public class CreateHandler extends BaseHandlerStd {
                         proxy.initiate("AWS-Kendra-Faq::Create", proxyClient, model, callbackContext)
                                 // STEP 2.1 [TODO: construct a body of a request]
                                 .translateToServiceRequest(Translator::translateToCreateRequest)
-                                .makeServiceCall(this::createResource)
+                                .makeServiceCall(this::createFaq)
                                 .done(this::setId)
                 )
                 .then(progress -> stabilize(proxy, proxyClient, progress))
@@ -95,7 +95,7 @@ public class CreateHandler extends BaseHandlerStd {
      * @param proxyClient the aws service client to make the call
      * @return awsResponse create resource response
      */
-    private CreateFaqResponse createResource(
+    private CreateFaqResponse createFaq(
             final CreateFaqRequest createFaqRequest,
             final ProxyClient<KendraClient> proxyClient) {
         CreateFaqResponse createFaqResponse;
