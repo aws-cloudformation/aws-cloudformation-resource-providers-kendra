@@ -7,12 +7,18 @@ import software.amazon.awssdk.services.kendra.model.DescribeDataSourceRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeDataSourceResponse;
 import software.amazon.awssdk.services.kendra.model.ListDataSourcesRequest;
 import software.amazon.awssdk.services.kendra.model.ListDataSourcesResponse;
+import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
+import software.amazon.awssdk.services.kendra.model.Tag;
+import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
+import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateDataSourceRequest;
 
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -40,6 +46,11 @@ public class Translator {
       .description(model.getDescription())
       .schedule(model.getSchedule())
       .roleArn(model.getRoleArn());
+    if (model.getTags() != null && !model.getTags().isEmpty()) {
+      builder.tags(model.getTags().stream().map(
+              x -> Tag.builder().key(x.getKey()).value(x.getValue()).build())
+              .collect(Collectors.toList()));
+    }
     return builder.build();
   }
 
@@ -63,8 +74,9 @@ public class Translator {
    * @return model resource model
    */
   static ResourceModel translateFromReadResponse(final DescribeDataSourceResponse describeDataSourceResponse,
-   final String dataSourceArn) {
-    return ResourceModel.builder()
+                                                 final ListTagsForResourceResponse listTagsForResourceResponse,
+                                                 final String dataSourceArn) {
+    ResourceModel.ResourceModelBuilder builder = ResourceModel.builder()
         .id(describeDataSourceResponse.id())
         .arn(dataSourceArn)
         .name(describeDataSourceResponse.name())
@@ -74,8 +86,14 @@ public class Translator {
         .schedule(describeDataSourceResponse.schedule())
         .type(describeDataSourceResponse.typeAsString())
         .dataSourceConfiguration(DataSourceResponseConverter.getDataSourceConfiguration(describeDataSourceResponse.configuration(),
-          describeDataSourceResponse.typeAsString()))
-        .build();
+          describeDataSourceResponse.typeAsString()));
+    if (listTagsForResourceResponse.tags() != null && !listTagsForResourceResponse.tags().isEmpty()) {
+      List<software.amazon.kendra.datasource.Tag> tags = listTagsForResourceResponse.tags().stream()
+              .map(x -> software.amazon.kendra.datasource.Tag.builder().key(x.key()).value(x.value()).build())
+              .collect(Collectors.toList());
+      builder.tags(tags);
+    }
+    return builder.build();
   }
 
   /**
@@ -150,5 +168,32 @@ public class Translator {
     return Optional.ofNullable(collection)
         .map(Collection::stream)
         .orElseGet(Stream::empty);
+  }
+
+  static ListTagsForResourceRequest translateToListTagsRequest(final String arn) {
+    return ListTagsForResourceRequest
+            .builder()
+            .resourceARN(arn)
+            .build();
+  }
+
+  static UntagResourceRequest translateToUntagResourceRequest(Set<software.amazon.kendra.datasource.Tag> tags, String arn) {
+    return UntagResourceRequest
+            .builder()
+            .resourceARN(arn)
+            .tagKeys(tags.stream().map(x -> x.getKey()).collect(Collectors.toList()))
+            .build();
+  }
+
+  static TagResourceRequest translateToTagResourceRequest(Set<software.amazon.kendra.datasource.Tag> tags, String arn) {
+    return TagResourceRequest
+            .builder()
+            .resourceARN(arn)
+            .tags(tags.stream().map(x -> Tag
+                    .builder()
+                    .key(x.getKey())
+                    .value(x.getValue()).build())
+                    .collect(Collectors.toList()))
+            .build();
   }
 }

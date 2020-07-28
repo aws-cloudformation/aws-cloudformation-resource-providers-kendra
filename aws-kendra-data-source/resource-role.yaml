@@ -28,6 +28,9 @@ Resources:
                 - "kendra:DeleteDataSource"
                 - "kendra:DescribeDataSource"
                 - "kendra:ListDataSources"
+                - "kendra:ListTagsForResource"
+                - "kendra:TagResource"
+                - "kendra:UntagResource"
                 - "kendra:UpdateDataSource"
                 Resource: "*"
 Outputs:
