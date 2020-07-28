@@ -39,6 +39,11 @@ public class Translator {
                     .key(model.getS3Path().getKey())
                     .bucket(model.getS3Path().getBucket())
                     .build());
+    if (model.getTags() != null) {
+      builder.tags(model.getTags().stream()
+              .map(x -> Tag.builder().key(x.getKey()).value(x.getValue()).build())
+              .collect(Collectors.toList()));
+    }
     return builder.build();
   }
 

@@ -45,7 +45,7 @@ public class ReadHandler extends BaseHandlerStd {
         // https://github.com/aws-cloudformation/cloudformation-cli-java-plugin/blob/master/src/main/java/software/amazon/cloudformation/proxy/CallChain.java
 
         DescribeFaqRequest describeFaqRequest = Translator.translateToReadRequest(model);
-        DescribeFaqResponse describeFaqResponse = readResource(describeFaqRequest, proxyClient);
+        DescribeFaqResponse describeFaqResponse = readFaq(describeFaqRequest, proxyClient);
         String faqArn = faqArnBuilder.build(request);
         final ListTagsForResourceRequest listTagsForResourceRequest = Translator.translateToListTagsRequest(faqArn);
         ListTagsForResourceResponse listTagsForResourceResponse;
@@ -65,7 +65,7 @@ public class ReadHandler extends BaseHandlerStd {
      * @param proxyClient the aws service client to make the call
      * @return describe resource response
      */
-    private DescribeFaqResponse readResource(
+    private DescribeFaqResponse readFaq(
             final DescribeFaqRequest describeFaqRequest,
             final ProxyClient<KendraClient> proxyClient) {
         DescribeFaqResponse describeFaqResponse;

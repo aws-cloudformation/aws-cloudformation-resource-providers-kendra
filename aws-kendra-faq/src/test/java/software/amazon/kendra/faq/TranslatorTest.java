@@ -30,6 +30,8 @@ class TranslatorTest {
                 .key(s3Key)
                 .bucket(s3Bucket)
                 .build();
+        String tagKey = "tagKey";
+        String tagValue = "tagValue";
         ResourceModel resourceModel = ResourceModel
                 .builder()
                 .indexId(indexId)
@@ -37,6 +39,7 @@ class TranslatorTest {
                 .name(name)
                 .s3Path(s3Path)
                 .roleArn(roleArn)
+                .tags(Arrays.asList(Tag.builder().key(tagKey).value(tagValue).build()))
                 .build();
 
         CreateFaqRequest createFaqRequest = CreateFaqRequest
@@ -50,6 +53,8 @@ class TranslatorTest {
                         .bucket(s3Bucket)
                         .build())
                 .roleArn(roleArn)
+                .tags(Arrays.asList(software.amazon.awssdk.services.kendra.model.Tag
+                        .builder().key(tagKey).value(tagValue).build()))
                 .build();
 
         assertThat(Translator.translateToCreateRequest(resourceModel)).isEqualTo(createFaqRequest);
