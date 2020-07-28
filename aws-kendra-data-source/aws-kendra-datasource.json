@@ -10,6 +10,37 @@
       "maxLength": 36,
       "pattern": "[a-zA-Z0-9][a-zA-Z0-9-]*"
     },
+    "Tag": {
+      "description": "A label for tagging Kendra resources",
+      "type": "object",
+      "properties": {
+        "Key": {
+          "description": "A string used to identify this tag",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "Value": {
+          "description": "A string containing the value for the tag",
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "Key",
+        "Value"
+      ],
+      "additionalProperties": false
+    },
+    "TagList": {
+      "description": "List of tags",
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "$ref": "#/definitions/Tag"
+      }
+    },
     "DataSourceInclusionsExclusionsStrings": {
       "type": "array",
       "maxItems": 100,
@@ -139,6 +170,10 @@
       "minLength": 1,
       "maxLength": 1284,
       "pattern": "arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}"
+    },
+    "Tags": {
+      "description": "Tags for labeling the data source",
+      "$ref": "#/definitions/TagList"
     }
   },
   "required": [
@@ -153,12 +188,14 @@
       "permissions": [
         "kendra:CreateDataSource",
         "kendra:DescribeDataSource",
+        "kendra:ListTagsForResource",
         "iam:PassRole"
       ]
     },
     "read": {
       "permissions": [
-        "kendra:DescribeDataSource"
+        "kendra:DescribeDataSource",
+        "kendra:ListTagsForResource"
       ]
     },
     "delete": {
@@ -177,6 +214,9 @@
       "permissions": [
         "kendra:DescribeDataSource",
         "kendra:UpdateDataSource",
+        "kendra:ListTagsForResource",
+        "kendra:TagResource",
+        "kendra:UntagResource",
         "iam:PassRole"
       ]
     }

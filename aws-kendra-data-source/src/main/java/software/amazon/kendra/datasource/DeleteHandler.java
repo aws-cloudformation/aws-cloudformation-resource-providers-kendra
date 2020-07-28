@@ -12,13 +12,39 @@ import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.Delay;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
+import software.amazon.cloudformation.proxy.delay.Constant;
+
+import java.time.Duration;
 
 public class DeleteHandler extends BaseHandlerStd {
+
+    private static final Constant STABILIZATION_DELAY = Constant.of()
+            // Set the timeout to something silly/way too high, because
+            // we already set the timeout in the schema https://github.com/aws-cloudformation/aws-cloudformation-resource-schema
+            .timeout(Duration.ofDays(365L))
+            // Set the delay to five minutes so the stabilization code only calls
+            // DescribeDataSource every five minutes - delete can take hours
+            .delay(Duration.ofMinutes(5))
+            .build();
+
     private Logger logger;
+
+    private Delay delay;
+
+    public DeleteHandler() {
+        super();
+        delay = STABILIZATION_DELAY;
+    }
+
+    public DeleteHandler(Delay delay) {
+        super();
+        this.delay = delay;
+    }
 
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
         final AmazonWebServicesClientProxy proxy,
@@ -40,7 +66,7 @@ public class DeleteHandler extends BaseHandlerStd {
 
                     // STEP 2.1 [construct a body of a request]
                     .translateToServiceRequest(Translator::translateToDeleteRequest)
-
+                    .backoffDelay(delay)
                     // STEP 2.2 [ make an api call]
                     .makeServiceCall(this::deleteDataSource)
 

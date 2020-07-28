@@ -1,6 +1,7 @@
 package software.amazon.kendra.datasource;
 
 import java.time.Duration;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.AfterEach;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
@@ -11,6 +12,8 @@ import software.amazon.awssdk.services.kendra.model.CreateDataSourceResponse;
 import software.amazon.awssdk.services.kendra.model.DataSourceStatus;
 import software.amazon.awssdk.services.kendra.model.DescribeDataSourceRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeDataSourceResponse;
+import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
@@ -105,6 +108,8 @@ public class CreateHandlerTest extends AbstractTestBase {
                 .schedule(TEST_SCHEDULE)
                 .status(DataSourceStatus.ACTIVE)
                 .build());
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
+                .thenReturn(ListTagsForResourceResponse.builder().build());
 
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
 
@@ -174,6 +179,8 @@ public class CreateHandlerTest extends AbstractTestBase {
                 .schedule(TEST_SCHEDULE)
                 .status(DataSourceStatus.ACTIVE)
                 .build());
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
+                .thenReturn(ListTagsForResourceResponse.builder().build());
 
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
 
@@ -314,6 +321,76 @@ public class CreateHandlerTest extends AbstractTestBase {
         assertThrows(CfnNotStabilizedException.class, () -> {
             handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
         });
+    }
+
+    @Test
+    public void handleRequest_Tags() {
+        String key = "key";
+        String value = "value";
+        final CreateHandler handler = new CreateHandler(testDataSourceArnBuilder);
+        final ResourceModel model = ResourceModel.builder()
+            .name(TEST_DATA_SOURCE_NAME)
+            .indexId(TEST_INDEX_ID)
+            .type(TEST_DATA_SOURCE_TYPE)
+            .dataSourceConfiguration(DataSourceConfiguration.builder().build())
+            .description(TEST_DESCRIPTION)
+            .roleArn(TEST_ROLE_ARN)
+            .schedule(TEST_SCHEDULE)
+            .tags(Arrays.asList(Tag.builder().key(key).value(value).build()))
+            .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .build();
+
+        when(proxyClient.client().createDataSource(any(CreateDataSourceRequest.class)))
+            .thenReturn(CreateDataSourceResponse.builder().id(TEST_ID).build());
+        when(proxyClient.client().describeDataSource(any(DescribeDataSourceRequest.class)))
+            .thenReturn(DescribeDataSourceResponse.builder()
+                .id(TEST_ID)
+                .name(TEST_DATA_SOURCE_NAME)
+                .indexId(TEST_INDEX_ID)
+                .type(TEST_DATA_SOURCE_TYPE)
+                .configuration(software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder().build())
+                .description(TEST_DESCRIPTION)
+                .roleArn(TEST_ROLE_ARN)
+                .schedule(TEST_SCHEDULE)
+                .status(DataSourceStatus.ACTIVE)
+                .build());
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
+                .thenReturn(ListTagsForResourceResponse
+                        .builder()
+                        .tags(Arrays.asList(software.amazon.awssdk.services.kendra.model.Tag
+                                .builder().key(key).value(value).build()))
+                        .build());
+
+        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+
+        ResourceModel expectedResourceModel = ResourceModel.builder()
+            .id(TEST_ID)
+            .indexId(TEST_INDEX_ID)
+            .name(TEST_DATA_SOURCE_NAME)
+            .arn(testDataSourceArnBuilder.build(request))
+            .description(TEST_DESCRIPTION)
+            .roleArn(TEST_ROLE_ARN)
+            .schedule(TEST_SCHEDULE)
+            .type(TEST_DATA_SOURCE_TYPE)
+            .tags(Arrays.asList(Tag.builder().key(key).value(value).build()))
+            .build();
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        assertThat(response.getResourceModel()).isEqualTo(expectedResourceModel);
+        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getMessage()).isNull();
+        assertThat(response.getErrorCode()).isNull();
+
+        verify(proxyClient.client(), times(1)).createDataSource(any(CreateDataSourceRequest.class));
+        verify(proxyClient.client(), times(2)).describeDataSource(any(DescribeDataSourceRequest.class));
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
+
+
     }
 
 }

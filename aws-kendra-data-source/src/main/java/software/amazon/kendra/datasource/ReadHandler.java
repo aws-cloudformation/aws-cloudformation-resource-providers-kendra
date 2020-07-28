@@ -1,15 +1,12 @@
 package software.amazon.kendra.datasource;
 
-// TODO: replace all usage of SdkClient with your service client type, e.g; YourServiceAsyncClient
-// import software.amazon.awssdk.services.yourservice.YourServiceAsyncClient;
-
-import software.amazon.awssdk.awscore.AwsRequest;
-import software.amazon.awssdk.awscore.AwsResponse;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
-import software.amazon.awssdk.core.SdkClient;
 import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.services.kendra.model.DescribeDataSourceRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeDataSourceResponse;
+import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
+import software.amazon.awssdk.services.kendra.model.ResourceInUseException;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
@@ -53,9 +50,17 @@ public class ReadHandler extends BaseHandlerStd {
         } catch (final AwsServiceException e) {
             throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e);
         }
-        // STEP 4 [TODO: Add List Tags for DataSource]
+        // STEP 4 [Add List Tags for DataSource]
         String dataSourceArn = dataSourceArnBuilder.build(request);
-        return constructResourceModelFromResponse(describeDataSourceResponse, dataSourceArn);
+        final ListTagsForResourceRequest listTagsForResourceRequest = Translator.translateToListTagsRequest(dataSourceArn);
+        ListTagsForResourceResponse listTagsForResourceResponse;
+        try {
+            listTagsForResourceResponse = proxyClient.injectCredentialsAndInvokeV2(listTagsForResourceRequest,
+                    proxyClient.client()::listTagsForResource);
+        } catch (ResourceInUseException e) {
+            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e);
+        }
+        return constructResourceModelFromResponse(describeDataSourceResponse, listTagsForResourceResponse, dataSourceArn);
     }
 
     /**
@@ -65,8 +70,11 @@ public class ReadHandler extends BaseHandlerStd {
      * @return progressEvent indicating success, in progress with delay callback or failed state
      */
     private ProgressEvent<ResourceModel, CallbackContext> constructResourceModelFromResponse(
-        final DescribeDataSourceResponse describeDataSourceResponse, final String dataSourceArn) {
-        ResourceModel resourceModel = Translator.translateFromReadResponse(describeDataSourceResponse, dataSourceArn);
+        final DescribeDataSourceResponse describeDataSourceResponse,
+        final ListTagsForResourceResponse listTagsForResourceResponse,
+        final String dataSourceArn) {
+        ResourceModel resourceModel =
+            Translator.translateFromReadResponse(describeDataSourceResponse, listTagsForResourceResponse, dataSourceArn);
         return ProgressEvent.defaultSuccessHandler(resourceModel);
     }
 
