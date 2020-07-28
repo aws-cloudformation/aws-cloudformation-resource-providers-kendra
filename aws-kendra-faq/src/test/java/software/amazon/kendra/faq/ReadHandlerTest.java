@@ -112,6 +112,7 @@ public class ReadHandlerTest extends AbstractTestBase {
                 .builder()
                 .id(id)
                 .indexId(indexId)
+                .arn(faqArnBuilder.build(request))
                 .description(description)
                 .roleArn(roleArn)
                 .name(name)

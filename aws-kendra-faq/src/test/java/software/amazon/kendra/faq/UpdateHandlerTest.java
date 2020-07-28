@@ -113,7 +113,17 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
         assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getResourceModel()).isEqualTo(resourceModel);
+        ResourceModel expectedResourceModel = ResourceModel
+                .builder()
+                .id(faqId)
+                .indexId(indexId)
+                .arn(faqArnBuilder.build(request))
+                .name(name)
+                .description(description)
+                .roleArn(roleArn)
+                .s3Path(s3Path)
+                .build();
+        assertThat(response.getResourceModel()).isEqualTo(expectedResourceModel);
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
@@ -192,7 +202,18 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
         assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getResourceModel()).isEqualTo(resourceModel);
+        ResourceModel expectedResourceModel = ResourceModel
+                .builder()
+                .id(faqId)
+                .indexId(indexId)
+                .arn(faqArnBuilder.build(request))
+                .tags(Arrays.asList(Tag.builder().key(key).value(value).build()))
+                .name(name)
+                .description(description)
+                .roleArn(roleArn)
+                .s3Path(s3Path)
+                .build();
+        assertThat(response.getResourceModel()).isEqualTo(expectedResourceModel);
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
@@ -269,7 +290,17 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
         assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getResourceModel()).isEqualTo(resourceModel);
+        ResourceModel expectedResourceModel = ResourceModel
+                .builder()
+                .id(faqId)
+                .indexId(indexId)
+                .arn(faqArnBuilder.build(request))
+                .name(name)
+                .description(description)
+                .roleArn(roleArn)
+                .s3Path(s3Path)
+                .build();
+        assertThat(response.getResourceModel()).isEqualTo(expectedResourceModel);
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
@@ -356,7 +387,18 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
         assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getResourceModel()).isEqualTo(resourceModel);
+        ResourceModel expectedResourceModel = ResourceModel
+                .builder()
+                .id(faqId)
+                .indexId(indexId)
+                .arn(faqArnBuilder.build(request))
+                .tags(Arrays.asList(Tag.builder().key(tagKeyToAdd).value(tagValueToAdd).build()))
+                .name(name)
+                .description(description)
+                .roleArn(roleArn)
+                .s3Path(s3Path)
+                .build();
+        assertThat(response.getResourceModel()).isEqualTo(expectedResourceModel);
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();

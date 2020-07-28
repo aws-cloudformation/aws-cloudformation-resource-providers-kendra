@@ -110,10 +110,12 @@ class TranslatorTest {
                 .build();
         String key = "key";
         String value = "value";
+        String arn = "arn";
         ResourceModel resourceModel = ResourceModel
                 .builder()
                 .id(id)
                 .indexId(indexId)
+                .arn(arn)
                 .description(description)
                 .name(name)
                 .s3Path(s3Path)
@@ -142,7 +144,7 @@ class TranslatorTest {
                         .value(value)
                         .build()))
                 .build();
-        assertThat(Translator.translateFromReadResponse(describeFaqResponse, listTagsForResourceResponse))
+        assertThat(Translator.translateFromReadResponse(describeFaqResponse, listTagsForResourceResponse, arn))
                 .isEqualTo(resourceModel);
     }
 
