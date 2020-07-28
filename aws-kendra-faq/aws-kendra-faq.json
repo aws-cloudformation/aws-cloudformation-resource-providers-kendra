@@ -118,6 +118,9 @@
     "Tags": {
       "description": "Tags for labeling the FAQ",
       "$ref": "#/definitions/TagList"
+    },
+    "Arn": {
+      "type": "string"
     }
   },
   "required": [
@@ -162,7 +165,8 @@
   },
   "additionalProperties": false,
   "readOnlyProperties": [
-    "/properties/Id"
+    "/properties/Id",
+    "/properties/Arn"
   ],
   "createOnlyProperties": [
     "/properties/IndexId",

@@ -56,10 +56,12 @@ public class Translator {
   }
 
   static ResourceModel translateFromReadResponse(final DescribeFaqResponse describeFaqResponse,
-                                                 final ListTagsForResourceResponse listTagsForResourceResponse) {
+                                                 final ListTagsForResourceResponse listTagsForResourceResponse,
+                                                 final String arn) {
     ResourceModel.ResourceModelBuilder builder = ResourceModel.builder()
             .id(describeFaqResponse.id())
             .indexId(describeFaqResponse.indexId())
+            .arn(arn)
             .description(describeFaqResponse.description())
             .name(describeFaqResponse.name())
             .roleArn(describeFaqResponse.roleArn())

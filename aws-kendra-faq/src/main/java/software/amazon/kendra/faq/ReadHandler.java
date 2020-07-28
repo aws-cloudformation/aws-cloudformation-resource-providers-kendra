@@ -55,7 +55,7 @@ public class ReadHandler extends BaseHandlerStd {
         } catch (ResourceInUseException e) {
             throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e);
         }
-        return constructResourceModelFromResponse(describeFaqResponse, listTagsForResourceResponse);
+        return constructResourceModelFromResponse(describeFaqResponse, listTagsForResourceResponse, faqArn);
     }
 
     /**
@@ -90,8 +90,12 @@ public class ReadHandler extends BaseHandlerStd {
 
     private ProgressEvent<ResourceModel, CallbackContext> constructResourceModelFromResponse(
             final DescribeFaqResponse describeFaqResponse,
-            final ListTagsForResourceResponse listTagsForResourceResponse) {
+            final ListTagsForResourceResponse listTagsForResourceResponse,
+            final String arn) {
         return ProgressEvent.defaultSuccessHandler(
-                Translator.translateFromReadResponse(describeFaqResponse, listTagsForResourceResponse));
+                Translator.translateFromReadResponse(
+                        describeFaqResponse,
+                        listTagsForResourceResponse,
+                        arn));
     }
 }
