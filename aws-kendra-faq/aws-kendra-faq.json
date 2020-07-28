@@ -1,105 +1,178 @@
 {
   "typeName": "AWS::Kendra::Faq",
-  "description": "An example resource schema demonstrating some basic constructs and validation rules.",
-  "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-rpdk.git",
+  "description": "A Kendra FAQ resource",
+  "sourceUrl": "https://docs.aws.amazon.com/kendra/latest/dg/in-creating-faq.html",
   "definitions": {
-    "InitechDateFormat": {
-      "$comment": "Use the `definitions` block to provide shared resource property schemas",
-      "type": "string",
-      "format": "date-time"
-    },
-    "Memo": {
+    "Tag": {
+      "description": "A label for tagging Kendra resources",
       "type": "object",
       "properties": {
-        "Heading": {
-          "type": "string"
+        "Key": {
+          "description": "A string used to identify this tag",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
         },
-        "Body": {
-          "type": "string"
+        "Value": {
+          "description": "A string containing the value for the tag",
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 256
         }
       },
+      "required": [
+        "Key",
+        "Value"
+      ],
       "additionalProperties": false
+    },
+    "TagList": {
+      "description": "List of tags",
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "$ref": "#/definitions/Tag"
+      }
+    },
+    "IndexId": {
+      "description": "Unique ID of Index",
+      "type": "string",
+      "minLength": 36,
+      "maxLength": 36,
+      "pattern": "[a-zA-Z0-9][a-zA-Z0-9-]*"
+    },
+    "Description": {
+      "description": "Description of the FAQ",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000,
+      "pattern": "^\\P{C}*$"
+    },
+    "S3Path": {
+      "type": "object",
+      "properties": {
+        "Bucket": {
+          "$ref": "#/definitions/S3BucketName"
+        },
+        "Key": {
+          "$ref": "#/definitions/S3ObjectKey"
+        }
+      },
+      "required": [
+        "Bucket",
+        "Key"
+      ]
+    },
+    "S3BucketName": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 63,
+      "pattern": "[a-z0-9][\\.\\-a-z0-9]{1,61}[a-z0-9]"
+    },
+    "S3ObjectKey": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "FaqName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "[a-zA-Z0-9][a-zA-Z0-9-]*"
+    },
+    "RoleArn": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1284,
+      "pattern": "arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}"
     }
   },
   "properties": {
-    "TPSCode": {
-      "description": "A TPS Code is automatically generated on creation and assigned as the unique identifier.",
+    "Id": {
+      "description": "Unique ID of the FAQ",
       "type": "string",
-      "pattern": "^[A-Z]{3,5}[0-9]{8}-[0-9]{4}$"
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "[a-zA-Z0-9][a-zA-Z0-9_-]*"
     },
-    "Title": {
-      "description": "The title of the TPS report is a mandatory element.",
-      "type": "string",
-      "minLength": 20,
-      "maxLength": 250
+    "IndexId": {
+      "description": "Index ID",
+      "$ref": "#/definitions/IndexId"
     },
-    "CoverSheetIncluded": {
-      "description": "Required for all TPS Reports submitted after 2/19/1999",
-      "type": "boolean"
+    "Name": {
+      "description": "FAQ name",
+      "$ref": "#/definitions/FaqName"
     },
-    "DueDate": {
-      "$ref": "#/definitions/InitechDateFormat"
+    "Description": {
+      "description": "FAQ description",
+      "$ref": "#/definitions/Description"
     },
-    "ApprovalDate": {
-      "$ref": "#/definitions/InitechDateFormat"
+    "S3Path": {
+      "description": "FAQ S3 path",
+      "$ref": "#/definitions/S3Path"
     },
-    "Memo": {
-      "$ref": "#/definitions/Memo"
+    "RoleArn": {
+      "description": "FAQ role ARN",
+      "$ref": "#/definitions/RoleArn"
     },
-    "SecondCopyOfMemo": {
-      "description": "In case you didn't get the first one.",
-      "$ref": "#/definitions/Memo"
-    },
-    "TestCode": {
-      "type": "string",
-      "enum": [
-        "NOT_STARTED",
-        "CANCELLED"
-      ]
-    },
-    "Authors": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
+    "Tags": {
+      "description": "Tags for labeling the FAQ",
+      "$ref": "#/definitions/TagList"
     }
   },
-  "additionalProperties": false,
   "required": [
-    "TestCode",
-    "Title"
-  ],
-  "readOnlyProperties": [
-    "/properties/TPSCode"
-  ],
-  "primaryIdentifier": [
-    "/properties/TPSCode"
+    "IndexId",
+    "Name",
+    "S3Path",
+    "RoleArn"
   ],
   "handlers": {
     "create": {
       "permissions": [
-        "initech:CreateReport"
-      ]
-    },
-    "read": {
-      "permissions": [
-        "initech:DescribeReport"
+        "kendra:CreateFaq",
+        "kendra:DescribeFaq",
+        "iam:PassRole",
+        "kendra:ListTagsForResource"
       ]
     },
     "update": {
       "permissions": [
-        "initech:UpdateReport"
+        "kendra:ListTagsForResource",
+        "kendra:UntagResource",
+        "kendra:TagResource"
+      ]
+    },
+    "read": {
+      "permissions": [
+        "kendra:DescribeFaq",
+        "kendra:ListTagsForResource"
       ]
     },
     "delete": {
       "permissions": [
-        "initech:DeleteReport"
+        "kendra:DeleteFaq",
+        "kendra:DescribeFaq"
       ]
     },
     "list": {
       "permissions": [
-        "initech:ListReports"
+        "kendra:ListFaqs"
       ]
     }
-  }
+  },
+  "additionalProperties": false,
+  "readOnlyProperties": [
+    "/properties/Id"
+  ],
+  "createOnlyProperties": [
+    "/properties/IndexId",
+    "/properties/Name",
+    "/properties/S3Path",
+    "/properties/RoleArn",
+    "/properties/Description"
+  ],
+  "primaryIdentifier": [
+    "/properties/Id",
+    "/properties/IndexId"
+  ]
 }

@@ -1,28 +1,43 @@
 package software.amazon.kendra.faq;
 
-// TODO: replace all usage of SdkClient with your service client type, e.g; YourServiceAsyncClient
-// import software.amazon.awssdk.services.yourservice.YourServiceAsyncClient;
-
-import software.amazon.awssdk.awscore.AwsRequest;
-import software.amazon.awssdk.awscore.AwsResponse;
-import software.amazon.awssdk.awscore.exception.AwsServiceException;
-import software.amazon.awssdk.core.SdkClient;
-import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
+import com.google.common.collect.Sets;
+import software.amazon.awssdk.services.kendra.KendraClient;
+import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
+import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
+import software.amazon.awssdk.services.kendra.model.ValidationException;
+import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public class UpdateHandler extends BaseHandlerStd {
     private Logger logger;
 
+    private FaqArnBuilder faqArnBuilder;
+
+    public UpdateHandler() {
+        super();
+        faqArnBuilder = new FaqArn();
+    }
+
+    public UpdateHandler(FaqArnBuilder faqArnBuilder) {
+        this.faqArnBuilder = faqArnBuilder;
+    }
+
     protected ProgressEvent<ResourceModel, CallbackContext> handleRequest(
-        final AmazonWebServicesClientProxy proxy,
-        final ResourceHandlerRequest<ResourceModel> request,
-        final CallbackContext callbackContext,
-        final ProxyClient<SdkClient> proxyClient,
-        final Logger logger) {
+            final AmazonWebServicesClientProxy proxy,
+            final ResourceHandlerRequest<ResourceModel> request,
+            final CallbackContext callbackContext,
+            final ProxyClient<KendraClient> proxyClient,
+            final Logger logger) {
 
         this.logger = logger;
 
@@ -32,120 +47,51 @@ public class UpdateHandler extends BaseHandlerStd {
         // https://github.com/aws-cloudformation/cloudformation-cli-java-plugin/blob/master/src/main/java/software/amazon/cloudformation/proxy/CallChain.java
 
         return ProgressEvent.progress(model, callbackContext)
-            // STEP 1 [first update/stabilize progress chain - required for resource update]
-            .then(progress ->
-                // STEP 1.0 [initialize a proxy context]
-                proxy.initiate("AWS-Kendra-Faq::Update", proxyClient, model, callbackContext)
-
-                    // STEP 1.1 [TODO: construct a body of a request]
-                    .translateToServiceRequest(Translator::translateToFirstUpdateRequest)
-
-                    // STEP 1.2 [TODO: make an api call]
-                    .makeServiceCall(this::updateResource)
-
-                    // STEP 1.3 [TODO: stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]
-                    // stabilization step may or may not be needed after each API call
-                    // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
-                    .stabilize(this::stabilizedOnFirstUpdate)
-                    .progress())
-
-            // If your resource is provisioned through multiple API calls, then the following pattern is required (and might take as many postUpdate callbacks as necessary)
-            // STEP 2 [second update/stabilize progress chain]
-            .then(progress ->
-                    // STEP 2.0 [initialize a proxy context]
-                    proxy.initiate("AWS-Kendra-Faq::Update", proxyClient, model, callbackContext)
-
-                    // STEP 2.1 [TODO: construct a body of a request]
-                    .translateToServiceRequest(Translator::translateToSecondUpdateRequest)
-
-                    // STEP 2.2 [TODO: make an api call]
-                    .makeServiceCall(this::secondUpdate)
-                    .progress())
-
-            // STEP 3 [TODO: describe call/chain to return the resource model]
-            .then(progress -> new ReadHandler().handleRequest(proxy, request, callbackContext, proxyClient, logger));
+                // STEP 1 [first update/stabilize progress chain - required for resource update]
+                .then(progress -> updateTags(proxyClient, progress, request))
+                .then(progress -> new ReadHandler(faqArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
     }
 
-    /**
-     * Implement client invocation of the update request through the proxyClient, which is already initialised with
-     * caller credentials, correct region and retry settings
-     * @param awsRequest the aws service request to update a resource
-     * @param proxyClient the aws service client to make the call
-     * @return update resource response
-     */
-    private AwsResponse updateResource(
-        final AwsRequest awsRequest,
-        final ProxyClient<SdkClient> proxyClient) {
-        AwsResponse awsResponse = null;
-        try {
-
-            // TODO: put your update resource code here
-
-        } catch (final AwsServiceException e) {
-            /*
-             * While the handler contract states that the handler must always return a progress event,
-             * you may throw any instance of BaseHandlerException, as the wrapper map it to a progress event.
-             * Each BaseHandlerException maps to a specific error code, and you should map service exceptions as closely as possible
-             * to more specific error codes
-             */
-            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e);
+    private ProgressEvent<ResourceModel, CallbackContext> updateTags(
+            final ProxyClient<KendraClient> proxyClient,
+            final ProgressEvent<ResourceModel, CallbackContext> progress,
+            ResourceHandlerRequest<ResourceModel> request) {
+        ResourceModel resourceModel = progress.getResourceModel();
+        CallbackContext callbackContext = progress.getCallbackContext();
+        Set<Tag> currentTags = new HashSet<>();
+        if (resourceModel.getTags() != null) {
+            currentTags = resourceModel.getTags().stream().collect(Collectors.toSet());
         }
 
-        logger.log(String.format("%s has successfully been updated.", ResourceModel.TYPE_NAME));
-        return awsResponse;
-    }
+        String arn = faqArnBuilder.build(request);
+        ListTagsForResourceRequest listTagsForResourceRequest = Translator.translateToListTagsRequest(arn);
+        List<software.amazon.awssdk.services.kendra.model.Tag> existingTagsSdk = proxyClient.injectCredentialsAndInvokeV2(
+                listTagsForResourceRequest, proxyClient.client()::listTagsForResource).tags();
+        Set<Tag> existingTags = existingTagsSdk.stream().map(x -> Tag.builder().key(x.key()).value(x.value()).build())
+                .collect(Collectors.toSet());
 
-    /**
-     * If your resource requires some form of stabilization (e.g. service does not provide strong consistency), you will need to ensure that your code
-     * accounts for any potential issues, so that a subsequent read/update requests will not cause any conflicts (e.g. NotFoundException/InvalidRequestException)
-     * for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
-     * @param awsResponse the aws service  update resource response
-     * @param proxyClient the aws service client to make the call
-     * @param model resource model
-     * @param callbackContext callback context
-     * @return boolean state of stabilized or not
-     */
-    private boolean stabilizedOnFirstUpdate(
-        final AwsRequest awsRequest,
-        final AwsResponse awsResponse,
-        final ProxyClient<SdkClient> proxyClient,
-        final ResourceModel model,
-        final CallbackContext callbackContext) {
-
-        // TODO: put your stabilization code here
-
-        final boolean stabilized = true;
-
-        logger.log(String.format("%s [%s] update has stabilized: %s", ResourceModel.TYPE_NAME, model.getPrimaryIdentifier(), stabilized));
-        return stabilized;
-    }
-
-    /**
-     * If your resource is provisioned through multiple API calls, you will need to apply each subsequent update
-     * step in a discrete call/stabilize chain to ensure the entire resource is provisioned as intended.
-     * @param awsRequest the aws service request to update a resource
-     * @param proxyClient the aws service client to make the call
-     * @return update resource response
-     */
-    private AwsResponse secondUpdate(
-        final AwsRequest awsRequest,
-        final ProxyClient<SdkClient> proxyClient) {
-        AwsResponse awsResponse = null;
-        try {
-
-            // TODO: put your post update resource code here
-
-        } catch (final AwsServiceException e) {
-            /*
-             * While the handler contract states that the handler must always return a progress event,
-             * you may throw any instance of BaseHandlerException, as the wrapper map it to a progress event.
-             * Each BaseHandlerException maps to a specific error code, and you should map service exceptions as closely as possible
-             * to more specific error codes
-             */
-            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e);
+        final Set<Tag> tagsToAdd = Sets.difference(currentTags, existingTags);
+        if (!tagsToAdd.isEmpty()) {
+            TagResourceRequest tagResourceRequest = Translator.translateToTagResourceRequest(tagsToAdd, arn);
+            try {
+                proxyClient.injectCredentialsAndInvokeV2(tagResourceRequest, proxyClient.client()::tagResource);
+            } catch (ValidationException e) {
+                throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME, e);
+            }
         }
 
-        logger.log(String.format("%s has successfully been updated.", ResourceModel.TYPE_NAME));
-        return awsResponse;
+        final Set<Tag> tagsToRemove = Sets.difference(existingTags, currentTags);
+        if (!tagsToRemove.isEmpty()) {
+            UntagResourceRequest untagResourceRequest = Translator.translateToUntagResourceRequest(tagsToRemove, arn);
+            try {
+                proxyClient.injectCredentialsAndInvokeV2(untagResourceRequest, proxyClient.client()::untagResource);
+            } catch (ValidationException e) {
+                throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME, e);
+            }
+        }
+
+        return ProgressEvent.progress(resourceModel, callbackContext);
     }
+
+
 }
