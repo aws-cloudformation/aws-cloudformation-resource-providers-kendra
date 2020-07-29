@@ -172,16 +172,15 @@ public class Translator {
     String description = model.getDescription() == null ? "" : model.getDescription();
     String name = model.getName() == null ? "" : model.getName();
     String roleArn = model.getRoleArn() == null ? "" : model.getRoleArn();
-    final UpdateIndexRequest.Builder updateIndexRequestBuilder = UpdateIndexRequest
+    return UpdateIndexRequest
             .builder()
             .id(model.getId())
             .roleArn(roleArn)
             .name(name)
             .description(description)
             .documentMetadataConfigurationUpdates(translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations()))
-            .capacityUnits(translateToCapacityUnitsConfiguration(model.getCapacityUnits(),
-                    model.getEdition()));
-    return updateIndexRequestBuilder.build();
+            .capacityUnits(translateToCapacityUnitsConfiguration(model.getCapacityUnits(), model.getEdition()))
+            .build();
   }
 
   static CapacityUnitsConfiguration translateToCapacityUnitsConfiguration(
@@ -214,14 +213,13 @@ public class Translator {
    */
   static UpdateIndexRequest translateToPostCreateUpdateRequest(final ResourceModel model) {
     // We only need to update attributes we couldn't set during create.
-    final UpdateIndexRequest.Builder updateIndexBuilder = UpdateIndexRequest
+    return UpdateIndexRequest
             .builder()
             .id(model.getId())
             .documentMetadataConfigurationUpdates(
                     translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations()))
-            .capacityUnits(translateToCapacityUnitsConfiguration(model.getCapacityUnits(),
-                    model.getEdition()));
-    return updateIndexBuilder.build();
+            .capacityUnits(translateToCapacityUnitsConfiguration(model.getCapacityUnits(), model.getEdition()))
+            .build();
   }
 
   static List<DocumentMetadataConfiguration> translateToSdkDocumentMetadataConfigurationList(List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList) {
