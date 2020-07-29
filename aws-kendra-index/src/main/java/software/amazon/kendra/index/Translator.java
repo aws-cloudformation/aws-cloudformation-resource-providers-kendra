@@ -260,8 +260,7 @@ public class Translator {
       }
       return sdkRelevanceBuilder.build();
     } else {
-      // Null equivalent.
-      return Relevance.builder().build();
+      return null;
     }
   }
 
@@ -274,8 +273,7 @@ public class Translator {
       sdkSearchBuilder.sortable(modelSearch.getSortable());
       return sdkSearchBuilder.build();
     } else {
-      // Null equivalent.
-      return Search.builder().build();
+      return null;
     }
   }
 
