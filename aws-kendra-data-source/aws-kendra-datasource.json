@@ -115,6 +115,84 @@
       "required": [
         "BucketName"
       ]
+    },
+    "Url": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
+      "pattern": "^(https?|ftp|file)://([^\\s]*)"
+    },
+    "SecretArn": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1284,
+      "pattern": "arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}"
+    },
+    "DataSourceVpcConfiguration": {
+      "type": "object",
+      "properties": {
+        "SubnetIds": {
+          "type": "array",
+          "maxItems": 6,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "pattern": "[\\-0-9a-zA-Z]+"
+          }
+        },
+        "SecurityGroupIds": {
+          "type": "array",
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "pattern": "[\\-0-9a-zA-Z]+"
+          }
+        }
+      },
+      "required": [
+        "SubnetIds",
+        "SecurityGroupIds"
+      ]
+    },
+    "DataSourceFieldName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[a-zA-Z][a-zA-Z0-9_.]*$"
+    },
+    "DataSourceToIndexFieldMapping": {
+      "type": "object",
+      "properties": {
+        "DataSourceFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "DateFieldFormat": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 40,
+          "pattern": "^(?!\\s).*(?&lt;!\\s)$"
+        },
+        "IndexFieldName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 30,
+          "pattern": "^\\P{C}*$"
+        }
+      },
+      "required": [
+        "DataSourceFieldName",
+        "IndexFieldName"
+      ]
+    },
+    "DataSourceToIndexFieldMappingList": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "$ref": "#/definitions/DataSourceToIndexFieldMapping"
+      }
     }
   },
   "properties": {
