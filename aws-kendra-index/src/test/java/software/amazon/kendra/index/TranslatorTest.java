@@ -49,6 +49,7 @@ class TranslatorTest {
         assertThat(sdkDocumentMetadataConfiguration.relevance().freshness()).isNull();
         assertThat(sdkDocumentMetadataConfiguration.search()).isNotNull();
         assertThat(sdkDocumentMetadataConfiguration.search().searchable()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.search().sortable()).isNull();
         assertThat(sdkDocumentMetadataConfiguration.search().facetable()).isNull();
         assertThat(sdkDocumentMetadataConfiguration.search().displayable()).isNull();
     }
@@ -72,6 +73,7 @@ class TranslatorTest {
         assertThat(sdkDocumentMetadataConfiguration.relevance().freshness()).isNull();
         assertThat(sdkDocumentMetadataConfiguration.search()).isNotNull();
         assertThat(sdkDocumentMetadataConfiguration.search().searchable()).isNull();
+        assertThat(sdkDocumentMetadataConfiguration.search().sortable()).isNull();
         assertThat(sdkDocumentMetadataConfiguration.search().facetable()).isNull();
         assertThat(sdkDocumentMetadataConfiguration.search().displayable()).isNull();
     }
@@ -131,6 +133,7 @@ class TranslatorTest {
         searchBuilder.displayable(true);
         searchBuilder.facetable(true);
         searchBuilder.searchable(true);
+        searchBuilder.sortable(true);
 
         documentMetadataConfigurationBuilder.search(searchBuilder.build());
         resourceModelBuilder.documentMetadataConfigurations(
@@ -143,6 +146,8 @@ class TranslatorTest {
         assertThat(sdkDocumentMetadataConfiguration.search().facetable())
                 .isTrue();
         assertThat(sdkDocumentMetadataConfiguration.search().searchable())
+                .isTrue();
+        assertThat(sdkDocumentMetadataConfiguration.search().sortable())
                 .isTrue();
         assertThat(sdkDocumentMetadataConfiguration.name()).isNull();
         assertThat(sdkDocumentMetadataConfiguration.type()).isNull();
@@ -234,6 +239,7 @@ class TranslatorTest {
         sdkSearchBuilder.searchable(true);
         sdkSearchBuilder.facetable(true);
         sdkSearchBuilder.displayable(true);
+        sdkSearchBuilder.sortable(true);
 
         software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration.Builder sdkDocumentMetadataConfigurationBuilder =
                 software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration.builder()
@@ -244,6 +250,7 @@ class TranslatorTest {
                 Arrays.asList(sdkDocumentMetadataConfigurationBuilder.build())).get(0);
         Search modelSearch = modelDocumentMetadataConfiguration.getSearch();
         assertThat(modelSearch.getSearchable()).isTrue();
+        assertThat(modelSearch.getSortable()).isTrue();
         assertThat(modelSearch.getFacetable()).isTrue();
         assertThat(modelSearch.getDisplayable()).isTrue();
 

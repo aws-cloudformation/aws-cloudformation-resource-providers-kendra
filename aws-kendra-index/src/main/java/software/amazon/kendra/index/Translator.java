@@ -271,6 +271,7 @@ public class Translator {
       sdkSearchBuilder.displayable(modelSearch.getDisplayable());
       sdkSearchBuilder.facetable(modelSearch.getFacetable());
       sdkSearchBuilder.searchable(modelSearch.getSearchable());
+      sdkSearchBuilder.sortable(modelSearch.getSearchable());
       return sdkSearchBuilder.build();
     } else {
       // Null equivalent.
@@ -327,6 +328,7 @@ public class Translator {
       software.amazon.kendra.index.Search.SearchBuilder modelSearchBuilder =
               software.amazon.kendra.index.Search.builder();
       modelSearchBuilder.searchable(sdkSearch.searchable());
+      modelSearchBuilder.sortable(sdkSearch.sortable());
       modelSearchBuilder.facetable(sdkSearch.facetable());
       modelSearchBuilder.displayable(sdkSearch.displayable());
       return modelSearchBuilder.build();
