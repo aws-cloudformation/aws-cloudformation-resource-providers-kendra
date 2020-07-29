@@ -6,6 +6,7 @@ import software.amazon.awssdk.services.kendra.model.DeleteIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
 import software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration;
+import software.amazon.awssdk.services.kendra.model.IndexEdition;
 import software.amazon.awssdk.services.kendra.model.Relevance;
 import software.amazon.awssdk.services.kendra.model.Search;
 import software.amazon.awssdk.services.kendra.model.ListIndicesRequest;
@@ -171,20 +172,21 @@ public class Translator {
     String description = model.getDescription() == null ? "" : model.getDescription();
     String name = model.getName() == null ? "" : model.getName();
     String roleArn = model.getRoleArn() == null ? "" : model.getRoleArn();
-    final UpdateIndexRequest updateIndexRequest = UpdateIndexRequest
+    final UpdateIndexRequest.Builder updateIndexRequestBuilder = UpdateIndexRequest
             .builder()
             .id(model.getId())
             .roleArn(roleArn)
             .name(name)
             .description(description)
             .documentMetadataConfigurationUpdates(translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations()))
-            .capacityUnits(translateToCapacityUnitsConfiguration(model.getCapacityUnits()))
-            .build();
-    return updateIndexRequest;
+            .capacityUnits(translateToCapacityUnitsConfiguration(model.getCapacityUnits(),
+                    model.getEdition()));
+    return updateIndexRequestBuilder.build();
   }
 
   static CapacityUnitsConfiguration translateToCapacityUnitsConfiguration(
-          software.amazon.kendra.index.CapacityUnitsConfiguration modelCapacityUnitsConfiguration) {
+          software.amazon.kendra.index.CapacityUnitsConfiguration modelCapacityUnitsConfiguration,
+          String indexEdition) {
     if (modelCapacityUnitsConfiguration != null) {
       return CapacityUnitsConfiguration
               .builder()
@@ -192,12 +194,16 @@ public class Translator {
               .queryCapacityUnits(modelCapacityUnitsConfiguration.getQueryCapacityUnits())
               .build();
     } else {
-      // Null equivalent for partial updates.
-      return CapacityUnitsConfiguration
-              .builder()
-              .queryCapacityUnits(0)
-              .storageCapacityUnits(0)
-              .build();
+      if (indexEdition.equals(IndexEdition.ENTERPRISE_EDITION.toString())) {
+        // Null equivalent for partial updates.
+        return CapacityUnitsConfiguration
+                .builder()
+                .queryCapacityUnits(0)
+                .storageCapacityUnits(0)
+                .build();
+      } else {
+        return null;
+      }
     }
   }
 
@@ -211,9 +217,10 @@ public class Translator {
     final UpdateIndexRequest.Builder updateIndexBuilder = UpdateIndexRequest
             .builder()
             .id(model.getId())
-            .capacityUnits(translateToCapacityUnitsConfiguration(model.getCapacityUnits()))
             .documentMetadataConfigurationUpdates(
-                    translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations()));
+                    translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations()))
+            .capacityUnits(translateToCapacityUnitsConfiguration(model.getCapacityUnits(),
+                    model.getEdition()));
     return updateIndexBuilder.build();
   }
 

@@ -336,6 +336,37 @@ class TranslatorTest {
         DeleteIndexRequest deleteIndexRequest = Translator.translateToDeleteRequest(resourceModel);
         assertThat(deleteIndexRequest.id()).isEqualTo(id);
     }
+
+    @Test
+    void testTranslateToPostCreateUpdateRequestDeveloperEdition() {
+        String id = "id";
+        String name = "name";
+        String type = DocumentAttributeValueType.STRING_VALUE.toString();
+        DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder =
+                DocumentMetadataConfiguration.builder();
+        documentMetadataConfigurationBuilder.name(name).type(type);
+        // roleArn should not be updated
+        ResourceModel resourceModel = ResourceModel
+                .builder()
+                .id(id)
+                .roleArn("roleArn")
+                .name("name")
+                .description("description")
+                .edition(IndexEdition.DEVELOPER_EDITION.toString())
+                .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                .build();
+
+        UpdateIndexRequest updateIndexRequest = Translator.translateToPostCreateUpdateRequest(resourceModel);
+        assertThat(updateIndexRequest.roleArn()).isNull();
+        assertThat(updateIndexRequest.description()).isNull();
+        assertThat(updateIndexRequest.name()).isNull();
+        assertThat(updateIndexRequest.id()).isEqualTo(id);
+        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates().size()).isEqualTo(1);
+        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates().get(0).name()).isEqualTo(name);
+        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates().get(0).type().toString()).isEqualTo(type);
+        assertThat(updateIndexRequest.capacityUnits()).isNull();
+    }
+
     @Test
     void testTranslateToPostCreateUpdateRequest() {
         String id = "id";
@@ -353,6 +384,7 @@ class TranslatorTest {
                 .roleArn("roleArn")
                 .name("name")
                 .description("description")
+                .edition(IndexEdition.ENTERPRISE_EDITION.toString())
                 .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
                 .capacityUnits(CapacityUnitsConfiguration.builder()
                         .queryCapacityUnits(queryCapacityUnits)
@@ -391,6 +423,7 @@ class TranslatorTest {
                 .description(description)
                 .roleArn(roleArn)
                 .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                .edition(IndexEdition.ENTERPRISE_EDITION.toString())
                 .capacityUnits(CapacityUnitsConfiguration
                         .builder()
                         .queryCapacityUnits(queryCapacityUnits)
@@ -408,10 +441,39 @@ class TranslatorTest {
     }
 
     @Test
+    void testTranslateToUpdateRequestDeveloperEdition() {
+        String metadataName = "metadataName";
+        DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder =
+                DocumentMetadataConfiguration.builder();
+        documentMetadataConfigurationBuilder.name(metadataName);
+        String name = "name";
+        String description = "description";
+        String roleArn = "roleArn";
+        String id = "id";
+        ResourceModel resourceModel = ResourceModel
+                .builder()
+                .name(name)
+                .id(id)
+                .description(description)
+                .roleArn(roleArn)
+                .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                .edition(IndexEdition.DEVELOPER_EDITION.toString())
+                .build();
+        UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel);
+        assertThat(updateIndexRequest.id()).isEqualTo(id);
+        assertThat(updateIndexRequest.description()).isEqualTo(description);
+        assertThat(updateIndexRequest.name()).isEqualTo(name);
+        assertThat(updateIndexRequest.roleArn()).isEqualTo(roleArn);
+        assertThat(updateIndexRequest.documentMetadataConfigurationUpdates().size()).isEqualTo(1);
+        assertThat(updateIndexRequest.capacityUnits()).isNull();
+    }
+
+    @Test
     void testTranslateToUpdateRequestUnsetInCloudFormation() {
         String id = "id";
         ResourceModel resourceModel = ResourceModel
                 .builder()
+                .edition(IndexEdition.ENTERPRISE_EDITION.toString())
                 .id(id)
                 .build();
         UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel);
@@ -429,6 +491,7 @@ class TranslatorTest {
         ResourceModel resourceModel = ResourceModel
                 .builder()
                 .id(id)
+                .edition(IndexEdition.ENTERPRISE_EDITION.toString())
                 .build();
         UpdateIndexRequest updateIndexRequest = Translator.translateToPostCreateUpdateRequest(resourceModel);
         assertThat(updateIndexRequest.description()).isNull();
