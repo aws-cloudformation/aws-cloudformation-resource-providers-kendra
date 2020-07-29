@@ -193,6 +193,9 @@ public class Translator {
               .queryCapacityUnits(modelCapacityUnitsConfiguration.getQueryCapacityUnits())
               .build();
     } else {
+      // If the edition type is enterprise, then provide the null equivalent. But if the edition is developer,
+      // then provide null - this is because for developer editions we can't provide CapacityUnitsConfiguration
+      // without getting a validation exception.
       if (indexEdition.equals(IndexEdition.ENTERPRISE_EDITION.toString())) {
         // Null equivalent for partial updates.
         return CapacityUnitsConfiguration
