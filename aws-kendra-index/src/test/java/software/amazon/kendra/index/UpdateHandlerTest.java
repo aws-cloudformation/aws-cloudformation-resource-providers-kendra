@@ -83,11 +83,13 @@ public class UpdateHandlerTest extends AbstractTestBase {
         String roleArn = "roleArn";
         String name = "name";
         String id = "id";
+        String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
         final ResourceModel model = ResourceModel
                 .builder()
                 .roleArn(roleArn)
                 .name(name)
                 .id(id)
+                .edition(indexEdition)
                 .build();
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
@@ -96,13 +98,12 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
                 .thenReturn(UpdateIndexResponse.builder().build());
-        IndexEdition indexEdition = IndexEdition.ENTERPRISE_EDITION;
         when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
                 .thenReturn(DescribeIndexResponse.builder()
                         .id(id)
                         .name(name)
                         .roleArn(roleArn)
-                        .edition(indexEdition.toString())
+                        .edition(indexEdition)
                         .status(IndexStatus.ACTIVE.toString())
                         .build());
         when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
@@ -121,7 +122,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .builder()
                 .id(id)
                 .arn(testIndexArnBuilder.build(request))
-                .edition(indexEdition.toString())
+                .edition(indexEdition)
                 .roleArn(roleArn)
                 .name(name)
                 .build();
@@ -142,11 +143,13 @@ public class UpdateHandlerTest extends AbstractTestBase {
         String roleArn = "roleArn";
         String name = "name";
         String id = "id";
+        String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
         final ResourceModel model = ResourceModel
                 .builder()
                 .roleArn(roleArn)
                 .name(name)
                 .id(id)
+                .edition(indexEdition)
                 .build();
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
@@ -155,13 +158,12 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
                 .thenReturn(UpdateIndexResponse.builder().build());
-        IndexEdition indexEdition = IndexEdition.ENTERPRISE_EDITION;
         when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
                 .thenReturn(DescribeIndexResponse.builder()
                                 .id(id)
                                 .name(name)
                                 .roleArn(roleArn)
-                                .edition(indexEdition.toString())
+                                .edition(indexEdition)
                                 .status(IndexStatus.UPDATING.toString())
                                 .build(),
                         DescribeIndexResponse
@@ -258,12 +260,14 @@ public class UpdateHandlerTest extends AbstractTestBase {
         String key = "key";
         String value = "value";
         List<Tag> tags = Arrays.asList(Tag.builder().key(key).value(value).build());
+        IndexEdition indexEdition = IndexEdition.ENTERPRISE_EDITION;
         final ResourceModel model = ResourceModel
                 .builder()
                 .id(id)
                 .roleArn(roleArn)
                 .name(name)
                 .tags(tags)
+                .edition(indexEdition.toString())
                 .build();
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
@@ -272,7 +276,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
                 .thenReturn(UpdateIndexResponse.builder().build());
-        IndexEdition indexEdition = IndexEdition.ENTERPRISE_EDITION;
         when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
                 .thenReturn(DescribeIndexResponse.builder()
                         .id(id)
@@ -324,11 +327,13 @@ public class UpdateHandlerTest extends AbstractTestBase {
         String roleArn = "roleArn";
         String name = "name";
         String id = "id";
+        String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
         final ResourceModel model = ResourceModel
                 .builder()
                 .id(id)
                 .roleArn(roleArn)
                 .name(name)
+                .edition(indexEdition)
                 .build();
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
@@ -337,13 +342,12 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
                 .thenReturn(UpdateIndexResponse.builder().build());
-        IndexEdition indexEdition = IndexEdition.ENTERPRISE_EDITION;
         when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
                 .thenReturn(DescribeIndexResponse.builder()
                         .id(id)
                         .name(name)
                         .roleArn(roleArn)
-                        .edition(indexEdition.toString())
+                        .edition(indexEdition)
                         .status(IndexStatus.ACTIVE.toString())
                         .build());
 
@@ -368,7 +372,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .builder()
                 .id(id)
                 .arn(testIndexArnBuilder.build(request))
-                .edition(indexEdition.toString())
+                .edition(indexEdition)
                 .roleArn(roleArn)
                 .name(name)
                 .build();
@@ -393,12 +397,14 @@ public class UpdateHandlerTest extends AbstractTestBase {
         String keyAdd = "keyAdd";
         String valueAdd = "valueAdd";
         List<Tag> tagsToAdd = Arrays.asList(Tag.builder().key(keyAdd).value(valueAdd).build());
+        String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
         final ResourceModel model = ResourceModel
                 .builder()
                 .id(id)
                 .roleArn(roleArn)
                 .name(name)
                 .tags(tagsToAdd)
+                .edition(indexEdition)
                 .build();
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
@@ -407,7 +413,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
                 .thenReturn(UpdateIndexResponse.builder().build());
-        IndexEdition indexEdition = IndexEdition.ENTERPRISE_EDITION;
         when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
                 .thenReturn(DescribeIndexResponse.builder()
                         .id(id)
@@ -470,12 +475,14 @@ public class UpdateHandlerTest extends AbstractTestBase {
         String key = "key";
         String value = "value";
         List<Tag> tags = Arrays.asList(Tag.builder().key(key).value(value).build());
+        String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
         final ResourceModel model = ResourceModel
                 .builder()
                 .id(id)
                 .roleArn(roleArn)
                 .name(name)
                 .tags(tags)
+                .edition(indexEdition)
                 .build();
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
@@ -485,7 +492,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                         .id(id)
                         .name(name)
                         .roleArn(roleArn)
-                        .edition(IndexEdition.ENTERPRISE_EDITION)
+                        .edition(indexEdition)
                         .status(IndexStatus.ACTIVE.toString())
                         .build());
 
@@ -514,13 +521,13 @@ public class UpdateHandlerTest extends AbstractTestBase {
         String roleArn = "roleArn";
         String name = "name";
         String id = "id";
-        String key = "key";
-        String value = "value";
+        String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
         final ResourceModel model = ResourceModel
                 .builder()
                 .id(id)
                 .roleArn(roleArn)
                 .name(name)
+                .edition(indexEdition)
                 .build();
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
@@ -530,7 +537,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                         .id(id)
                         .name(name)
                         .roleArn(roleArn)
-                        .edition(IndexEdition.ENTERPRISE_EDITION)
+                        .edition(indexEdition)
                         .status(IndexStatus.ACTIVE.toString())
                         .build());
 

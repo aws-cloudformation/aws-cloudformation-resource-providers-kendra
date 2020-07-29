@@ -6,6 +6,7 @@ import software.amazon.awssdk.services.kendra.model.DeleteIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
 import software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration;
+import software.amazon.awssdk.services.kendra.model.IndexEdition;
 import software.amazon.awssdk.services.kendra.model.Relevance;
 import software.amazon.awssdk.services.kendra.model.Search;
 import software.amazon.awssdk.services.kendra.model.ListIndicesRequest;
@@ -171,20 +172,20 @@ public class Translator {
     String description = model.getDescription() == null ? "" : model.getDescription();
     String name = model.getName() == null ? "" : model.getName();
     String roleArn = model.getRoleArn() == null ? "" : model.getRoleArn();
-    final UpdateIndexRequest updateIndexRequest = UpdateIndexRequest
+    return UpdateIndexRequest
             .builder()
             .id(model.getId())
             .roleArn(roleArn)
             .name(name)
             .description(description)
             .documentMetadataConfigurationUpdates(translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations()))
-            .capacityUnits(translateToCapacityUnitsConfiguration(model.getCapacityUnits()))
+            .capacityUnits(translateToCapacityUnitsConfiguration(model.getCapacityUnits(), model.getEdition()))
             .build();
-    return updateIndexRequest;
   }
 
   static CapacityUnitsConfiguration translateToCapacityUnitsConfiguration(
-          software.amazon.kendra.index.CapacityUnitsConfiguration modelCapacityUnitsConfiguration) {
+          software.amazon.kendra.index.CapacityUnitsConfiguration modelCapacityUnitsConfiguration,
+          String indexEdition) {
     if (modelCapacityUnitsConfiguration != null) {
       return CapacityUnitsConfiguration
               .builder()
@@ -192,12 +193,19 @@ public class Translator {
               .queryCapacityUnits(modelCapacityUnitsConfiguration.getQueryCapacityUnits())
               .build();
     } else {
-      // Null equivalent for partial updates.
-      return CapacityUnitsConfiguration
-              .builder()
-              .queryCapacityUnits(0)
-              .storageCapacityUnits(0)
-              .build();
+      // If the edition type is enterprise, then provide the null equivalent. But if the edition is developer,
+      // then provide null - this is because for developer editions we can't provide CapacityUnitsConfiguration
+      // without getting a validation exception.
+      if (indexEdition.equals(IndexEdition.ENTERPRISE_EDITION.toString())) {
+        // Null equivalent for partial updates.
+        return CapacityUnitsConfiguration
+                .builder()
+                .queryCapacityUnits(0)
+                .storageCapacityUnits(0)
+                .build();
+      } else {
+        return null;
+      }
     }
   }
 
@@ -208,13 +216,13 @@ public class Translator {
    */
   static UpdateIndexRequest translateToPostCreateUpdateRequest(final ResourceModel model) {
     // We only need to update attributes we couldn't set during create.
-    final UpdateIndexRequest.Builder updateIndexBuilder = UpdateIndexRequest
+    return UpdateIndexRequest
             .builder()
             .id(model.getId())
-            .capacityUnits(translateToCapacityUnitsConfiguration(model.getCapacityUnits()))
             .documentMetadataConfigurationUpdates(
-                    translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations()));
-    return updateIndexBuilder.build();
+                    translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations()))
+            .capacityUnits(translateToCapacityUnitsConfiguration(model.getCapacityUnits(), model.getEdition()))
+            .build();
   }
 
   static List<DocumentMetadataConfiguration> translateToSdkDocumentMetadataConfigurationList(List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList) {
