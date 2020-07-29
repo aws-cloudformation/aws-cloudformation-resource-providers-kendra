@@ -647,7 +647,7 @@ class TranslatorTest {
     void testTranslateToCapacityUnitsConfigurationUnsetEnterpriseEdition() {
         software.amazon.awssdk.services.kendra.model.CapacityUnitsConfiguration
                 capacityUnitsConfiguration = Translator
-                .translateToCapacityUnitsConfiguration(null, IndexEdition.DEVELOPER_EDITION.toString());
+                .translateToCapacityUnitsConfiguration(null, IndexEdition.ENTERPRISE_EDITION.toString());
         assertThat(capacityUnitsConfiguration.queryCapacityUnits()).isEqualTo(0);
         assertThat(capacityUnitsConfiguration.storageCapacityUnits()).isEqualTo(0);
     }
@@ -656,7 +656,7 @@ class TranslatorTest {
     void testTranslateToCapacityUnitsConfigurationUnsetDeveloperEdition() {
         software.amazon.awssdk.services.kendra.model.CapacityUnitsConfiguration
                 capacityUnitsConfiguration = Translator
-                .translateToCapacityUnitsConfiguration(null, IndexEdition.ENTERPRISE_EDITION.toString());
+                .translateToCapacityUnitsConfiguration(null, IndexEdition.DEVELOPER_EDITION.toString());
         assertThat(capacityUnitsConfiguration).isNull();
     }
 
