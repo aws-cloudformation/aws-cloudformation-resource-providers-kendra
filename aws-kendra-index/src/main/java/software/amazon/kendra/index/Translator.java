@@ -271,7 +271,7 @@ public class Translator {
       sdkSearchBuilder.displayable(modelSearch.getDisplayable());
       sdkSearchBuilder.facetable(modelSearch.getFacetable());
       sdkSearchBuilder.searchable(modelSearch.getSearchable());
-      sdkSearchBuilder.sortable(modelSearch.getSearchable());
+      sdkSearchBuilder.sortable(modelSearch.getSortable());
       return sdkSearchBuilder.build();
     } else {
       // Null equivalent.
