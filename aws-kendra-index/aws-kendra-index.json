@@ -126,6 +126,9 @@
         },
         "Displayable": {
           "type": "boolean"
+        },
+        "Sortable": {
+          "type": "boolean"
         }
       }
     },
