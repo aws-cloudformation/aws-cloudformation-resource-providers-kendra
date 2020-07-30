@@ -319,7 +319,8 @@
         "kendra:CreateDataSource",
         "kendra:DescribeDataSource",
         "kendra:ListTagsForResource",
-        "iam:PassRole"
+        "iam:PassRole",
+        "kendra:TagResource"
       ]
     },
     "read": {
