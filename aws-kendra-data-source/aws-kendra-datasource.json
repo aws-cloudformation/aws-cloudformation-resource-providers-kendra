@@ -241,6 +241,221 @@
         "SecretArn",
         "SharePointVersion"
       ]
+    },
+    "SalesforceConfiguration": {
+      "type": "object",
+      "properties": {
+        "ServerUrl": {
+          "$ref": "#/definitions/Url"
+        },
+        "StandardObjectConfigurations": {
+          "$ref": "#/definitions/SalesforceStandardObjectConfigurationList"
+        },
+        "KnowledgeArticleConfiguration": {
+          "$ref": "#/definitions/SalesforceKnowledgeArticleConfiguration"
+        },
+        "ChatterFeedConfiguration": {
+          "$ref": "#/definitions/SalesforceChatterFeedConfiguration"
+        },
+        "CrawlAttachments": {
+          "type": "boolean"
+        },
+        "StandardObjectAttachmentConfiguration": {
+          "$ref": "#/definitions/SalesforceStandardObjectAttachmentConfiguration"
+        },
+        "IncludeAttachmentFilePatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "ExcludeAttachmentFilePatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        }
+      },
+      "required": [
+        "ServerUrl",
+        "SecretArn"
+      ]
+    },
+    "SalesforceStandardObjectConfigurationList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 17,
+      "items": {
+        "$ref": "#/definitions/SalesforceStandardObjectConfiguration"
+      }
+    },
+    "SalesforceStandardObjectConfiguration": {
+      "type": "object",
+      "properties": {
+        "Name": {
+          "$ref": "#/definitions/SalesforceStandardObjectName"
+        },
+        "DocumentDataFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "DocumentTitleFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "FieldMappings": {
+          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        }
+      },
+      "required": [
+        "Name",
+        "DocumentDataFieldName"
+      ]
+    },
+    "SalesforceStandardObjectName": {
+      "type": "string",
+      "enum": [
+        "ACCOUNT",
+        "CAMPAIGN",
+        "CASE",
+        "CONTACT",
+        "CONTRACT",
+        "DOCUMENT",
+        "GROUP",
+        "IDEA",
+        "LEAD",
+        "OPPORTUNITY",
+        "PARTNER",
+        "PRICEBOOK",
+        "PRODUCT",
+        "PROFILE",
+        "SOLUTION",
+        "TASK",
+        "USER"
+      ]
+    },
+    "SalesforceKnowledgeArticleConfiguration": {
+      "type": "object",
+      "properties": {
+        "IncludedStates": {
+          "$ref": "#/definitions/SalesforceKnowledgeArticleStateList"
+        },
+        "StandardKnowledgeArticleTypeConfiguration": {
+          "$ref": "#/definitions/SalesforceStandardKnowledgeArticleTypeConfiguration"
+        },
+        "CustomKnowledgeArticleTypeConfigurations": {
+          "$ref": "#/definitions/SalesforceCustomKnowledgeArticleTypeConfigurationList"
+        }
+      },
+      "required": [
+        "IncludedStates"
+      ]
+    },
+    "SalesforceKnowledgeArticleStateList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "items": {
+        "$ref": "#/definitions/SalesforceKnowledgeArticleState"
+      }
+    },
+    "SalesforceKnowledgeArticleState": {
+      "type": "string",
+      "enum": [
+        "DRAFT",
+        "PUBLISHED",
+        "ARCHIVED"
+      ]
+    },
+    "SalesforceStandardKnowledgeArticleTypeConfiguration": {
+      "type": "object",
+      "properties": {
+        "DocumentDataFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "DocumentTitleFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "FieldMappings": {
+          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        }
+      },
+      "required": [
+        "DocumentDataFieldName"
+      ]
+    },
+    "SalesforceCustomKnowledgeArticleTypeConfigurationList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "$ref": "#/definitions/SalesforceCustomKnowledgeArticleTypeConfiguration"
+      }
+    },
+    "SalesforceCustomKnowledgeArticleTypeConfiguration": {
+      "type": "object",
+      "properties": {
+        "Name": {
+          "$ref": "#/definitions/SalesforceCustomKnowledgeArticleTypeName"
+        },
+        "DocumentDataFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "DocumentTitleFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "FieldMappings": {
+          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        }
+      },
+      "required": [
+        "Name",
+        "DocumentDataField"
+      ]
+    },
+    "SalesforceCustomKnowledgeArticleTypeName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+    },
+    "SalesforceChatterFeedConfiguration": {
+      "type": "object",
+      "properties": {
+        "DocumentDataFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "DocumentTitleFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "FieldMappings": {
+          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        },
+        "IncludeFilterTypes": {
+          "$ref": "#/definitions/SalesforceChatterFeedIncludeFilterTypes"
+        }
+      },
+      "required": [
+        "DocumentDataFieldName"
+      ]
+    },
+    "SalesforceChatterFeedIncludeFilterTypes": {
+      "type": "array",
+      "minLength": 1,
+      "maxLength": 2,
+      "items": {
+        "$ref": "#/definitions/SalesforceChatterFeedIncludeFilterType"
+      }
+    },
+    "SalesforceChatterFeedIncludeFilterType": {
+      "type": "string",
+      "enum": [
+        "ACTIVE_USER",
+        "STANDARD_USER"
+      ]
+    },
+    "SalesforceStandardObjectAttachmentConfiguration": {
+      "type": "object",
+      "properties": {
+        "DocumentTitleFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "FieldMappings": {
+          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        }
+      }
     }
   },
   "properties": {
@@ -278,89 +493,94 @@
         "S3Configuration": {
           "$ref": "#/definitions/S3DataSourceConfiguration"
         },
+        <<<<<<< HEAD
         "SharePointConfiguration": {
           "$ref": "#/definitions/SharePointConfiguration"
+          =======
+          "SalesforceConfiguration": {
+            "$ref": "#/definitions/SalesforceConfiguration"
+            >>>>>>> m
+          }
         }
+      },
+      "Description": {
+        "description": "Description of data source",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1000,
+        "pattern": "^\\P{C}*$"
+      },
+      "Schedule": {
+        "description": "Schedule",
+        "type": "string"
+      },
+      "RoleArn": {
+        "description": "Role ARN",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1284,
+        "pattern": "arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}"
+      },
+      "Tags": {
+        "description": "Tags for labeling the data source",
+        "$ref": "#/definitions/TagList"
       }
     },
-    "Description": {
-      "description": "Description of data source",
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 1000,
-      "pattern": "^\\P{C}*$"
+    "required": [
+      "Name",
+      "IndexId",
+      "Type",
+      "DataSourceConfiguration",
+      "RoleArn"
+    ],
+    "handlers": {
+      "create": {
+        "permissions": [
+          "kendra:CreateDataSource",
+          "kendra:DescribeDataSource",
+          "kendra:ListTagsForResource",
+          "iam:PassRole"
+        ]
+      },
+      "read": {
+        "permissions": [
+          "kendra:DescribeDataSource",
+          "kendra:ListTagsForResource"
+        ]
+      },
+      "delete": {
+        "permissions": [
+          "kendra:DescribeDataSource",
+          "kendra:DeleteDataSource"
+        ],
+        "timeoutInMinutes": 720
+      },
+      "list": {
+        "permissions": [
+          "kendra:ListDataSources"
+        ]
+      },
+      "update": {
+        "permissions": [
+          "kendra:DescribeDataSource",
+          "kendra:UpdateDataSource",
+          "kendra:ListTagsForResource",
+          "kendra:TagResource",
+          "kendra:UntagResource",
+          "iam:PassRole"
+        ]
+      }
     },
-    "Schedule": {
-      "description": "Schedule",
-      "type": "string"
-    },
-    "RoleArn": {
-      "description": "Role ARN",
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 1284,
-      "pattern": "arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}"
-    },
-    "Tags": {
-      "description": "Tags for labeling the data source",
-      "$ref": "#/definitions/TagList"
-    }
-  },
-  "required": [
-    "Name",
-    "IndexId",
-    "Type",
-    "DataSourceConfiguration",
-    "RoleArn"
-  ],
-  "handlers": {
-    "create": {
-      "permissions": [
-        "kendra:CreateDataSource",
-        "kendra:DescribeDataSource",
-        "kendra:ListTagsForResource",
-        "iam:PassRole"
-      ]
-    },
-    "read": {
-      "permissions": [
-        "kendra:DescribeDataSource",
-        "kendra:ListTagsForResource"
-      ]
-    },
-    "delete": {
-      "permissions": [
-        "kendra:DescribeDataSource",
-        "kendra:DeleteDataSource"
-      ],
-      "timeoutInMinutes": 720
-    },
-    "list": {
-      "permissions": [
-        "kendra:ListDataSources"
-      ]
-    },
-    "update": {
-      "permissions": [
-        "kendra:DescribeDataSource",
-        "kendra:UpdateDataSource",
-        "kendra:ListTagsForResource",
-        "kendra:TagResource",
-        "kendra:UntagResource",
-        "iam:PassRole"
-      ]
-    }
-  },
-  "additionalProperties": false,
-  "primaryIdentifier": [
-    "/properties/Id",
-    "/properties/IndexId"
-  ],
-  "readOnlyProperties": [
-    "/properties/Id",
-    "/properties/Arn"
-  ],
-  "createOnlyProperties": [
-    "/properties/Type"
-  ]
-}
+    "additionalProperties": false,
+    "primaryIdentifier": [
+      "/properties/Id",
+      "/properties/IndexId"
+    ],
+    "readOnlyProperties": [
+      "/properties/Id",
+      "/properties/Arn"
+    ],
+    "createOnlyProperties": [
+      "/properties/Type"
+    ]
+  }
