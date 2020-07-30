@@ -493,94 +493,92 @@
         "S3Configuration": {
           "$ref": "#/definitions/S3DataSourceConfiguration"
         },
-        <<<<<<< HEAD
         "SharePointConfiguration": {
           "$ref": "#/definitions/SharePointConfiguration"
-          =======
-          "SalesforceConfiguration": {
-            "$ref": "#/definitions/SalesforceConfiguration"
-            >>>>>>> m
-          }
+        },
+        "SalesforceConfiguration": {
+          "$ref": "#/definitions/SalesforceConfiguration"
         }
-      },
-      "Description": {
-        "description": "Description of data source",
-        "type": "string",
-        "minLength": 1,
-        "maxLength": 1000,
-        "pattern": "^\\P{C}*$"
-      },
-      "Schedule": {
-        "description": "Schedule",
-        "type": "string"
-      },
-      "RoleArn": {
-        "description": "Role ARN",
-        "type": "string",
-        "minLength": 1,
-        "maxLength": 1284,
-        "pattern": "arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}"
-      },
-      "Tags": {
-        "description": "Tags for labeling the data source",
-        "$ref": "#/definitions/TagList"
       }
     },
-    "required": [
-      "Name",
-      "IndexId",
-      "Type",
-      "DataSourceConfiguration",
-      "RoleArn"
-    ],
-    "handlers": {
-      "create": {
-        "permissions": [
-          "kendra:CreateDataSource",
-          "kendra:DescribeDataSource",
-          "kendra:ListTagsForResource",
-          "iam:PassRole"
-        ]
-      },
-      "read": {
-        "permissions": [
-          "kendra:DescribeDataSource",
-          "kendra:ListTagsForResource"
-        ]
-      },
-      "delete": {
-        "permissions": [
-          "kendra:DescribeDataSource",
-          "kendra:DeleteDataSource"
-        ],
-        "timeoutInMinutes": 720
-      },
-      "list": {
-        "permissions": [
-          "kendra:ListDataSources"
-        ]
-      },
-      "update": {
-        "permissions": [
-          "kendra:DescribeDataSource",
-          "kendra:UpdateDataSource",
-          "kendra:ListTagsForResource",
-          "kendra:TagResource",
-          "kendra:UntagResource",
-          "iam:PassRole"
-        ]
-      }
+    "Description": {
+      "description": "Description of data source",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000,
+      "pattern": "^\\P{C}*$"
     },
-    "additionalProperties": false,
-    "primaryIdentifier": [
-      "/properties/Id",
-      "/properties/IndexId"
-    ],
-    "readOnlyProperties": [
-      "/properties/Id",
-      "/properties/Arn"
-    ],
-    "createOnlyProperties": [
-      "/properties/Type"
-    ]
-  }
+    "Schedule": {
+      "description": "Schedule",
+      "type": "string"
+    },
+    "RoleArn": {
+      "description": "Role ARN",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1284,
+      "pattern": "arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}"
+    },
+    "Tags": {
+      "description": "Tags for labeling the data source",
+      "$ref": "#/definitions/TagList"
+    }
+  },
+  "required": [
+    "Name",
+    "IndexId",
+    "Type",
+    "DataSourceConfiguration",
+    "RoleArn"
+  ],
+  "handlers": {
+    "create": {
+      "permissions": [
+        "kendra:CreateDataSource",
+        "kendra:DescribeDataSource",
+        "kendra:ListTagsForResource",
+        "iam:PassRole"
+      ]
+    },
+    "read": {
+      "permissions": [
+        "kendra:DescribeDataSource",
+        "kendra:ListTagsForResource"
+      ]
+    },
+    "delete": {
+      "permissions": [
+        "kendra:DescribeDataSource",
+        "kendra:DeleteDataSource"
+      ],
+      "timeoutInMinutes": 720
+    },
+    "list": {
+      "permissions": [
+        "kendra:ListDataSources"
+      ]
+    },
+    "update": {
+      "permissions": [
+        "kendra:DescribeDataSource",
+        "kendra:UpdateDataSource",
+        "kendra:ListTagsForResource",
+        "kendra:TagResource",
+        "kendra:UntagResource",
+        "iam:PassRole"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "primaryIdentifier": [
+    "/properties/Id",
+    "/properties/IndexId"
+  ],
+  "readOnlyProperties": [
+    "/properties/Id",
+    "/properties/Arn"
+  ],
+  "createOnlyProperties": [
+    "/properties/Type"
+  ]
+}
