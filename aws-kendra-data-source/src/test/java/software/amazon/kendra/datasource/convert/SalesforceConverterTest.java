@@ -559,4 +559,34 @@ public class SalesforceConverterTest {
         assertThat(SalesforceConverter.toModel(input)).isEqualTo(expected);
     }
 
+    @Test
+    void testToModelIncludedStates() {
+        assertThat(SalesforceConverter.toModelIncludedStates(null)).isNull();
+    }
+
+    @Test
+    void testToModelSalesforceStandardKnowledgeArticleTypeConfiguration() {
+        assertThat(SalesforceConverter.toModelSalesforceStandardKnowledgeArticleTypeConfiguration(null)).isNull();
+    }
+
+    @Test
+    void testToModelSalesforceCustomKnowledgeArticleTypeConfigurationList() {
+        assertThat(SalesforceConverter.toModelSalesforceCustomKnowledgeArticleTypeConfigurationList(null)).isNull();
+    }
+
+    @Test
+    void testToModelSalesforceStandardObjectConfiguration() {
+        assertThat(SalesforceConverter.toModelSalesforceStandardObjectConfiguration(null)).isNull();
+    }
+
+    @Test
+    void testToModelDataSourceToIndexFieldMappingList() {
+        assertThat(SalesforceConverter.toModelDataSourceToIndexFieldMappingList(null)).isNull();
+    }
+
+    @Test
+    void testToModelIncludeFilterTypes() {
+        assertThat(SalesforceConverter.toModelIncludeFilterTypes(null)).isNull();
+    }
+
 }
