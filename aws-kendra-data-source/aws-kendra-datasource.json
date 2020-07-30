@@ -248,6 +248,9 @@
         "ServerUrl": {
           "$ref": "#/definitions/Url"
         },
+        "SecretArn": {
+          "$ref": "#/definitions/SecretArn"
+        },
         "StandardObjectConfigurations": {
           "$ref": "#/definitions/SalesforceStandardObjectConfigurationList"
         },
