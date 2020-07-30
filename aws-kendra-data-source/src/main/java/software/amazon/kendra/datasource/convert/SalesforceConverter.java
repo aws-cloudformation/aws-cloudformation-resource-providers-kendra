@@ -25,16 +25,16 @@ public class SalesforceConverter {
     }
 
     static SalesforceConfiguration toSdk(software.amazon.kendra.datasource.SalesforceConfiguration model) {
-        SalesforceConfiguration.Builder builder = SalesforceConfiguration.builder();
-        builder.serverUrl(model.getServerUrl());
-        builder.secretArn(model.getSecretArn());
-        builder.standardObjectConfigurations(toSdkSalesforceStandardObjectConfigurationList(model.getStandardObjectConfigurations()));
-        builder.knowledgeArticleConfiguration(toSdkSalesforceKnowledgeArticleConfiguration(model.getKnowledgeArticleConfiguration()));
-        builder.chatterFeedConfiguration(toSdkSalesforceChatterFeedConfiguration(model.getChatterFeedConfiguration()));
-        builder.crawlAttachments(model.getCrawlAttachments());
-        builder.includeAttachmentFilePatterns(toSdkFilePatterns(model.getIncludeAttachmentFilePatterns()));
-        builder.excludeAttachmentFilePatterns(toSdkFilePatterns(model.getExcludeAttachmentFilePatterns()));
-        return builder.build();
+        return SalesforceConfiguration.builder()
+                .serverUrl(model.getServerUrl())
+                .secretArn(model.getSecretArn())
+                .standardObjectConfigurations(toSdkSalesforceStandardObjectConfigurationList(model.getStandardObjectConfigurations()))
+                .knowledgeArticleConfiguration(toSdkSalesforceKnowledgeArticleConfiguration(model.getKnowledgeArticleConfiguration()))
+                .chatterFeedConfiguration(toSdkSalesforceChatterFeedConfiguration(model.getChatterFeedConfiguration()))
+                .crawlAttachments(model.getCrawlAttachments())
+                .includeAttachmentFilePatterns(toSdkFilePatterns(model.getIncludeAttachmentFilePatterns()))
+                .excludeAttachmentFilePatterns(toSdkFilePatterns(model.getExcludeAttachmentFilePatterns()))
+                .build();
     }
 
     static SalesforceChatterFeedConfiguration toSdkSalesforceChatterFeedConfiguration(
@@ -70,12 +70,12 @@ public class SalesforceConverter {
 
     static SalesforceStandardObjectConfiguration toSdkSalesforceStandardObjectConfiguration(
             software.amazon.kendra.datasource.SalesforceStandardObjectConfiguration model) {
-        SalesforceStandardObjectConfiguration.Builder builder = SalesforceStandardObjectConfiguration.builder();
-        builder.name(model.getName());
-        builder.documentDataFieldName(model.getDocumentDataFieldName());
-        builder.documentTitleFieldName(model.getDocumentTitleFieldName());
-        builder.fieldMappings(toSdkDataSourceToIndexFieldMappingList(model.getFieldMappings()));
-        return builder.build();
+        return SalesforceStandardObjectConfiguration.builder()
+                .name(model.getName())
+                .documentDataFieldName(model.getDocumentDataFieldName())
+                .documentTitleFieldName(model.getDocumentTitleFieldName())
+                .fieldMappings(toSdkDataSourceToIndexFieldMappingList(model.getFieldMappings()))
+                .build();
     }
 
 
@@ -85,15 +85,16 @@ public class SalesforceConverter {
             return null;
         }
 
-        SalesforceKnowledgeArticleConfiguration.Builder builder = SalesforceKnowledgeArticleConfiguration
-                .builder();
-        builder.includedStates(toSdkSalesforceKnowledgeArticleStateList(model.getIncludedStates()));
-        builder.standardKnowledgeArticleTypeConfiguration(
-                toSdkSalesforceStandardKnowledgeArticleTypeConfiguration(
-                        model.getStandardKnowledgeArticleTypeConfiguration()));
-        builder.customKnowledgeArticleTypeConfigurations(
-                toSdkSalesforceCustomKnowledgeArticleTypeConfigurationList(model.getCustomKnowledgeArticleTypeConfigurations()));
-        return builder.build();
+        return SalesforceKnowledgeArticleConfiguration
+                .builder()
+                .includedStates(toSdkSalesforceKnowledgeArticleStateList(model.getIncludedStates()))
+                .standardKnowledgeArticleTypeConfiguration(
+                        toSdkSalesforceStandardKnowledgeArticleTypeConfiguration(
+                                model.getStandardKnowledgeArticleTypeConfiguration()))
+                .customKnowledgeArticleTypeConfigurations(
+                        toSdkSalesforceCustomKnowledgeArticleTypeConfigurationList(
+                                model.getCustomKnowledgeArticleTypeConfigurations()))
+                .build();
     }
 
     static SalesforceStandardKnowledgeArticleTypeConfiguration toSdkSalesforceStandardKnowledgeArticleTypeConfiguration(
