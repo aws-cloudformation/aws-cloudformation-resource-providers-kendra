@@ -1,7 +1,7 @@
 package software.amazon.kendra.datasource;
 
 import software.amazon.awssdk.services.kendra.model.CreateDataSourceRequest;
-import software.amazon.awssdk.services.kendra.model.DataSourceConfiguration;
+import software.amazon.awssdk.services.kendra.model.DataSourceType;
 import software.amazon.awssdk.services.kendra.model.DeleteDataSourceRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeDataSourceRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeDataSourceResponse;
@@ -13,6 +13,7 @@ import software.amazon.awssdk.services.kendra.model.Tag;
 import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateDataSourceRequest;
+import software.amazon.kendra.datasource.convert.S3Converter;
 
 
 import java.util.Collection;
@@ -42,7 +43,7 @@ public class Translator {
       .name(model.getName())
       .indexId(model.getIndexId())
       .type(model.getType())
-      .configuration(DataSourceRequestConverter.getDataSourceConfiguration(model.getDataSourceConfiguration(), model.getType()))
+      .configuration(toSdkDataSourceConfiguration(model.getDataSourceConfiguration(), model.getType()))
       .description(model.getDescription())
       .schedule(model.getSchedule())
       .roleArn(model.getRoleArn());
@@ -85,7 +86,7 @@ public class Translator {
         .roleArn(describeDataSourceResponse.roleArn())
         .schedule(describeDataSourceResponse.schedule())
         .type(describeDataSourceResponse.typeAsString())
-        .dataSourceConfiguration(DataSourceResponseConverter.getDataSourceConfiguration(describeDataSourceResponse.configuration(),
+        .dataSourceConfiguration(toModelDataSourceConfiguration(describeDataSourceResponse.configuration(),
           describeDataSourceResponse.typeAsString()));
     if (listTagsForResourceResponse.tags() != null && !listTagsForResourceResponse.tags().isEmpty()) {
       List<software.amazon.kendra.datasource.Tag> tags = listTagsForResourceResponse.tags().stream()
@@ -119,8 +120,9 @@ public class Translator {
     String name = model.getName() == null ? "" : model.getName();
     String roleArn = model.getRoleArn() == null ? "" : model.getRoleArn();
     String schedule = model.getSchedule() == null ? "" : model.getSchedule();
-    DataSourceConfiguration dataSourceConfiguration = model.getDataSourceConfiguration() == null ?
-      DataSourceConfiguration.builder().build() : DataSourceRequestConverter.getDataSourceConfiguration(model.getDataSourceConfiguration(), model.getType());
+    software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration = model.getDataSourceConfiguration() == null ?
+      software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder().build()
+      : toSdkDataSourceConfiguration(model.getDataSourceConfiguration(), model.getType());
     final UpdateDataSourceRequest updateDataSourceRequest = UpdateDataSourceRequest.builder()
       .id(model.getId())
       .indexId(model.getIndexId())
@@ -195,5 +197,23 @@ public class Translator {
                     .value(x.getValue()).build())
                     .collect(Collectors.toList()))
             .build();
+  }
+
+  static software.amazon.awssdk.services.kendra.model.DataSourceConfiguration toSdkDataSourceConfiguration(
+    final DataSourceConfiguration dataSourceConfiguration, final String dataSourceType) {
+    if (DataSourceType.S3.toString().equals(dataSourceType)) {
+      return S3Converter.sdkDataSourceConfiguration(dataSourceConfiguration.getS3Configuration());
+    } else {
+      return null;
+    }
+  }
+
+  static DataSourceConfiguration toModelDataSourceConfiguration(
+    final software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration, final String dataSourceType) {
+    if (DataSourceType.S3.toString().equals(dataSourceType)) {
+      return S3Converter.modelDataSourceConfiguration(dataSourceConfiguration.s3Configuration());
+    } else {
+      return null;
+    }
   }
 }
