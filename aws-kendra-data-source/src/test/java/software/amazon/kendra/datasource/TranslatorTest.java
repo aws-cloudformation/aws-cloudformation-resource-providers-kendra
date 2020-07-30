@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.in;
+import software.amazon.awssdk.services.kendra.model.DataSourceType;
 
 public class TranslatorTest {
 
@@ -172,5 +172,46 @@ public class TranslatorTest {
         assertThat(actual).isEqualTo(expected);
     }
 
+    @Test
+    void testTranslateS3() {
+        ResourceModel resourceModel = ResourceModel
+                .builder()
+                .type("S3")
+                .dataSourceConfiguration(DataSourceConfiguration
+                        .builder()
+                        .s3Configuration(S3DataSourceConfiguration.builder().build())
+                        .build())
+                .build();
+        CreateDataSourceRequest expected = CreateDataSourceRequest
+                .builder()
+                .type(DataSourceType.S3)
+                .configuration(software.amazon.awssdk.services.kendra.model.DataSourceConfiguration
+                        .builder()
+                        .s3Configuration(software.amazon.awssdk.services.kendra.model.S3DataSourceConfiguration.builder().build())
+                        .build())
+                .build();
+        assertThat(Translator.translateToCreateRequest(resourceModel)).isEqualTo(expected);
+    }
+
+    @Test
+    void testTranslateSalesforce() {
+        ResourceModel resourceModel = ResourceModel
+                .builder()
+                .type("SALESFORCE")
+                .dataSourceConfiguration(DataSourceConfiguration
+                        .builder()
+                        .salesforceConfiguration(SalesforceConfiguration.builder().build())
+                        .build())
+                .build();
+        CreateDataSourceRequest expected = CreateDataSourceRequest
+                .builder()
+                .type(DataSourceType.SALESFORCE)
+                .configuration(software.amazon.awssdk.services.kendra.model.DataSourceConfiguration
+                        .builder()
+                        .salesforceConfiguration(software.amazon.awssdk.services.kendra.model.SalesforceConfiguration.builder().build())
+                        .build())
+                .build();
+        assertThat(Translator.translateToCreateRequest(resourceModel)).isEqualTo(expected);
+    }
 
 }
