@@ -193,6 +193,54 @@
       "items": {
         "$ref": "#/definitions/DataSourceToIndexFieldMapping"
       }
+    },
+    "SharePointConfiguration": {
+      "description": "SharePoint configuration",
+      "type": "object",
+      "properties": {
+        "SharePointVersion": {
+          "type": "string",
+          "enum": [
+            "SHAREPOINT_ONLINE"
+          ]
+        },
+        "Urls": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/Url"
+          }
+        },
+        "SecretArn": {
+          "$ref": "#/definitions/SecretArn"
+        },
+        "CrawlAttachments": {
+          "type": "boolean"
+        },
+        "UseChangeLog": {
+          "type": "boolean"
+        },
+        "InclusionPatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "ExclusionPatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "VpcConfiguration": {
+          "$ref": "#/definitions/DataSourceVpcConfiguration"
+        },
+        "FieldMappings": {
+          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        },
+        "DocumentTitleFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        }
+      },
+      "required": [
+        "Urls",
+        "SecretArn",
+        "SharePointVersion"
+      ]
     }
   },
   "properties": {
@@ -220,7 +268,8 @@
       "description": "Data source type",
       "type": "string",
       "enum": [
-        "S3"
+        "S3",
+        "SHAREPOINT"
       ]
     },
     "DataSourceConfiguration": {
@@ -228,6 +277,9 @@
       "properties": {
         "S3Configuration": {
           "$ref": "#/definitions/S3DataSourceConfiguration"
+        },
+        "SharePointConfiguration": {
+          "$ref": "#/definitions/SharePointConfiguration"
         }
       }
     },
