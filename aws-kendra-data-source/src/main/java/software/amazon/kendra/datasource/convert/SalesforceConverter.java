@@ -203,9 +203,9 @@ public class SalesforceConverter {
     }
 
     static List<String> toModelIncludedStates(List<String> sdk) {
-       if (sdk == null || sdk.isEmpty()) {
-           return null;
-       }
+        if (sdk == null || sdk.isEmpty()) {
+            return null;
+        }
         return sdk.stream().collect(Collectors.toList());
     }
 
@@ -317,7 +317,5 @@ public class SalesforceConverter {
                 .indexFieldName(sdk.indexFieldName())
                 .build();
     }
-
-
 
 }
