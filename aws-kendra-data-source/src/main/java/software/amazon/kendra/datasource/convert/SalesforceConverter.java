@@ -32,8 +32,8 @@ public class SalesforceConverter {
         builder.knowledgeArticleConfiguration(toSdkSalesforceKnowledgeArticleConfiguration(model.getKnowledgeArticleConfiguration()));
         builder.chatterFeedConfiguration(toSdkSalesforceChatterFeedConfiguration(model.getChatterFeedConfiguration()));
         builder.crawlAttachments(model.getCrawlAttachments());
-        builder.includeAttachmentFilePatterns(toSdkFilePatterns(model.getIncludeAttachmentFilePatterns()));
-        builder.excludeAttachmentFilePatterns(toSdkFilePatterns(model.getExcludeAttachmentFilePatterns()));
+        builder.includeAttachmentFilePatterns(toFilePatterns(model.getIncludeAttachmentFilePatterns()));
+        builder.excludeAttachmentFilePatterns(toFilePatterns(model.getExcludeAttachmentFilePatterns()));
         return builder.build();
     }
 
@@ -146,7 +146,7 @@ public class SalesforceConverter {
         return modelList.stream().map(x -> toSdkDataSourceToIndexFieldMapping(x)).collect(Collectors.toList());
     }
 
-    static List<String> toSdkFilePatterns(List<String> model) {
+    static List<String> toFilePatterns(List<String> model) {
         if (model == null) {
             return null;
         }
@@ -161,5 +161,26 @@ public class SalesforceConverter {
                 .dateFieldFormat(model.getDateFieldFormat())
                 .build();
     }
+
+    public static software.amazon.kendra.datasource.DataSourceConfiguration modelDataSourceConfiguration(
+            SalesforceConfiguration sdk) {
+        return software.amazon.kendra.datasource.DataSourceConfiguration
+                .builder()
+                .salesforceConfiguration(toModel(sdk))
+                .build();
+    }
+
+    static software.amazon.kendra.datasource.SalesforceConfiguration toModel(SalesforceConfiguration sdk) {
+        return software.amazon.kendra.datasource.SalesforceConfiguration
+                .builder()
+                .serverUrl(sdk.serverUrl())
+                .secretArn(sdk.secretArn())
+                .crawlAttachments(sdk.crawlAttachments())
+                .includeAttachmentFilePatterns(toFilePatterns(sdk.includeAttachmentFilePatterns()))
+                .excludeAttachmentFilePatterns(toFilePatterns(sdk.excludeAttachmentFilePatterns()))
+                .build();
+    }
+
+
 
 }

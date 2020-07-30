@@ -220,6 +220,8 @@ public class Translator {
       return S3Converter.modelDataSourceConfiguration(dataSourceConfiguration.s3Configuration());
     } else if(DataSourceType.SHAREPOINT.toString().equals(dataSourceType)) {
       return SharePointConverter.modelDataSourceConfiguration(dataSourceConfiguration.sharePointConfiguration());
+    } else if (DataSourceType.SALESFORCE.toString().equals(dataSourceType)) {
+      return SalesforceConverter.modelDataSourceConfiguration(dataSourceConfiguration.salesforceConfiguration());
     } else {
       return null;
     }

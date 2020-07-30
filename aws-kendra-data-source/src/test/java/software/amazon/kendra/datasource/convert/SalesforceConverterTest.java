@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class SalesforceConverterTest {
 
+    // Tests to SDK from model
     @Test
     void sdkDataSourceConfiguration() {
         DataSourceConfiguration expected =
@@ -34,7 +35,7 @@ public class SalesforceConverterTest {
     }
 
     @Test
-    void testToSdkServerUrlAndSecretArn() {
+    void testToSdkServerUrlAndSecretArnAndCrawlAttachments() {
         String serverUrl = "serverUrl";
         String secretArn = "secretArn";
         SalesforceConfiguration expected = SalesforceConfiguration
@@ -307,6 +308,60 @@ public class SalesforceConverterTest {
     @Test
     void testToSdkSalesforceCustomKnowledgeArticleTypeConfigurationList() {
         assertThat(SalesforceConverter.toSdkSalesforceCustomKnowledgeArticleTypeConfigurationList(null)).isNull();
+    }
+
+    // Tests to model from SDK
+    @Test
+    void testModelDataSourceConfiguration() {
+        assertThat(SalesforceConverter.modelDataSourceConfiguration(SalesforceConfiguration.builder().build())).isEqualTo(
+                software.amazon.kendra.datasource.DataSourceConfiguration
+                        .builder()
+                        .salesforceConfiguration(
+                                software.amazon.kendra.datasource.SalesforceConfiguration.builder().build()).build());
+    }
+
+    @Test
+    void testToModelServerUrlAndSecretArnAndCrawlAttachments() {
+        String serverUrl = "serverUrl";
+        String secretArn = "secretArn";
+        software.amazon.kendra.datasource.SalesforceConfiguration expected =
+                software.amazon.kendra.datasource.SalesforceConfiguration
+                        .builder()
+                        .serverUrl(serverUrl)
+                        .secretArn(secretArn)
+                        .crawlAttachments(true)
+                        .build();
+
+        SalesforceConfiguration input = SalesforceConfiguration
+                .builder()
+                .serverUrl(serverUrl)
+                .secretArn(secretArn)
+                .crawlAttachments(true)
+                .build();
+
+        assertThat(SalesforceConverter.toModel(input)).isEqualTo(expected);
+    }
+
+    @Test
+    void testToModelFilePatterns() {
+        List<String> include = Arrays.asList("txt");
+        List<String> exclude = Arrays.asList("txt");
+
+
+        software.amazon.kendra.datasource.SalesforceConfiguration expected =
+                software.amazon.kendra.datasource.SalesforceConfiguration
+                        .builder()
+                        .includeAttachmentFilePatterns(include)
+                        .excludeAttachmentFilePatterns(exclude)
+                        .build();
+
+        SalesforceConfiguration input = SalesforceConfiguration
+                .builder()
+                .includeAttachmentFilePatterns(include)
+                .excludeAttachmentFilePatterns(exclude)
+                .build();
+
+        assertThat(SalesforceConverter.toModel(input)).isEqualTo(expected);
     }
 
 }
