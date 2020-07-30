@@ -15,6 +15,7 @@ import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateDataSourceRequest;
 import software.amazon.kendra.datasource.convert.S3Converter;
 import software.amazon.kendra.datasource.convert.SharePointConverter;
+import software.amazon.kendra.datasource.convert.SalesforceConverter;
 
 
 import java.util.Collection;
@@ -206,7 +207,9 @@ public class Translator {
       return S3Converter.sdkDataSourceConfiguration(dataSourceConfiguration.getS3Configuration());
     } else if (DataSourceType.SHAREPOINT.toString().equals(dataSourceType)) {
       return SharePointConverter.sdkDataSourceConfiguration(dataSourceConfiguration.getSharePointConfiguration());
-    }else {
+    } else if (DataSourceType.SALESFORCE.toString().equals(dataSourceType)){
+      return SalesforceConverter.sdkDataSourceConfiguration(dataSourceConfiguration.getSalesforceConfiguration());
+    } else {
       return null;
     }
   }

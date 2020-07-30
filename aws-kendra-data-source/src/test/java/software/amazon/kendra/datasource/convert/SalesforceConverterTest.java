@@ -1,8 +1,10 @@
-package software.amazon.kendra.datasource.translate;
+package software.amazon.kendra.datasource.convert;
 
 import org.junit.jupiter.api.Test;
+import software.amazon.awssdk.services.kendra.model.DataSourceConfiguration;
 import software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping;
 import software.amazon.awssdk.services.kendra.model.SalesforceChatterFeedConfiguration;
+import software.amazon.awssdk.services.kendra.model.SalesforceChatterFeedIncludeFilterType;
 import software.amazon.awssdk.services.kendra.model.SalesforceConfiguration;
 import software.amazon.awssdk.services.kendra.model.SalesforceCustomKnowledgeArticleTypeConfiguration;
 import software.amazon.awssdk.services.kendra.model.SalesforceKnowledgeArticleConfiguration;
@@ -18,6 +20,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SalesforceConverterTest {
 
     @Test
+    void sdkDataSourceConfiguration() {
+        DataSourceConfiguration expected =
+                DataSourceConfiguration
+                        .builder()
+                        .salesforceConfiguration(SalesforceConfiguration.builder().build())
+                        .build();
+
+        software.amazon.kendra.datasource.SalesforceConfiguration input = software.amazon.kendra.datasource.SalesforceConfiguration
+                .builder().build();
+
+        assertThat(SalesforceConverter.sdkDataSourceConfiguration(input)).isEqualTo(expected);
+    }
+
+    @Test
     void testToSdkServerUrlAndSecretArn() {
         String serverUrl = "serverUrl";
         String secretArn = "secretArn";
@@ -25,6 +41,7 @@ public class SalesforceConverterTest {
                 .builder()
                 .serverUrl(serverUrl)
                 .secretArn(secretArn)
+                .crawlAttachments(true)
                 .build();
 
         software.amazon.kendra.datasource.SalesforceConfiguration input =
@@ -32,12 +49,13 @@ public class SalesforceConverterTest {
                         .builder()
                         .serverUrl(serverUrl)
                         .secretArn(secretArn)
+                        .crawlAttachments(true)
                         .build();
         assertThat(SalesforceConverter.toSdk(input)).isEqualTo(expected);
     }
 
     @Test
-    void testToSdkSalesforceSotandardObjectConfigurationList() {
+    void testToSdkSalesforceStandardObjectConfigurationList() {
         String name = "name";
         String documentDataFieldName = "documentDataFieldName";
         String documentTitleFieldName = "documentTitleFieldName";
@@ -90,6 +108,24 @@ public class SalesforceConverterTest {
                         .build();
 
         assertThat(SalesforceConverter.toSdk(input)).isEqualTo(expected);
+    }
+
+    @Test
+    void testToSdkNullFieldMappings() {
+        software.amazon.kendra.datasource.SalesforceStandardObjectConfiguration modelSalesforceStandardObjectConfiguration
+                = software.amazon.kendra.datasource.SalesforceStandardObjectConfiguration
+                .builder()
+                .name("name")
+                .build();
+        software.amazon.kendra.datasource.SalesforceConfiguration input =
+                software.amazon.kendra.datasource.SalesforceConfiguration
+                        .builder()
+                        .standardObjectConfigurations(Arrays.asList(modelSalesforceStandardObjectConfiguration))
+                        .build();
+
+        SalesforceConfiguration actual = SalesforceConverter.toSdk(input);
+        assertThat(actual.standardObjectConfigurations().size()).isEqualTo(1);
+        assertThat(actual.standardObjectConfigurations().get(0).fieldMappings()).isEmpty();
     }
 
     @Test
@@ -178,9 +214,99 @@ public class SalesforceConverterTest {
 
     @Test
     void testChatterFeedConfiguration() {
+        String documentDataFieldName = "documentDataFieldName";
+        String documentTitleFieldName = "documentTitleFieldName";
+        String dataSourceFieldName = "dataSourceFieldName";
+        String indexFieldName = "indexFieldName";
+        String dateFieldFormat = "dataSourceFieldName";
+        DataSourceToIndexFieldMapping dataSourceToIndexFieldMapping =
+                DataSourceToIndexFieldMapping
+                        .builder()
+                        .dataSourceFieldName(dataSourceFieldName)
+                        .indexFieldName(indexFieldName)
+                        .dateFieldFormat(dateFieldFormat)
+                        .build();
         SalesforceChatterFeedConfiguration salesforceChatterFeedConfiguration = SalesforceChatterFeedConfiguration
                 .builder()
-                .
+                .fieldMappings(Arrays.asList(dataSourceToIndexFieldMapping))
+                .documentDataFieldName(documentDataFieldName)
+                .documentTitleFieldName(documentTitleFieldName)
+                .includeFilterTypes(SalesforceChatterFeedIncludeFilterType.ACTIVE_USER)
+                .build();
+
+        software.amazon.kendra.datasource.DataSourceToIndexFieldMapping modelDataSourceToIndexFieldMapping =
+                software.amazon.kendra.datasource.DataSourceToIndexFieldMapping
+                        .builder()
+                        .dataSourceFieldName(dataSourceFieldName)
+                        .indexFieldName(indexFieldName)
+                        .dateFieldFormat(dateFieldFormat)
+                        .build();
+        software.amazon.kendra.datasource.SalesforceChatterFeedConfiguration modelSalesforceChatterFeedConfiguration =
+                software.amazon.kendra.datasource.SalesforceChatterFeedConfiguration
+                .builder()
+                .documentDataFieldName(documentDataFieldName)
+                .documentTitleFieldName(documentTitleFieldName)
+                .fieldMappings(Arrays.asList(modelDataSourceToIndexFieldMapping))
+                .includeFilterTypes(Arrays.asList("ACTIVE_USER"))
+                .build();
+
+        SalesforceConfiguration expected = SalesforceConfiguration
+                .builder()
+                .chatterFeedConfiguration(salesforceChatterFeedConfiguration)
+                .build();
+
+        software.amazon.kendra.datasource.SalesforceConfiguration input =
+                software.amazon.kendra.datasource.SalesforceConfiguration
+                        .builder()
+                        .chatterFeedConfiguration(modelSalesforceChatterFeedConfiguration)
+                        .build();
+
+        assertThat(SalesforceConverter.toSdk(input)).isEqualTo(expected);
+    }
+
+    @Test
+    void testToSdkFilePatterns() {
+        List<String> include = Arrays.asList("txt");
+        List<String> exclude = Arrays.asList("txt");
+        SalesforceConfiguration expected = SalesforceConfiguration
+                .builder()
+                .includeAttachmentFilePatterns(include)
+                .excludeAttachmentFilePatterns(exclude)
+                .build();
+
+        software.amazon.kendra.datasource.SalesforceConfiguration input =
+                software.amazon.kendra.datasource.SalesforceConfiguration
+                        .builder()
+                        .includeAttachmentFilePatterns(include)
+                        .excludeAttachmentFilePatterns(exclude)
+                        .build();
+
+        assertThat(SalesforceConverter.toSdk(input)).isEqualTo(expected);
+    }
+
+    @Test
+    void testToSdkSalesforceChatterFeedIncludeFilterType() {
+        assertThat(SalesforceConverter.toSdkSalesforceChatterFeedIncludeFilterType(null)).isNull();
+    }
+
+    @Test
+    void testToSdkSalesforceStandardKnowledgeArticleTypeConfiguration() {
+        assertThat(SalesforceConverter.toSdkSalesforceStandardKnowledgeArticleTypeConfiguration(null)).isNull();
+    }
+
+    @Test
+    void testToSdkSalesforceKnowledgeArticleStateList() {
+        assertThat(SalesforceConverter.toSdkSalesforceKnowledgeArticleStateList(null)).isNull();
+    }
+
+    @Test
+    void testToSdkSalesforceCustomKnowledgeArticleTypeConfiguration() {
+        assertThat(SalesforceConverter.toSdkSalesforceCustomKnowledgeArticleTypeConfiguration(null)).isNull();
+    }
+
+    @Test
+    void testToSdkSalesforceCustomKnowledgeArticleTypeConfigurationList() {
+        assertThat(SalesforceConverter.toSdkSalesforceCustomKnowledgeArticleTypeConfigurationList(null)).isNull();
     }
 
 }

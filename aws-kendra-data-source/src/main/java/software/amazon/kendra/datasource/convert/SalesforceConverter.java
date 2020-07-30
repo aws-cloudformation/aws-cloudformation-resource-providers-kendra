@@ -1,5 +1,6 @@
-package software.amazon.kendra.datasource.translate;
+package software.amazon.kendra.datasource.convert;
 
+import software.amazon.awssdk.services.kendra.model.DataSourceConfiguration;
 import software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping;
 import software.amazon.awssdk.services.kendra.model.SalesforceChatterFeedConfiguration;
 import software.amazon.awssdk.services.kendra.model.SalesforceChatterFeedIncludeFilterType;
@@ -15,17 +16,28 @@ import java.util.stream.Collectors;
 
 public class SalesforceConverter {
 
-    public static SalesforceConfiguration toSdk(software.amazon.kendra.datasource.SalesforceConfiguration model) {
+    public static DataSourceConfiguration sdkDataSourceConfiguration(
+            software.amazon.kendra.datasource.SalesforceConfiguration model) {
+        return DataSourceConfiguration
+                .builder()
+                .salesforceConfiguration(toSdk(model))
+                .build();
+    }
+
+    static SalesforceConfiguration toSdk(software.amazon.kendra.datasource.SalesforceConfiguration model) {
         SalesforceConfiguration.Builder builder = SalesforceConfiguration.builder();
         builder.serverUrl(model.getServerUrl());
         builder.secretArn(model.getSecretArn());
         builder.standardObjectConfigurations(toSdkSalesforceStandardObjectConfigurationList(model.getStandardObjectConfigurations()));
         builder.knowledgeArticleConfiguration(toSdkSalesforceKnowledgeArticleConfiguration(model.getKnowledgeArticleConfiguration()));
         builder.chatterFeedConfiguration(toSdkSalesforceChatterFeedConfiguration(model.getChatterFeedConfiguration()));
+        builder.crawlAttachments(model.getCrawlAttachments());
+        builder.includeAttachmentFilePatterns(toSdkFilePatterns(model.getIncludeAttachmentFilePatterns()));
+        builder.excludeAttachmentFilePatterns(toSdkFilePatterns(model.getExcludeAttachmentFilePatterns()));
         return builder.build();
     }
 
-    private static SalesforceChatterFeedConfiguration toSdkSalesforceChatterFeedConfiguration(
+    static SalesforceChatterFeedConfiguration toSdkSalesforceChatterFeedConfiguration(
             software.amazon.kendra.datasource.SalesforceChatterFeedConfiguration model) {
         if (model == null) {
             return null;
@@ -40,7 +52,7 @@ public class SalesforceConverter {
                 .build();
     }
 
-    private static List<SalesforceChatterFeedIncludeFilterType> toSdkSalesforceChatterFeedIncludeFilterType(
+    static List<SalesforceChatterFeedIncludeFilterType> toSdkSalesforceChatterFeedIncludeFilterType(
             List<String> model) {
         if (model == null) {
             return null;
@@ -48,7 +60,7 @@ public class SalesforceConverter {
         return model.stream().map(x -> SalesforceChatterFeedIncludeFilterType.fromValue(x)).collect(Collectors.toList());
     }
 
-    private static List<SalesforceStandardObjectConfiguration> toSdkSalesforceStandardObjectConfigurationList(
+    static List<SalesforceStandardObjectConfiguration> toSdkSalesforceStandardObjectConfigurationList(
             List<software.amazon.kendra.datasource.SalesforceStandardObjectConfiguration> model) {
         if (model == null) {
             return null;
@@ -56,7 +68,7 @@ public class SalesforceConverter {
         return model.stream().map(x -> toSdkSalesforceStandardObjectConfiguration(x)).collect(Collectors.toList());
     }
 
-    private static SalesforceStandardObjectConfiguration toSdkSalesforceStandardObjectConfiguration(
+    static SalesforceStandardObjectConfiguration toSdkSalesforceStandardObjectConfiguration(
             software.amazon.kendra.datasource.SalesforceStandardObjectConfiguration model) {
         SalesforceStandardObjectConfiguration.Builder builder = SalesforceStandardObjectConfiguration.builder();
         builder.name(model.getName());
@@ -67,7 +79,7 @@ public class SalesforceConverter {
     }
 
 
-    private static SalesforceKnowledgeArticleConfiguration toSdkSalesforceKnowledgeArticleConfiguration(
+    static SalesforceKnowledgeArticleConfiguration toSdkSalesforceKnowledgeArticleConfiguration(
             software.amazon.kendra.datasource.SalesforceKnowledgeArticleConfiguration model) {
         if (model == null) {
             return null;
@@ -84,7 +96,7 @@ public class SalesforceConverter {
         return builder.build();
     }
 
-    private static SalesforceStandardKnowledgeArticleTypeConfiguration toSdkSalesforceStandardKnowledgeArticleTypeConfiguration(
+    static SalesforceStandardKnowledgeArticleTypeConfiguration toSdkSalesforceStandardKnowledgeArticleTypeConfiguration(
             software.amazon.kendra.datasource.SalesforceStandardKnowledgeArticleTypeConfiguration model) {
         if (model == null) {
             return null;
@@ -97,7 +109,7 @@ public class SalesforceConverter {
                 .build();
     }
 
-    private static List<SalesforceCustomKnowledgeArticleTypeConfiguration> toSdkSalesforceCustomKnowledgeArticleTypeConfigurationList(
+    static List<SalesforceCustomKnowledgeArticleTypeConfiguration> toSdkSalesforceCustomKnowledgeArticleTypeConfigurationList(
             List<software.amazon.kendra.datasource.SalesforceCustomKnowledgeArticleTypeConfiguration> model) {
         if (model == null) {
             return null;
@@ -105,8 +117,8 @@ public class SalesforceConverter {
         return model.stream().map(x -> toSdkSalesforceCustomKnowledgeArticleTypeConfiguration(x)).collect(Collectors.toList());
     }
 
-    private static SalesforceCustomKnowledgeArticleTypeConfiguration toSdkSalesforceCustomKnowledgeArticleTypeConfiguration(
-           software.amazon.kendra.datasource.SalesforceCustomKnowledgeArticleTypeConfiguration model) {
+    static SalesforceCustomKnowledgeArticleTypeConfiguration toSdkSalesforceCustomKnowledgeArticleTypeConfiguration(
+            software.amazon.kendra.datasource.SalesforceCustomKnowledgeArticleTypeConfiguration model) {
         if (model == null) {
             return null;
         }
@@ -119,14 +131,14 @@ public class SalesforceConverter {
                 .build();
     }
 
-    private static List<SalesforceKnowledgeArticleState> toSdkSalesforceKnowledgeArticleStateList(List<String> modelIncludedStates) {
+    static List<SalesforceKnowledgeArticleState> toSdkSalesforceKnowledgeArticleStateList(List<String> modelIncludedStates) {
         if (modelIncludedStates == null) {
             return null;
         }
         return modelIncludedStates.stream().map(x -> SalesforceKnowledgeArticleState.fromValue(x)).collect(Collectors.toList());
     }
 
-    private static List<DataSourceToIndexFieldMapping> toSdkDataSourceToIndexFieldMappingList(
+    static List<DataSourceToIndexFieldMapping> toSdkDataSourceToIndexFieldMappingList(
             List<software.amazon.kendra.datasource.DataSourceToIndexFieldMapping> modelList) {
         if (modelList == null) {
             return null;
@@ -134,7 +146,14 @@ public class SalesforceConverter {
         return modelList.stream().map(x -> toSdkDataSourceToIndexFieldMapping(x)).collect(Collectors.toList());
     }
 
-    private static DataSourceToIndexFieldMapping toSdkDataSourceToIndexFieldMapping(
+    static List<String> toSdkFilePatterns(List<String> model) {
+        if (model == null) {
+            return null;
+        }
+        return model.stream().collect(Collectors.toList());
+    }
+
+    static DataSourceToIndexFieldMapping toSdkDataSourceToIndexFieldMapping(
             software.amazon.kendra.datasource.DataSourceToIndexFieldMapping model) {
         return DataSourceToIndexFieldMapping.builder()
                 .indexFieldName(model.getIndexFieldName())
