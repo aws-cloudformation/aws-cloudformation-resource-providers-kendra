@@ -135,7 +135,8 @@
         "kendra:CreateFaq",
         "kendra:DescribeFaq",
         "iam:PassRole",
-        "kendra:ListTagsForResource"
+        "kendra:ListTagsForResource",
+        "kendra:TagResource"
       ]
     },
     "update": {
