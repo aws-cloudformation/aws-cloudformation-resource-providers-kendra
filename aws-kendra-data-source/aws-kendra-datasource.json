@@ -241,6 +241,224 @@
         "SecretArn",
         "SharePointVersion"
       ]
+    },
+    "SalesforceConfiguration": {
+      "type": "object",
+      "properties": {
+        "ServerUrl": {
+          "$ref": "#/definitions/Url"
+        },
+        "SecretArn": {
+          "$ref": "#/definitions/SecretArn"
+        },
+        "StandardObjectConfigurations": {
+          "$ref": "#/definitions/SalesforceStandardObjectConfigurationList"
+        },
+        "KnowledgeArticleConfiguration": {
+          "$ref": "#/definitions/SalesforceKnowledgeArticleConfiguration"
+        },
+        "ChatterFeedConfiguration": {
+          "$ref": "#/definitions/SalesforceChatterFeedConfiguration"
+        },
+        "CrawlAttachments": {
+          "type": "boolean"
+        },
+        "StandardObjectAttachmentConfiguration": {
+          "$ref": "#/definitions/SalesforceStandardObjectAttachmentConfiguration"
+        },
+        "IncludeAttachmentFilePatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "ExcludeAttachmentFilePatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        }
+      },
+      "required": [
+        "ServerUrl",
+        "SecretArn"
+      ]
+    },
+    "SalesforceStandardObjectConfigurationList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 17,
+      "items": {
+        "$ref": "#/definitions/SalesforceStandardObjectConfiguration"
+      }
+    },
+    "SalesforceStandardObjectConfiguration": {
+      "type": "object",
+      "properties": {
+        "Name": {
+          "$ref": "#/definitions/SalesforceStandardObjectName"
+        },
+        "DocumentDataFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "DocumentTitleFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "FieldMappings": {
+          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        }
+      },
+      "required": [
+        "Name",
+        "DocumentDataFieldName"
+      ]
+    },
+    "SalesforceStandardObjectName": {
+      "type": "string",
+      "enum": [
+        "ACCOUNT",
+        "CAMPAIGN",
+        "CASE",
+        "CONTACT",
+        "CONTRACT",
+        "DOCUMENT",
+        "GROUP",
+        "IDEA",
+        "LEAD",
+        "OPPORTUNITY",
+        "PARTNER",
+        "PRICEBOOK",
+        "PRODUCT",
+        "PROFILE",
+        "SOLUTION",
+        "TASK",
+        "USER"
+      ]
+    },
+    "SalesforceKnowledgeArticleConfiguration": {
+      "type": "object",
+      "properties": {
+        "IncludedStates": {
+          "$ref": "#/definitions/SalesforceKnowledgeArticleStateList"
+        },
+        "StandardKnowledgeArticleTypeConfiguration": {
+          "$ref": "#/definitions/SalesforceStandardKnowledgeArticleTypeConfiguration"
+        },
+        "CustomKnowledgeArticleTypeConfigurations": {
+          "$ref": "#/definitions/SalesforceCustomKnowledgeArticleTypeConfigurationList"
+        }
+      },
+      "required": [
+        "IncludedStates"
+      ]
+    },
+    "SalesforceKnowledgeArticleStateList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "items": {
+        "$ref": "#/definitions/SalesforceKnowledgeArticleState"
+      }
+    },
+    "SalesforceKnowledgeArticleState": {
+      "type": "string",
+      "enum": [
+        "DRAFT",
+        "PUBLISHED",
+        "ARCHIVED"
+      ]
+    },
+    "SalesforceStandardKnowledgeArticleTypeConfiguration": {
+      "type": "object",
+      "properties": {
+        "DocumentDataFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "DocumentTitleFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "FieldMappings": {
+          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        }
+      },
+      "required": [
+        "DocumentDataFieldName"
+      ]
+    },
+    "SalesforceCustomKnowledgeArticleTypeConfigurationList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "$ref": "#/definitions/SalesforceCustomKnowledgeArticleTypeConfiguration"
+      }
+    },
+    "SalesforceCustomKnowledgeArticleTypeConfiguration": {
+      "type": "object",
+      "properties": {
+        "Name": {
+          "$ref": "#/definitions/SalesforceCustomKnowledgeArticleTypeName"
+        },
+        "DocumentDataFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "DocumentTitleFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "FieldMappings": {
+          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        }
+      },
+      "required": [
+        "Name",
+        "DocumentDataField"
+      ]
+    },
+    "SalesforceCustomKnowledgeArticleTypeName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+    },
+    "SalesforceChatterFeedConfiguration": {
+      "type": "object",
+      "properties": {
+        "DocumentDataFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "DocumentTitleFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "FieldMappings": {
+          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        },
+        "IncludeFilterTypes": {
+          "$ref": "#/definitions/SalesforceChatterFeedIncludeFilterTypes"
+        }
+      },
+      "required": [
+        "DocumentDataFieldName"
+      ]
+    },
+    "SalesforceChatterFeedIncludeFilterTypes": {
+      "type": "array",
+      "minLength": 1,
+      "maxLength": 2,
+      "items": {
+        "$ref": "#/definitions/SalesforceChatterFeedIncludeFilterType"
+      }
+    },
+    "SalesforceChatterFeedIncludeFilterType": {
+      "type": "string",
+      "enum": [
+        "ACTIVE_USER",
+        "STANDARD_USER"
+      ]
+    },
+    "SalesforceStandardObjectAttachmentConfiguration": {
+      "type": "object",
+      "properties": {
+        "DocumentTitleFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "FieldMappings": {
+          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        }
+      }
     }
   },
   "properties": {
@@ -280,6 +498,9 @@
         },
         "SharePointConfiguration": {
           "$ref": "#/definitions/SharePointConfiguration"
+        },
+        "SalesforceConfiguration": {
+          "$ref": "#/definitions/SalesforceConfiguration"
         }
       }
     },
