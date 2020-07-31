@@ -256,9 +256,8 @@ public class Translator {
                           .build());
         }
       } else {
-        // otherwise it's a custom field.
-        // We don't allow customers to remove custom fields from their CloudFormation template so
-        // check if they have here.
+        // otherwise it's a custom field. We don't allow customers to remove
+        // custom fields from their CloudFormation template so check for that here.
         if (!sdkAttributesDefinedInCFTemplateMap.containsKey(entry.getKey())) {
           throw new TranslatorValidationException(
                   String.format("Custom attribute %s cannot be removed", entry.getKey()));
