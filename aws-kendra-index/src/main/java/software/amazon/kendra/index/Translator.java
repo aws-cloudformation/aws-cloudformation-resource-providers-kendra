@@ -172,7 +172,7 @@ public class Translator {
    * @return updateIndexRequest the aws service request to modify a resource
    */
   static UpdateIndexRequest translateToUpdateRequest(final ResourceModel model,
-                                                     Map<String, String> currentAttributes) {
+                                                     Map<String, String> currentAttributes) throws TranslatorValidationException {
     // Null equivalents for partial updates.
     String description = model.getDescription() == null ? "" : model.getDescription();
     String name = model.getName() == null ? "" : model.getName();
@@ -233,7 +233,7 @@ public class Translator {
 
   static List<DocumentMetadataConfiguration> translateToSdkDocumentMetadataConfigurationList(
           List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList,
-          Map<String, String> currentAttributes) {
+          Map<String, String> currentAttributes) throws TranslatorValidationException {
 
     // Document metadata configuration requested directly from the CloudFormation template
     List<DocumentMetadataConfiguration> requestedSdkDocumentMetadataConfigurationList =
@@ -260,14 +260,15 @@ public class Translator {
         // and it's a custom field, then the customer has removed it from their template
         // which is not allowed because you can't remove fields from the index.
         if (!requestedAttributes.containsKey(entry.getKey())) {
-          throw new CfnInvalidRequestException("Custom attributes cannot be removed");
+          throw new TranslatorValidationException(
+                  String.format("Custom attribute %s cannot be removed", entry.getKey()));
         }
       }
     }
 
     return Stream.concat(
-            defaultDocumentMetadataConfigurationList.stream(),
-            requestedSdkDocumentMetadataConfigurationList.stream())
+            requestedSdkDocumentMetadataConfigurationList.stream(),
+            defaultDocumentMetadataConfigurationList.stream())
             .collect(Collectors.toList());
 
   }

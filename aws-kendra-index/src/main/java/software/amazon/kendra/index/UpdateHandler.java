@@ -108,7 +108,11 @@ public class UpdateHandler extends BaseHandlerStd {
             currentAttributes = describeIndexResponse.documentMetadataConfigurations()
                     .stream().collect(Collectors.toMap(x -> x.name(), x -> x.typeAsString()));
         }
-        return Translator.translateToUpdateRequest(model, currentAttributes);
+        try {
+            return Translator.translateToUpdateRequest(model, currentAttributes);
+        } catch (TranslatorValidationException e) {
+            throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME + e.getMessage(), e);
+        }
     }
 
     private boolean stabilize(
