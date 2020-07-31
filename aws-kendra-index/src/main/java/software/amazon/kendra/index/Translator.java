@@ -232,34 +232,37 @@ public class Translator {
   }
 
   static List<DocumentMetadataConfiguration> translateToSdkDocumentMetadataConfigurationList(
-          List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList,
-          Map<String, String> currentAttributes) throws TranslatorValidationException {
+          List<software.amazon.kendra.index.DocumentMetadataConfiguration> attributesDefinedInCFTemplate,
+          Map<String, String> attributesDefinedOnIndex) throws TranslatorValidationException {
 
-    // Document metadata configuration requested directly from the CloudFormation template
-    List<DocumentMetadataConfiguration> requestedSdkDocumentMetadataConfigurationList =
-            translateToSdkDocumentMetadataConfigurationList(modelDocumentMetadataConfigurationList);
-    Map<String, String> requestedAttributes = requestedSdkDocumentMetadataConfigurationList
+    // Document metadata configuration directly defined/requested in the CloudFormation template
+    List<DocumentMetadataConfiguration> sdkAttributesDefinedInCFTemplate =
+            translateToSdkDocumentMetadataConfigurationList(attributesDefinedInCFTemplate);
+    Map<String, String> sdkAttributesDefinedInCFTemplateMap = sdkAttributesDefinedInCFTemplate
             .stream().collect(Collectors.toMap(x -> x.name(), x -> x.typeAsString()));
 
-    List<DocumentMetadataConfiguration> defaultDocumentMetadataConfigurationList = new ArrayList<>();
-    for (Map.Entry<String, String> entry : currentAttributes.entrySet()) {
+    List<DocumentMetadataConfiguration> sdkDefaultAttributes = new ArrayList<>();
+    for (Map.Entry<String, String> entry : attributesDefinedOnIndex.entrySet()) {
       // If the attribute is a reserved one (i.e. it is prefixed with "_") ...
       if (entry.getKey().startsWith("_")) {
         // and it's not in the requested CloudFormation template,
-        // then provide the default value.
-        if (!requestedAttributes.containsKey(entry.getKey())) {
-          defaultDocumentMetadataConfigurationList.add(DocumentMetadataConfiguration
-                  .builder()
-                  .name(entry.getKey())
-                  .type(entry.getValue())
-                  .search((Search) null)
-                  .relevance((Relevance) null)
-                  .build());
+        // then provide the default value. This allows customers to add and remove
+        // reserved attributes. When removed, we set/reset the attribute to it's default
+        if (!sdkAttributesDefinedInCFTemplateMap.containsKey(entry.getKey())) {
+          sdkDefaultAttributes.add(
+                  DocumentMetadataConfiguration
+                          .builder()
+                          .name(entry.getKey())
+                          .type(entry.getValue())
+                          .search((Search) null)
+                          .relevance((Relevance) null)
+                          .build());
         }
       } else {
-        // and it's a custom field, then the customer has removed it from their template
-        // which is not allowed because you can't remove fields from the index.
-        if (!requestedAttributes.containsKey(entry.getKey())) {
+        // otherwise it's a custom field.
+        // We don't allow customers to remove custom fields from their CloudFormation template so
+        // check if they have here.
+        if (!sdkAttributesDefinedInCFTemplateMap.containsKey(entry.getKey())) {
           throw new TranslatorValidationException(
                   String.format("Custom attribute %s cannot be removed", entry.getKey()));
         }
@@ -267,8 +270,8 @@ public class Translator {
     }
 
     return Stream.concat(
-            requestedSdkDocumentMetadataConfigurationList.stream(),
-            defaultDocumentMetadataConfigurationList.stream())
+            sdkAttributesDefinedInCFTemplate.stream(),
+            sdkDefaultAttributes.stream())
             .collect(Collectors.toList());
 
   }
