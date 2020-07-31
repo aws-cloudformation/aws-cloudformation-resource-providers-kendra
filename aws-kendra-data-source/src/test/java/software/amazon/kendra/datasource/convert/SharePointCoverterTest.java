@@ -60,7 +60,7 @@ public class SharePointCoverterTest {
           .build())
         .build();
 
-     assertThat(SharePointConverter.sdkDataSourceConfiguration(dataSourceConfiguration.getSharePointConfiguration()))
+     assertThat(SharePointConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getSharePointConfiguration()))
     .isEqualTo(expectedDataSourceConfiguration);
   }
 
@@ -93,7 +93,7 @@ public class SharePointCoverterTest {
           .build())
         .build();
 
-     assertThat(SharePointConverter.sdkDataSourceConfiguration(dataSourceConfiguration.getSharePointConfiguration()))
+     assertThat(SharePointConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getSharePointConfiguration()))
     .isEqualTo(expectedDataSourceConfiguration);
   }
 
@@ -144,7 +144,7 @@ public class SharePointCoverterTest {
         .build())
       .build();
 
-     assertThat(SharePointConverter.modelDataSourceConfiguration(dataSourceConfiguration.sharePointConfiguration()))
+     assertThat(SharePointConverter.toModelDataSourceConfiguration(dataSourceConfiguration.sharePointConfiguration()))
     .isEqualTo(expectedDataSourceConfiguration);
   }
 
@@ -178,7 +178,7 @@ public class SharePointCoverterTest {
         .build())
       .build();
 
-     assertThat(SharePointConverter.modelDataSourceConfiguration(dataSourceConfiguration.sharePointConfiguration()))
+     assertThat(SharePointConverter.toModelDataSourceConfiguration(dataSourceConfiguration.sharePointConfiguration()))
     .isEqualTo(expectedDataSourceConfiguration);
   }
 

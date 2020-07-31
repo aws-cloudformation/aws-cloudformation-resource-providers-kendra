@@ -7,7 +7,7 @@ import software.amazon.kendra.datasource.S3DataSourceConfiguration;
 
 public class S3Converter {
 
-  public static software.amazon.awssdk.services.kendra.model.DataSourceConfiguration sdkDataSourceConfiguration(
+  public static software.amazon.awssdk.services.kendra.model.DataSourceConfiguration toSdkDataSourceConfiguration(
     S3DataSourceConfiguration s3DataSourceConfiguration) {
       return software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
       .s3Configuration(software.amazon.awssdk.services.kendra.model.S3DataSourceConfiguration.builder()
@@ -21,7 +21,7 @@ public class S3Converter {
     .build();
   }
 
-  public static DataSourceConfiguration modelDataSourceConfiguration(
+  public static DataSourceConfiguration toModelDataSourceConfiguration(
     software.amazon.awssdk.services.kendra.model.S3DataSourceConfiguration s3DataSourceConfiguration) {
     return DataSourceConfiguration.builder()
       .s3Configuration(S3DataSourceConfiguration.builder()

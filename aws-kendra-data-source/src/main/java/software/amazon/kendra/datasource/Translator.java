@@ -15,6 +15,7 @@ import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateDataSourceRequest;
 import software.amazon.kendra.datasource.convert.S3Converter;
 import software.amazon.kendra.datasource.convert.SharePointConverter;
+import software.amazon.kendra.datasource.convert.SalesforceConverter;
 
 
 import java.util.Collection;
@@ -203,10 +204,12 @@ public class Translator {
   static software.amazon.awssdk.services.kendra.model.DataSourceConfiguration toSdkDataSourceConfiguration(
     final DataSourceConfiguration dataSourceConfiguration, final String dataSourceType) {
     if (DataSourceType.S3.toString().equals(dataSourceType)) {
-      return S3Converter.sdkDataSourceConfiguration(dataSourceConfiguration.getS3Configuration());
+      return S3Converter.toSdkDataSourceConfiguration(dataSourceConfiguration.getS3Configuration());
     } else if (DataSourceType.SHAREPOINT.toString().equals(dataSourceType)) {
-      return SharePointConverter.sdkDataSourceConfiguration(dataSourceConfiguration.getSharePointConfiguration());
-    }else {
+      return SharePointConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getSharePointConfiguration());
+    } else if (DataSourceType.SALESFORCE.toString().equals(dataSourceType)){
+      return SalesforceConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getSalesforceConfiguration());
+    } else {
       return null;
     }
   }
@@ -214,9 +217,11 @@ public class Translator {
   static DataSourceConfiguration toModelDataSourceConfiguration(
     final software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration, final String dataSourceType) {
     if (DataSourceType.S3.toString().equals(dataSourceType)) {
-      return S3Converter.modelDataSourceConfiguration(dataSourceConfiguration.s3Configuration());
+      return S3Converter.toModelDataSourceConfiguration(dataSourceConfiguration.s3Configuration());
     } else if(DataSourceType.SHAREPOINT.toString().equals(dataSourceType)) {
-      return SharePointConverter.modelDataSourceConfiguration(dataSourceConfiguration.sharePointConfiguration());
+      return SharePointConverter.toModelDataSourceConfiguration(dataSourceConfiguration.sharePointConfiguration());
+    } else if (DataSourceType.SALESFORCE.toString().equals(dataSourceType)) {
+      return SalesforceConverter.toModelDataSourceConfiguration(dataSourceConfiguration.salesforceConfiguration());
     } else {
       return null;
     }
