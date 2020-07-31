@@ -230,7 +230,7 @@ public class Translator {
 
   static List<DocumentMetadataConfiguration> translateToSdkDocumentMetadataConfigurationList(
           List<software.amazon.kendra.index.DocumentMetadataConfiguration> attributesDefinedInCFTemplate,
-          Map<String, String> attributesDefinedAtIndexLevel) throws TranslatorValidationException {
+          Map<String, String> attributesDefinedOnIndex) throws TranslatorValidationException {
 
     // Document metadata configuration directly defined/requested in the CloudFormation template
     List<DocumentMetadataConfiguration> sdkAttributesDefinedInCFTemplate =
@@ -239,7 +239,7 @@ public class Translator {
             .stream().collect(Collectors.toMap(x -> x.name(), x -> x.typeAsString()));
 
     List<DocumentMetadataConfiguration> sdkDefaultAttributes = new ArrayList<>();
-    for (Map.Entry<String, String> entry : attributesDefinedAtIndexLevel.entrySet()) {
+    for (Map.Entry<String, String> entry : attributesDefinedOnIndex.entrySet()) {
       // If the attribute is a reserved one (i.e. it is prefixed with "_") ...
       if (entry.getKey().startsWith("_")) {
         // and it's not in the requested CloudFormation template,
