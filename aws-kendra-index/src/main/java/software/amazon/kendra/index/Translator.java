@@ -169,7 +169,7 @@ public class Translator {
    * @return updateIndexRequest the aws service request to modify a resource
    */
   static UpdateIndexRequest translateToUpdateRequest(final ResourceModel model,
-                                                     Map<String, String> currentAttributes) throws TranslatorValidationException {
+                                                     Map<String, String> attributesDefinedOnIndex) throws TranslatorValidationException {
     // Null equivalents for partial updates.
     String description = model.getDescription() == null ? "" : model.getDescription();
     String name = model.getName() == null ? "" : model.getName();
@@ -181,7 +181,7 @@ public class Translator {
             .name(name)
             .description(description)
             .documentMetadataConfigurationUpdates(
-                    translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations(), currentAttributes))
+                    translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations(), attributesDefinedOnIndex))
             .capacityUnits(translateToCapacityUnitsConfiguration(model.getCapacityUnits(), model.getEdition()))
             .build();
   }

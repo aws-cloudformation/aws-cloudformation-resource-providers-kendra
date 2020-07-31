@@ -103,13 +103,13 @@ public class UpdateHandler extends BaseHandlerStd {
         DescribeIndexRequest describeIndexRequest = Translator.translateToReadRequest(model);
         DescribeIndexResponse describeIndexResponse = proxyClient.injectCredentialsAndInvokeV2(describeIndexRequest,
                 proxyClient.client()::describeIndex);
-        Map<String, String> currentAttributes = new HashMap<>();
+        Map<String, String> attributesDefinedOnIndex = new HashMap<>();
         if (describeIndexResponse.documentMetadataConfigurations() != null) {
-            currentAttributes = describeIndexResponse.documentMetadataConfigurations()
+            attributesDefinedOnIndex = describeIndexResponse.documentMetadataConfigurations()
                     .stream().collect(Collectors.toMap(x -> x.name(), x -> x.typeAsString()));
         }
         try {
-            return Translator.translateToUpdateRequest(model, currentAttributes);
+            return Translator.translateToUpdateRequest(model, attributesDefinedOnIndex);
         } catch (TranslatorValidationException e) {
             throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME + e.getMessage(), e);
         }
