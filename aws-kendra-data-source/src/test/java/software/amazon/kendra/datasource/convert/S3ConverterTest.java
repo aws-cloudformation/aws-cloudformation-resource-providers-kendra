@@ -43,7 +43,7 @@ public class S3ConverterTest {
           .build())
         .build();
 
-    assertThat(S3Converter.sdkDataSourceConfiguration(dataSourceConfiguration.getS3Configuration()))
+    assertThat(S3Converter.toSdkDataSourceConfiguration(dataSourceConfiguration.getS3Configuration()))
       .isEqualTo(expectedDataSourceConfiguration);
   }
 
@@ -66,7 +66,7 @@ public class S3ConverterTest {
       .build())
     .build();
 
-     assertThat(S3Converter.sdkDataSourceConfiguration(dataSourceConfiguration.getS3Configuration()))
+     assertThat(S3Converter.toSdkDataSourceConfiguration(dataSourceConfiguration.getS3Configuration()))
       .isEqualTo(expectedDataSourceConfiguration);
   }
 
@@ -102,7 +102,7 @@ public class S3ConverterTest {
       .build())
     .build() ;
 
-    assertThat(S3Converter.modelDataSourceConfiguration(dataSourceConfiguration.s3Configuration()))
+    assertThat(S3Converter.toModelDataSourceConfiguration(dataSourceConfiguration.s3Configuration()))
       .isEqualTo(expectedDataSourceConfiguration);
   }
 
@@ -126,7 +126,7 @@ public class S3ConverterTest {
     .build())
     .build() ;
 
-    assertThat(S3Converter.modelDataSourceConfiguration(dataSourceConfiguration.s3Configuration()))
+    assertThat(S3Converter.toModelDataSourceConfiguration(dataSourceConfiguration.s3Configuration()))
       .isEqualTo(expectedDataSourceConfiguration);
   }
 }

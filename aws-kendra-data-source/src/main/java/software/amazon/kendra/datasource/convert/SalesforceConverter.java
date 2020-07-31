@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class SalesforceConverter {
 
-    public static DataSourceConfiguration sdkDataSourceConfiguration(
+    public static DataSourceConfiguration toSdkDataSourceConfiguration(
             software.amazon.kendra.datasource.SalesforceConfiguration model) {
         return DataSourceConfiguration
                 .builder()
@@ -163,7 +163,7 @@ public class SalesforceConverter {
                 .build();
     }
 
-    public static software.amazon.kendra.datasource.DataSourceConfiguration modelDataSourceConfiguration(
+    public static software.amazon.kendra.datasource.DataSourceConfiguration toModelDataSourceConfiguration(
             SalesforceConfiguration sdk) {
         return software.amazon.kendra.datasource.DataSourceConfiguration
                 .builder()

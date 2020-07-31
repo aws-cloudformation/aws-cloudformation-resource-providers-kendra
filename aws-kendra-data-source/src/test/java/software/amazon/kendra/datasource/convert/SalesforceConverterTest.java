@@ -31,7 +31,7 @@ public class SalesforceConverterTest {
         software.amazon.kendra.datasource.SalesforceConfiguration input = software.amazon.kendra.datasource.SalesforceConfiguration
                 .builder().build();
 
-        assertThat(SalesforceConverter.sdkDataSourceConfiguration(input)).isEqualTo(expected);
+        assertThat(SalesforceConverter.toSdkDataSourceConfiguration(input)).isEqualTo(expected);
     }
 
     @Test
@@ -314,7 +314,7 @@ public class SalesforceConverterTest {
     // Tests to model from SDK
     @Test
     void testModelDataSourceConfiguration() {
-        assertThat(SalesforceConverter.modelDataSourceConfiguration(SalesforceConfiguration.builder().build())).isEqualTo(
+        assertThat(SalesforceConverter.toModelDataSourceConfiguration(SalesforceConfiguration.builder().build())).isEqualTo(
                 software.amazon.kendra.datasource.DataSourceConfiguration
                         .builder()
                         .salesforceConfiguration(

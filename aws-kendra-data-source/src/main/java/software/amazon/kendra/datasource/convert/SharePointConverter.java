@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class SharePointConverter {
 
-  public static software.amazon.awssdk.services.kendra.model.DataSourceConfiguration sdkDataSourceConfiguration(
+  public static software.amazon.awssdk.services.kendra.model.DataSourceConfiguration toSdkDataSourceConfiguration(
     SharePointConfiguration sharePointConfiguration) {
     return software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
     .sharePointConfiguration(software.amazon.awssdk.services.kendra.model.SharePointConfiguration.builder()
@@ -29,7 +29,7 @@ public class SharePointConverter {
     .build();
   }
 
-  public static DataSourceConfiguration modelDataSourceConfiguration(
+  public static DataSourceConfiguration toModelDataSourceConfiguration(
     software.amazon.awssdk.services.kendra.model.SharePointConfiguration sharePointConfiguration) {
     return DataSourceConfiguration.builder()
       .sharePointConfiguration(SharePointConfiguration.builder()
