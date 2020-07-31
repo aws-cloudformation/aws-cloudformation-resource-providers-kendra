@@ -235,7 +235,7 @@ public class Translator {
     // Document metadata configuration directly defined/requested in the CloudFormation template
     List<DocumentMetadataConfiguration> sdkAttributesDefinedInCFTemplate =
             translateToSdkDocumentMetadataConfigurationList(attributesDefinedInCFTemplate);
-    Map<String, String> sdkAttributesDefinedInCFTemplateMap = sdkAttributesDefinedInCFTemplate
+    Map<String, String> sdkAttributesDefinedInCFTemplateNameToTypeMap = sdkAttributesDefinedInCFTemplate
             .stream().collect(Collectors.toMap(x -> x.name(), x -> x.typeAsString()));
 
     List<DocumentMetadataConfiguration> sdkDefaultAttributes = new ArrayList<>();
@@ -245,7 +245,7 @@ public class Translator {
         // and it's not in the requested CloudFormation template,
         // then provide the default value. This allows customers to add and remove
         // reserved attributes. When removed, we set/reset the attribute to it's default
-        if (!sdkAttributesDefinedInCFTemplateMap.containsKey(entry.getKey())) {
+        if (!sdkAttributesDefinedInCFTemplateNameToTypeMap.containsKey(entry.getKey())) {
           sdkDefaultAttributes.add(
                   DocumentMetadataConfiguration
                           .builder()
@@ -258,7 +258,7 @@ public class Translator {
       } else {
         // otherwise it's a custom field. We don't allow customers to remove
         // custom fields from their CloudFormation template so check for that here.
-        if (!sdkAttributesDefinedInCFTemplateMap.containsKey(entry.getKey())) {
+        if (!sdkAttributesDefinedInCFTemplateNameToTypeMap.containsKey(entry.getKey())) {
           throw new TranslatorValidationException(
                   String.format("Custom attribute %s cannot be removed", entry.getKey()));
         }
