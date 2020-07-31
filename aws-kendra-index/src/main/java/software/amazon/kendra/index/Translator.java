@@ -5,6 +5,7 @@ import software.amazon.awssdk.services.kendra.model.CreateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DeleteIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
+import software.amazon.awssdk.services.kendra.model.DocumentAttributeValueType;
 import software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration;
 import software.amazon.awssdk.services.kendra.model.IndexEdition;
 import software.amazon.awssdk.services.kendra.model.Relevance;
@@ -18,10 +19,13 @@ import software.amazon.awssdk.services.kendra.model.Tag;
 import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
+import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -167,7 +171,8 @@ public class Translator {
    * @param model resource model
    * @return updateIndexRequest the aws service request to modify a resource
    */
-  static UpdateIndexRequest translateToUpdateRequest(final ResourceModel model) {
+  static UpdateIndexRequest translateToUpdateRequest(final ResourceModel model,
+                                                     Map<String, String> currentAttributes) {
     // Null equivalents for partial updates.
     String description = model.getDescription() == null ? "" : model.getDescription();
     String name = model.getName() == null ? "" : model.getName();
@@ -178,7 +183,8 @@ public class Translator {
             .roleArn(roleArn)
             .name(name)
             .description(description)
-            .documentMetadataConfigurationUpdates(translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations()))
+            .documentMetadataConfigurationUpdates(
+                    translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations(), currentAttributes))
             .capacityUnits(translateToCapacityUnitsConfiguration(model.getCapacityUnits(), model.getEdition()))
             .build();
   }
@@ -225,7 +231,50 @@ public class Translator {
             .build();
   }
 
-  static List<DocumentMetadataConfiguration> translateToSdkDocumentMetadataConfigurationList(List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList) {
+  static List<DocumentMetadataConfiguration> translateToSdkDocumentMetadataConfigurationList(
+          List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList,
+          Map<String, String> currentAttributes) {
+
+    // Document metadata configuration requested directly from the CloudFormation template
+    List<DocumentMetadataConfiguration> requestedSdkDocumentMetadataConfigurationList =
+            translateToSdkDocumentMetadataConfigurationList(modelDocumentMetadataConfigurationList);
+    Map<String, String> requestedAttributes = requestedSdkDocumentMetadataConfigurationList
+            .stream().collect(Collectors.toMap(x -> x.name(), x -> x.typeAsString()));
+
+    List<DocumentMetadataConfiguration> defaultDocumentMetadataConfigurationList = new ArrayList<>();
+    for (Map.Entry<String, String> entry : currentAttributes.entrySet()) {
+      // If the attribute is a reserved one (i.e. it is prefixed with "_") ...
+      if (entry.getKey().startsWith("_")) {
+        // and it's not in the requested CloudFormation template,
+        // then provide the default value.
+        if (!requestedAttributes.containsKey(entry.getKey())) {
+          defaultDocumentMetadataConfigurationList.add(DocumentMetadataConfiguration
+                  .builder()
+                  .name(entry.getKey())
+                  .type(entry.getValue())
+                  .search((Search) null)
+                  .relevance((Relevance) null)
+                  .build());
+        }
+      } else {
+        // and it's a custom field, then the customer has removed it from their template
+        // which is not allowed because you can't remove fields from the index.
+        if (!requestedAttributes.containsKey(entry.getKey())) {
+          throw new CfnInvalidRequestException("Custom attributes cannot be removed");
+        }
+      }
+    }
+
+    return Stream.concat(
+            defaultDocumentMetadataConfigurationList.stream(),
+            requestedSdkDocumentMetadataConfigurationList.stream())
+            .collect(Collectors.toList());
+
+  }
+
+  static List<DocumentMetadataConfiguration> translateToSdkDocumentMetadataConfigurationList(
+          List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList) {
+
     List<DocumentMetadataConfiguration> sdkDocumentMetadataConfigurationList = new ArrayList<>();
     if (modelDocumentMetadataConfigurationList != null && !modelDocumentMetadataConfigurationList.isEmpty()) {
       sdkDocumentMetadataConfigurationList = new ArrayList<>();

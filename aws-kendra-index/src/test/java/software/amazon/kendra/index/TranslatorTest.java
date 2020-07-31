@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -393,9 +394,11 @@ class TranslatorTest {
     @Test
     void testTranslateToUpdateRequest() {
         String metadataName = "metadataName";
+        String metadataType = "STRING_VALUE";
         DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder =
                 DocumentMetadataConfiguration.builder();
         documentMetadataConfigurationBuilder.name(metadataName);
+        documentMetadataConfigurationBuilder.type(metadataType);
         String name = "name";
         String description = "description";
         String roleArn = "roleArn";
@@ -416,7 +419,9 @@ class TranslatorTest {
                         .storageCapacityUnits(storageCapacityUnits)
                         .build())
                 .build();
-        UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel);
+        Map<String, String> currentAttributes = new HashMap<>();
+        currentAttributes.put(metadataName, metadataType);
+        UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel, currentAttributes);
         assertThat(updateIndexRequest.id()).isEqualTo(id);
         assertThat(updateIndexRequest.description()).isEqualTo(description);
         assertThat(updateIndexRequest.name()).isEqualTo(name);
@@ -429,9 +434,11 @@ class TranslatorTest {
     @Test
     void testTranslateToUpdateRequestDeveloperEdition() {
         String metadataName = "metadataName";
+        String metadataType = "STRING_VALUE";
         DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder =
                 DocumentMetadataConfiguration.builder();
         documentMetadataConfigurationBuilder.name(metadataName);
+        documentMetadataConfigurationBuilder.type(metadataType);
         String name = "name";
         String description = "description";
         String roleArn = "roleArn";
@@ -445,7 +452,9 @@ class TranslatorTest {
                 .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
                 .edition(IndexEdition.DEVELOPER_EDITION.toString())
                 .build();
-        UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel);
+        Map<String, String> currentAttributes = new HashMap<>();
+        currentAttributes.put(metadataName, metadataType);
+        UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel, currentAttributes);
         assertThat(updateIndexRequest.id()).isEqualTo(id);
         assertThat(updateIndexRequest.description()).isEqualTo(description);
         assertThat(updateIndexRequest.name()).isEqualTo(name);
@@ -462,7 +471,7 @@ class TranslatorTest {
                 .edition(IndexEdition.ENTERPRISE_EDITION.toString())
                 .id(id)
                 .build();
-        UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel);
+        UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel, new HashMap<>());
         assertThat(updateIndexRequest.description()).isEqualTo("");
         assertThat(updateIndexRequest.name()).isEqualTo("");
         assertThat(updateIndexRequest.roleArn()).isEqualTo("");
