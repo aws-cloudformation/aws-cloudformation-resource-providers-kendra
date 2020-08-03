@@ -476,6 +476,9 @@
         },
         "AclConfiguration": {
           "$ref": "#/definitions/AclConfiguration"
+        },
+        "SqlConfiguration": {
+          "$ref": "#/definitions/SqlConfiguration"
         }
       },
       "required": [
@@ -576,6 +579,21 @@
       "minLength": 1,
       "maxLength": 100,
       "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+    },
+    "SqlConfiguration": {
+      "type": "object",
+      "properties": {
+        "QueryIdentifiersEnclosingOption": {
+          "$ref": "#/definitions/QueryIdentifiersEnclosingOption"
+        }
+      }
+    },
+    "QueryIdentifiersEnclosingOption": {
+      "type": "string",
+      "enum": [
+        "DOUBLE_QUOTES",
+        "NONE"
+      ]
     },
     "AclConfiguration": {
       "type": "object",
