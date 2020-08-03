@@ -572,7 +572,8 @@
     },
     "ChangeDetectingColumns": {
       "type": "array",
-      "maxItems": 200,
+      "minItems": 1,
+      "maxItems": 5,
       "items": {
         "$ref": "#/definitions/ColumnName"
       }
