@@ -458,6 +458,135 @@
           "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
         }
       }
+    },
+    "DatabaseConfiguration": {
+      "type": "object",
+      "properties": {
+        "DatabaseEngineType": {
+          "$ref": "#/definitions/DatabaseEngineType"
+        },
+        "ConnectionConfiguration": {
+          "$ref": "#/definitions/ConnectionConfiguration"
+        },
+        "VpcConfiguration": {
+          "$ref": "#/definitions/DataSourceVpcConfiguration"
+        },
+        "ColumnConfiguration": {
+          "$ref": "#/definitions/ColumnConfiguration"
+        },
+        "AclConfiguration": {
+          "$ref": "#/definitions/AclConfiguration"
+        }
+      },
+      "required": [
+        "ConnectionConfiguration",
+        "ColumnConfiguration",
+        "DatabaseEngineType"
+      ]
+    },
+    "DatabaseEngineType": {
+      "type": "string",
+      "enum": [
+        "RDS_AURORA_MYSQL",
+        "RDS_AURORA_POSTGRESQL",
+        "RDS_MYSQL",
+        "RDS_POSTGRESQL"
+      ]
+    },
+    "ConnectionConfiguration": {
+      "type": "object",
+      "properties": {
+        "DatabaseHost": {
+          "$ref": "#/definitions/DatabaseHost"
+        },
+        "DatabasePort": {
+          "$ref": "#/definitions/DatabasePort"
+        },
+        "DatabaseName": {
+          "$ref": "#/definitions/DatabaseName"
+        },
+        "TableName": {
+          "$ref": "#/definitions/TableName"
+        },
+        "SecretArn": {
+          "$ref": "#/definitions/SecretArn"
+        }
+      },
+      "required": [
+        "DatabaseHost",
+        "DatabasePort",
+        "DatabaseName",
+        "TableName",
+        "SecretArn"
+      ]
+    },
+    "DatabaseHost": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 253
+    },
+    "DatabasePort": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 65535
+    },
+    "DatabaseName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+    },
+    "TableName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+    },
+    "ColumnConfiguration": {
+      "type": "object",
+      "properties": {
+        "DocumentIdColumnName": {
+          "$ref": "#/definitions/ColumnName"
+        },
+        "DocumentDataColumnName": {
+          "$ref": "#/definitions/ColumnName"
+        },
+        "DocumentTitleColumnName": {
+          "$ref": "#/definitions/ColumnName"
+        },
+        "FieldMappings": {
+          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        },
+        "ChangeDetectingColumns": {
+          "type": "array",
+          "maxItems": 200,
+          "items": {
+            "$ref": "#/definitions/ColumnName"
+          }
+        }
+      },
+      "required": [
+        "DocumentIdColumnName",
+        "DocumentDataColumnName",
+        "ChangeDetectingColumns"
+      ]
+    },
+    "ColumnName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+    },
+    "AclConfiguration": {
+      "type": "object",
+      "properties": {
+        "AllowedGroupsColumnName": {
+          "$ref": "#/definitions/ColumnName"
+        }
+      },
+      "required": [
+        "AllowedGroupsColumnName"
+      ]
     }
   },
   "properties": {
