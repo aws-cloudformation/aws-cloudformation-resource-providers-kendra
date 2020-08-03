@@ -561,11 +561,7 @@
           "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
         },
         "ChangeDetectingColumns": {
-          "type": "array",
-          "maxItems": 200,
-          "items": {
-            "$ref": "#/definitions/ColumnName"
-          }
+          "$ref": "#/definitions/ChangeDetectingColumns"
         }
       },
       "required": [
@@ -573,6 +569,13 @@
         "DocumentDataColumnName",
         "ChangeDetectingColumns"
       ]
+    },
+    "ChangeDetectingColumns": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "$ref": "#/definitions/ColumnName"
+      }
     },
     "ColumnName": {
       "type": "string",
