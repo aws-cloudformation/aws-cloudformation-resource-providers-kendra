@@ -616,7 +616,8 @@
       "enum": [
         "S3",
         "SHAREPOINT",
-        "SALESFORCE"
+        "SALESFORCE",
+        "DATABASE"
       ]
     },
     "DataSourceConfiguration": {
@@ -630,6 +631,9 @@
         },
         "SalesforceConfiguration": {
           "$ref": "#/definitions/SalesforceConfiguration"
+        },
+        "DatabaseConfiguration": {
+          "$ref": "#/definitions/DatabaseConfiguration"
         }
       }
     },
