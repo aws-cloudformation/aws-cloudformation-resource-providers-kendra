@@ -82,24 +82,6 @@ public class DatabaseConverter {
                 .build();
     }
 
-    private static List<software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping> toSdk(List<DataSourceToIndexFieldMapping> model) {
-        if (model == null) {
-            return null;
-        }
-        return model.stream().map(x -> toSdk(x)).collect(Collectors.toList());
-    }
-
-    private static software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping toSdk(DataSourceToIndexFieldMapping model) {
-        if (model == null ) {
-            return null;
-        }
-        return software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping
-                .builder()
-                .dataSourceFieldName(model.getDataSourceFieldName())
-                .dateFieldFormat(model.getDateFieldFormat())
-                .indexFieldName(model.getIndexFieldName())
-                .build();
-    }
 
     private static software.amazon.awssdk.services.kendra.model.AclConfiguration toSdk(AclConfiguration model) {
         if (model == null) {
