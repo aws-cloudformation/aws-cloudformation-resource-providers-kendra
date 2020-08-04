@@ -22,6 +22,9 @@ public class DatabaseConverter {
     }
 
     public static software.amazon.awssdk.services.kendra.model.DatabaseConfiguration toSdk(DatabaseConfiguration model) {
+        if (model == null) {
+            return null;
+        }
         return software.amazon.awssdk.services.kendra.model.DatabaseConfiguration
                 .builder()
                 .databaseEngineType(model.getDatabaseEngineType())
@@ -126,6 +129,9 @@ public class DatabaseConverter {
     }
 
     public static DatabaseConfiguration toModel(software.amazon.awssdk.services.kendra.model.DatabaseConfiguration sdk) {
+        if (sdk == null) {
+            return null;
+        }
         return DatabaseConfiguration
                 .builder()
                 .databaseEngineType(sdk.databaseEngineTypeAsString())
