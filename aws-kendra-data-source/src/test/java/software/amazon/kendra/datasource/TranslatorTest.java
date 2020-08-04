@@ -15,8 +15,6 @@ import java.util.HashSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import software.amazon.awssdk.services.kendra.model.DataSourceType;
 
-import javax.sql.DataSource;
-
 public class TranslatorTest {
 
     @Test
@@ -51,13 +49,13 @@ public class TranslatorTest {
     void testTranslateToCreateRequest_WithS3DataSource() {
         String indexId = "indexId";
         ResourceModel resourceModel = ResourceModel
-            .builder()
-            .indexId(indexId)
-            .type("S3")
-            .dataSourceConfiguration(DataSourceConfiguration.builder()
-                .s3Configuration(S3DataSourceConfiguration.builder().build())
-                .build())
-            .build();
+                .builder()
+                .indexId(indexId)
+                .type("S3")
+                .dataSourceConfiguration(DataSourceConfiguration.builder()
+                        .s3Configuration(S3DataSourceConfiguration.builder().build())
+                        .build())
+                .build();
         CreateDataSourceRequest createDataSourceRequest = Translator.translateToCreateRequest(resourceModel);
         assertThat(createDataSourceRequest.indexId()).isEqualTo(indexId);
         assertThat(createDataSourceRequest.configuration().s3Configuration()).isNotNull();
@@ -67,13 +65,13 @@ public class TranslatorTest {
     void testTranslateToCreateRequest_WithSharePointDataSource() {
         String indexId = "indexId";
         ResourceModel resourceModel = ResourceModel
-            .builder()
-            .indexId(indexId)
-            .type("SHAREPOINT")
-            .dataSourceConfiguration(DataSourceConfiguration.builder()
-                .sharePointConfiguration(SharePointConfiguration.builder().build())
-                .build())
-            .build();
+                .builder()
+                .indexId(indexId)
+                .type("SHAREPOINT")
+                .dataSourceConfiguration(DataSourceConfiguration.builder()
+                        .sharePointConfiguration(SharePointConfiguration.builder().build())
+                        .build())
+                .build();
         CreateDataSourceRequest createDataSourceRequest = Translator.translateToCreateRequest(resourceModel);
         assertThat(createDataSourceRequest.indexId()).isEqualTo(indexId);
         assertThat(createDataSourceRequest.configuration().sharePointConfiguration()).isNotNull();
@@ -83,10 +81,10 @@ public class TranslatorTest {
     void testTranslateToCreateRequest_WithInvalidDataSource() {
         String indexId = "indexId";
         ResourceModel resourceModel = ResourceModel
-            .builder()
-            .indexId(indexId)
-            .description("description")
-            .build();
+                .builder()
+                .indexId(indexId)
+                .description("description")
+                .build();
         CreateDataSourceRequest createDataSourceRequest = Translator.translateToCreateRequest(resourceModel);
         assertThat(createDataSourceRequest.indexId()).isEqualTo(indexId);
         assertThat(createDataSourceRequest.configuration()).isEqualTo(null);
@@ -96,10 +94,10 @@ public class TranslatorTest {
     void testTranslateToCreateRequest_WithTags() {
         String indexId = "indexId";
         ResourceModel resourceModel = ResourceModel
-            .builder()
-            .indexId(indexId)
-            .tags(Arrays.asList(Tag.builder().key("key").value("value").build()))
-            .build();
+                .builder()
+                .indexId(indexId)
+                .tags(Arrays.asList(Tag.builder().key("key").value("value").build()))
+                .build();
         CreateDataSourceRequest createDataSourceRequest = Translator.translateToCreateRequest(resourceModel);
         assertThat(createDataSourceRequest.indexId()).isEqualTo(indexId);
         assertThat(createDataSourceRequest.tags().size()).isEqualTo(1);
@@ -112,11 +110,11 @@ public class TranslatorTest {
         String id = "id";
         String indexId = "indexId";
         ResourceModel resourceModel = ResourceModel
-            .builder()
-            .id(id)
-            .indexId(indexId)
-            .description("description")
-            .build();
+                .builder()
+                .id(id)
+                .indexId(indexId)
+                .description("description")
+                .build();
         UpdateDataSourceRequest updateDataSourceRequest = Translator.translateToUpdateRequest(resourceModel);
         assertThat(updateDataSourceRequest.id()).isEqualTo(id);
         assertThat(updateDataSourceRequest.indexId()).isEqualTo(indexId);
@@ -125,7 +123,7 @@ public class TranslatorTest {
         assertThat(updateDataSourceRequest.roleArn()).isEqualTo("");
         assertThat(updateDataSourceRequest.schedule()).isEqualTo("");
         assertThat(updateDataSourceRequest.configuration())
-            .isEqualTo(software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder().build());
+                .isEqualTo(software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder().build());
     }
 
     @Test
@@ -219,8 +217,6 @@ public class TranslatorTest {
     @Test
     void testTranslateToSdkDatabase() {
         DatabaseConfiguration databaseConfiguration = DatabaseConfiguration
-                .builder()
-                .build();
         DataSourceConfiguration dataSourceConfiguration = DataSourceConfiguration
                 .builder()
                 .databaseConfiguration(databaseConfiguration)
@@ -234,14 +230,33 @@ public class TranslatorTest {
                 .build();
 
         assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration, "DATABASE"))
+    }
+
+    @Test
+    void testTranslateToSdkServiceNow() {
+        ServiceNowConfiguration serviceNowConfiguration = ServiceNowConfiguration
+                .builder()
+                .build();
+        DataSourceConfiguration dataSourceConfiguration = DataSourceConfiguration
+                .builder()
+                .serviceNowConfiguration(serviceNowConfiguration)
+                .build();
+
+        software.amazon.awssdk.services.kendra.model.DataSourceConfiguration expected
+                = software.amazon.awssdk.services.kendra.model.DataSourceConfiguration
+                .builder()
+                .serviceNowConfiguration(software.amazon.awssdk.services.kendra.model.ServiceNowConfiguration
+                        .builder()
+                        .build())
+                .build();
+
+        assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration, "SERVICENOW"))
                 .isEqualTo(expected);
     }
 
     @Test
     void testTranslateToModelDatabase() {
         DatabaseConfiguration databaseConfiguration = DatabaseConfiguration
-                .builder()
-                .build();
         DataSourceConfiguration expected = DataSourceConfiguration
                 .builder()
                 .databaseConfiguration(databaseConfiguration)
@@ -256,4 +271,26 @@ public class TranslatorTest {
 
         assertThat(Translator.toModelDataSourceConfiguration(dataSourceConfiguration, "DATABASE")).isEqualTo(expected);
     }
+
+    @Test
+    void testTranslateToModelServiceNow() {
+        ServiceNowConfiguration serviceNowConfiguration = ServiceNowConfiguration
+                .builder()
+                .build();
+        DataSourceConfiguration expected = DataSourceConfiguration
+                .builder()
+                .serviceNowConfiguration(serviceNowConfiguration)
+                .build();
+
+        software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration
+                = software.amazon.awssdk.services.kendra.model.DataSourceConfiguration
+                .builder()
+                .serviceNowConfiguration(software.amazon.awssdk.services.kendra.model.ServiceNowConfiguration
+                        .builder()
+                        .build())
+                .build();
+
+        assertThat(Translator.toModelDataSourceConfiguration(dataSourceConfiguration, "SERVICENOW")).isEqualTo(expected);
+    }
+
 }

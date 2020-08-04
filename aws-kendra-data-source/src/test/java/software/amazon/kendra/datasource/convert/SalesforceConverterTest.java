@@ -580,11 +580,6 @@ public class SalesforceConverterTest {
     }
 
     @Test
-    void testToModelDataSourceToIndexFieldMappingList() {
-        assertThat(SalesforceConverter.toModelDataSourceToIndexFieldMappingList(null)).isNull();
-    }
-
-    @Test
     void testToModelIncludeFilterTypes() {
         assertThat(SalesforceConverter.toModelIncludeFilterTypes(null)).isNull();
     }

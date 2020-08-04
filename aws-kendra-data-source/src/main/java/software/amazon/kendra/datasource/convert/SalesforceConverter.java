@@ -1,7 +1,6 @@
 package software.amazon.kendra.datasource.convert;
 
 import software.amazon.awssdk.services.kendra.model.DataSourceConfiguration;
-import software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping;
 import software.amazon.awssdk.services.kendra.model.SalesforceChatterFeedConfiguration;
 import software.amazon.awssdk.services.kendra.model.SalesforceChatterFeedIncludeFilterType;
 import software.amazon.awssdk.services.kendra.model.SalesforceConfiguration;
@@ -47,7 +46,7 @@ public class SalesforceConverter {
                 .builder()
                 .documentDataFieldName(model.getDocumentDataFieldName())
                 .documentTitleFieldName(model.getDocumentTitleFieldName())
-                .fieldMappings(toSdkDataSourceToIndexFieldMappingList(model.getFieldMappings()))
+                .fieldMappings(FieldMappingConverter.toSdk(model.getFieldMappings()))
                 .includeFilterTypes(toSdkSalesforceChatterFeedIncludeFilterType(model.getIncludeFilterTypes()))
                 .build();
     }
@@ -74,7 +73,7 @@ public class SalesforceConverter {
                 .name(model.getName())
                 .documentDataFieldName(model.getDocumentDataFieldName())
                 .documentTitleFieldName(model.getDocumentTitleFieldName())
-                .fieldMappings(toSdkDataSourceToIndexFieldMappingList(model.getFieldMappings()))
+                .fieldMappings(FieldMappingConverter.toSdk(model.getFieldMappings()))
                 .build();
     }
 
@@ -106,7 +105,7 @@ public class SalesforceConverter {
                 .builder()
                 .documentDataFieldName(model.getDocumentDataFieldName())
                 .documentTitleFieldName(model.getDocumentTitleFieldName())
-                .fieldMappings(toSdkDataSourceToIndexFieldMappingList(model.getFieldMappings()))
+                .fieldMappings(FieldMappingConverter.toSdk(model.getFieldMappings()))
                 .build();
     }
 
@@ -128,7 +127,7 @@ public class SalesforceConverter {
                 .name(model.getName())
                 .documentDataFieldName(model.getDocumentDataFieldName())
                 .documentTitleFieldName(model.getDocumentTitleFieldName())
-                .fieldMappings(toSdkDataSourceToIndexFieldMappingList(model.getFieldMappings()))
+                .fieldMappings(FieldMappingConverter.toSdk(model.getFieldMappings()))
                 .build();
     }
 
@@ -139,28 +138,11 @@ public class SalesforceConverter {
         return modelIncludedStates.stream().map(x -> SalesforceKnowledgeArticleState.fromValue(x)).collect(Collectors.toList());
     }
 
-    static List<DataSourceToIndexFieldMapping> toSdkDataSourceToIndexFieldMappingList(
-            List<software.amazon.kendra.datasource.DataSourceToIndexFieldMapping> modelList) {
-        if (modelList == null) {
-            return null;
-        }
-        return modelList.stream().map(x -> toSdkDataSourceToIndexFieldMapping(x)).collect(Collectors.toList());
-    }
-
     static List<String> toSdkFilePatterns(List<String> model) {
         if (model == null) {
             return null;
         }
         return model.stream().collect(Collectors.toList());
-    }
-
-    static DataSourceToIndexFieldMapping toSdkDataSourceToIndexFieldMapping(
-            software.amazon.kendra.datasource.DataSourceToIndexFieldMapping model) {
-        return DataSourceToIndexFieldMapping.builder()
-                .indexFieldName(model.getIndexFieldName())
-                .dataSourceFieldName(model.getDataSourceFieldName())
-                .dateFieldFormat(model.getDateFieldFormat())
-                .build();
     }
 
     public static software.amazon.kendra.datasource.DataSourceConfiguration toModelDataSourceConfiguration(
@@ -219,7 +201,7 @@ public class SalesforceConverter {
                 .builder()
                 .documentDataFieldName(sdk.documentDataFieldName())
                 .documentTitleFieldName(sdk.documentTitleFieldName())
-                .fieldMappings(toModelDataSourceToIndexFieldMappingList(sdk.fieldMappings()))
+                .fieldMappings(FieldMappingConverter.toModel(sdk.fieldMappings()))
                 .build();
     }
 
@@ -244,7 +226,7 @@ public class SalesforceConverter {
                 .name(sdk.name())
                 .documentDataFieldName(sdk.documentDataFieldName())
                 .documentTitleFieldName(sdk.documentTitleFieldName())
-                .fieldMappings(toModelDataSourceToIndexFieldMappingList(sdk.fieldMappings()))
+                .fieldMappings(FieldMappingConverter.toModel(sdk.fieldMappings()))
                 .build();
 
     }
@@ -268,7 +250,7 @@ public class SalesforceConverter {
                 .name(sdk.nameAsString())
                 .documentDataFieldName(sdk.documentDataFieldName())
                 .documentTitleFieldName(sdk.documentTitleFieldName())
-                .fieldMappings(toModelDataSourceToIndexFieldMappingList(sdk.fieldMappings()))
+                .fieldMappings(FieldMappingConverter.toModel(sdk.fieldMappings()))
                 .build();
     }
 
@@ -279,13 +261,6 @@ public class SalesforceConverter {
         return model.stream().collect(Collectors.toList());
     }
 
-    static List<software.amazon.kendra.datasource.DataSourceToIndexFieldMapping> toModelDataSourceToIndexFieldMappingList(
-            List<DataSourceToIndexFieldMapping> sdk) {
-        if (sdk == null) {
-            return null;
-        }
-        return sdk.stream().map(x -> toModelDataSourceToIndexFieldMapping(x)).collect(Collectors.toList());
-    }
 
     static software.amazon.kendra.datasource.SalesforceChatterFeedConfiguration toModelSalesforceChatterFeedConfiguration(
             SalesforceChatterFeedConfiguration sdk) {
@@ -296,7 +271,7 @@ public class SalesforceConverter {
                 .builder()
                 .documentDataFieldName(sdk.documentDataFieldName())
                 .documentTitleFieldName(sdk.documentTitleFieldName())
-                .fieldMappings(toModelDataSourceToIndexFieldMappingList(sdk.fieldMappings()))
+                .fieldMappings(FieldMappingConverter.toModel(sdk.fieldMappings()))
                 .includeFilterTypes(toModelIncludeFilterTypes(sdk.includeFilterTypes()))
                 .build();
     }
@@ -306,16 +281,6 @@ public class SalesforceConverter {
             return null;
         }
         return sdk.stream().map(x -> x.toString()).collect(Collectors.toList());
-    }
-
-    static software.amazon.kendra.datasource.DataSourceToIndexFieldMapping toModelDataSourceToIndexFieldMapping(
-            DataSourceToIndexFieldMapping sdk) {
-        return software.amazon.kendra.datasource.DataSourceToIndexFieldMapping
-                .builder()
-                .dataSourceFieldName(sdk.dataSourceFieldName())
-                .dateFieldFormat(sdk.dateFieldFormat())
-                .indexFieldName(sdk.indexFieldName())
-                .build();
     }
 
 }
