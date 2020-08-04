@@ -458,6 +458,306 @@
           "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
         }
       }
+    },
+    "DatabaseConfiguration": {
+      "type": "object",
+      "properties": {
+        "DatabaseEngineType": {
+          "$ref": "#/definitions/DatabaseEngineType"
+        },
+        "ConnectionConfiguration": {
+          "$ref": "#/definitions/ConnectionConfiguration"
+        },
+        "VpcConfiguration": {
+          "$ref": "#/definitions/DataSourceVpcConfiguration"
+        },
+        "ColumnConfiguration": {
+          "$ref": "#/definitions/ColumnConfiguration"
+        },
+        "AclConfiguration": {
+          "$ref": "#/definitions/AclConfiguration"
+        },
+        "SqlConfiguration": {
+          "$ref": "#/definitions/SqlConfiguration"
+        }
+      },
+      "required": [
+        "ConnectionConfiguration",
+        "ColumnConfiguration",
+        "DatabaseEngineType"
+      ]
+    },
+    "DatabaseEngineType": {
+      "type": "string",
+      "enum": [
+        "RDS_AURORA_MYSQL",
+        "RDS_AURORA_POSTGRESQL",
+        "RDS_MYSQL",
+        "RDS_POSTGRESQL"
+      ]
+    },
+    "ConnectionConfiguration": {
+      "type": "object",
+      "properties": {
+        "DatabaseHost": {
+          "$ref": "#/definitions/DatabaseHost"
+        },
+        "DatabasePort": {
+          "$ref": "#/definitions/DatabasePort"
+        },
+        "DatabaseName": {
+          "$ref": "#/definitions/DatabaseName"
+        },
+        "TableName": {
+          "$ref": "#/definitions/TableName"
+        },
+        "SecretArn": {
+          "$ref": "#/definitions/SecretArn"
+        }
+      },
+      "required": [
+        "DatabaseHost",
+        "DatabasePort",
+        "DatabaseName",
+        "TableName",
+        "SecretArn"
+      ]
+    },
+    "DatabaseHost": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 253
+    },
+    "DatabasePort": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 65535
+    },
+    "DatabaseName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+    },
+    "TableName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+    },
+    "ColumnConfiguration": {
+      "type": "object",
+      "properties": {
+        "DocumentIdColumnName": {
+          "$ref": "#/definitions/ColumnName"
+        },
+        "DocumentDataColumnName": {
+          "$ref": "#/definitions/ColumnName"
+        },
+        "DocumentTitleColumnName": {
+          "$ref": "#/definitions/ColumnName"
+        },
+        "FieldMappings": {
+          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        },
+        "ChangeDetectingColumns": {
+          "$ref": "#/definitions/ChangeDetectingColumns"
+        }
+      },
+      "required": [
+        "DocumentIdColumnName",
+        "DocumentDataColumnName",
+        "ChangeDetectingColumns"
+      ]
+    },
+    "ChangeDetectingColumns": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 5,
+      "items": {
+        "$ref": "#/definitions/ColumnName"
+      }
+    },
+    "ColumnName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+    },
+    "SqlConfiguration": {
+      "type": "object",
+      "properties": {
+        "QueryIdentifiersEnclosingOption": {
+          "$ref": "#/definitions/QueryIdentifiersEnclosingOption"
+        }
+      }
+    },
+    "QueryIdentifiersEnclosingOption": {
+      "type": "string",
+      "enum": [
+        "DOUBLE_QUOTES",
+        "NONE"
+      ]
+    },
+    "AclConfiguration": {
+      "type": "object",
+      "properties": {
+        "AllowedGroupsColumnName": {
+          "$ref": "#/definitions/ColumnName"
+        }
+      },
+      "required": [
+        "AllowedGroupsColumnName"
+      ]
+    },
+    "OneDriveConfiguration": {
+      "type": "object",
+      "properties": {
+        "TenantDomain": {
+          "$ref": "#/definitions/TenantDomain"
+        },
+        "SecretArn": {
+          "$ref": "#/definitions/SecretArn"
+        },
+        "OneDriveUsers": {
+          "$ref": "#/definitions/OneDriveUsers"
+        },
+        "InclusionPatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "ExclusionPatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "FieldMappings": {
+          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        }
+      },
+      "required": [
+        "TenantDomain",
+        "SecretArn",
+        "OneDriveUsers"
+      ]
+    },
+    "TenantDomain": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\\.)+[a-z]{2,}$"
+    },
+    "OneDriveUsers": {
+      "type": "object",
+      "properties": {
+        "OneDriveUserList": {
+          "$ref": "#/definitions/OneDriveUserList"
+        },
+        "OneDriveUserS3Path": {
+          "$ref": "#/definitions/S3Path"
+        }
+      }
+    },
+    "OneDriveUserList": {
+      "type": "array",
+      "minLength": 1,
+      "maxLength": 100,
+      "items": {
+        "$ref": "#/definitions/OneDriveUser"
+      }
+    },
+    "OneDriveUser": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^(?!\\s).+@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
+    },
+    "ServiceNowConfiguration": {
+      "type": "object",
+      "properties": {
+        "HostUrl": {
+          "$ref": "#/definitions/ServiceNowHostUrl"
+        },
+        "SecretArn": {
+          "$ref": "#/definitions/SecretArn"
+        },
+        "ServiceNowBuildVersion": {
+          "$ref": "#/definitions/ServiceNowBuildVersionType"
+        },
+        "KnowledgeArticleConfiguration": {
+          "$ref": "#/definitions/ServiceNowKnowledgeArticleConfiguration"
+        },
+        "ServiceCatalogConfiguration": {
+          "$ref": "#/definitions/ServiceNowServiceCatalogConfiguration"
+        }
+      },
+      "required": [
+        "HostUrl",
+        "SecretArn",
+        "ServiceNowBuildVersion"
+      ]
+    },
+    "ServiceNowBuildVersionType": {
+      "type": "string",
+      "enum": [
+        "LONDON",
+        "OTHERS"
+      ]
+    },
+    "ServiceNowServiceCatalogConfiguration": {
+      "type": "object",
+      "properties": {
+        "CrawlAttachments": {
+          "type": "boolean"
+        },
+        "IncludeAttachmentFilePatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "ExcludeAttachmentFilePatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "DocumentDataFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "DocumentTitleFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "FieldMappings": {
+          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        }
+      },
+      "required": [
+        "DocumentDataFieldName"
+      ]
+    },
+    "ServiceNowHostUrl": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
+      "pattern": "^(?!(^(https?|ftp|file):\\/\\/))[a-z0-9-]+(\\.service-now\\.com)$"
+    },
+    "ServiceNowKnowledgeArticleConfiguration": {
+      "type": "object",
+      "properties": {
+        "CrawlAttachments": {
+          "type": "boolean"
+        },
+        "IncludeAttachmentFilePatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "ExcludeAttachmentFilePatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "DocumentDataFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "DocumentTitleFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "FieldMappings": {
+          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        }
+      },
+      "required": [
+        "DocumentDataFieldName"
+      ]
     }
   },
   "properties": {
@@ -487,7 +787,10 @@
       "enum": [
         "S3",
         "SHAREPOINT",
-        "SALESFORCE"
+        "SALESFORCE",
+        "ONEDRIVE",
+        "SERVICENOW",
+        "DATABASE"
       ]
     },
     "DataSourceConfiguration": {
@@ -501,6 +804,15 @@
         },
         "SalesforceConfiguration": {
           "$ref": "#/definitions/SalesforceConfiguration"
+        },
+        "OneDriveConfiguration": {
+          "$ref": "#/definitions/OneDriveConfiguration"
+        },
+        "ServiceNowConfiguration": {
+          "$ref": "#/definitions/ServiceNowConfiguration"
+        },
+        "DatabaseConfiguration": {
+          "$ref": "#/definitions/DatabaseConfiguration"
         }
       }
     },
