@@ -21,8 +21,7 @@ public class DatabaseConverter {
                 .build();
     }
 
-    public static software.amazon.awssdk.services.kendra.model.DatabaseConfiguration toSdk(
-            DatabaseConfiguration model) {
+    public static software.amazon.awssdk.services.kendra.model.DatabaseConfiguration toSdk(DatabaseConfiguration model) {
         return software.amazon.awssdk.services.kendra.model.DatabaseConfiguration
                 .builder()
                 .databaseEngineType(model.getDatabaseEngineType())
@@ -80,16 +79,14 @@ public class DatabaseConverter {
                 .build();
     }
 
-    private static List<software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping> toSdk(
-            List<DataSourceToIndexFieldMapping> model) {
+    private static List<software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping> toSdk(List<DataSourceToIndexFieldMapping> model) {
         if (model == null) {
             return null;
         }
         return model.stream().map(x -> toSdk(x)).collect(Collectors.toList());
     }
 
-    private static software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping toSdk(
-            DataSourceToIndexFieldMapping model) {
+    private static software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping toSdk(DataSourceToIndexFieldMapping model) {
         if (model == null ) {
             return null;
         }
@@ -121,8 +118,7 @@ public class DatabaseConverter {
                 .build();
     }
 
-    public static DataSourceConfiguration toModelDataSourceConfiguration(
-            software.amazon.awssdk.services.kendra.model.DatabaseConfiguration sdk) {
+    public static DataSourceConfiguration toModelDataSourceConfiguration(software.amazon.awssdk.services.kendra.model.DatabaseConfiguration sdk) {
         return software.amazon.kendra.datasource.DataSourceConfiguration
                 .builder()
                 .databaseConfiguration(toModel(sdk))
