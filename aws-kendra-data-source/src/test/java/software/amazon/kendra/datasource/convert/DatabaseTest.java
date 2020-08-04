@@ -8,6 +8,7 @@ import software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMappin
 import software.amazon.awssdk.services.kendra.model.DataSourceVpcConfiguration;
 import software.amazon.awssdk.services.kendra.model.DatabaseConfiguration;
 import software.amazon.awssdk.services.kendra.model.DatabaseEngineType;
+import software.amazon.awssdk.services.kendra.model.SqlConfiguration;
 
 import java.util.Arrays;
 import java.util.List;
@@ -170,6 +171,29 @@ public class DatabaseTest {
     }
 
     @Test
+    void testToSdkSqlConfig() {
+        String str = "s";
+        SqlConfiguration sdkSqlConfig = SqlConfiguration
+                .builder()
+                .queryIdentifiersEnclosingOption(str)
+                .build();
+        DatabaseConfiguration sdk = DatabaseConfiguration
+                .builder()
+                .sqlConfiguration(sdkSqlConfig)
+                .build();
+
+        software.amazon.kendra.datasource.DatabaseConfiguration model =
+                software.amazon.kendra.datasource.DatabaseConfiguration
+                        .builder()
+                        .sqlConfiguration(software.amazon.kendra.datasource.SqlConfiguration
+                                .builder()
+                                .queryIdentifiersEnclosingOption(str)
+                                .build())
+                        .build();
+        assertThat(DatabaseConverter.toSdk(model)).isEqualTo(sdk);
+    }
+
+    @Test
     void testToModelEngineType() {
         DatabaseConfiguration sdk = DatabaseConfiguration
                 .builder()
@@ -318,6 +342,29 @@ public class DatabaseTest {
                                 .builder()
                                 .allowedGroupsColumnName(columnName)
                                 .build())
+                        .build();
+        assertThat(DatabaseConverter.toModel(sdk)).isEqualTo(model);
+    }
+
+    @Test
+    void testToModelSqlConfig() {
+        String str = "s";
+        SqlConfiguration sdkSqlConfig = SqlConfiguration
+                .builder()
+                .queryIdentifiersEnclosingOption(str)
+                .build();
+        DatabaseConfiguration sdk = DatabaseConfiguration
+                .builder()
+                .sqlConfiguration(sdkSqlConfig)
+                .build();
+
+        software.amazon.kendra.datasource.DatabaseConfiguration model =
+                software.amazon.kendra.datasource.DatabaseConfiguration
+                        .builder()
+                                .sqlConfiguration(software.amazon.kendra.datasource.SqlConfiguration
+                                        .builder()
+                                        .queryIdentifiersEnclosingOption(str)
+                                        .build())
                         .build();
         assertThat(DatabaseConverter.toModel(sdk)).isEqualTo(model);
     }

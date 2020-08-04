@@ -30,6 +30,7 @@ public class DatabaseConverter {
                 .vpcConfiguration(toSdk(model.getVpcConfiguration()))
                 .columnConfiguration(toSdk(model.getColumnConfiguration()))
                 .aclConfiguration(toSdk(model.getAclConfiguration()))
+                .sqlConfiguration(toSdk(model.getSqlConfiguration()))
                 .build();
     }
 
@@ -110,6 +111,16 @@ public class DatabaseConverter {
                 .build();
     }
 
+    private static software.amazon.awssdk.services.kendra.model.SqlConfiguration toSdk(SqlConfiguration model) {
+        if (model == null) {
+            return null;
+        }
+        return software.amazon.awssdk.services.kendra.model.SqlConfiguration
+                .builder()
+                .queryIdentifiersEnclosingOption(model.getQueryIdentifiersEnclosingOption())
+                .build();
+    }
+
     public static DataSourceConfiguration toModelDataSourceConfiguration(
             software.amazon.awssdk.services.kendra.model.DatabaseConfiguration sdk) {
         return software.amazon.kendra.datasource.DataSourceConfiguration
@@ -126,6 +137,7 @@ public class DatabaseConverter {
                 .vpcConfiguration(toModel(sdk.vpcConfiguration()))
                 .columnConfiguration(toModel(sdk.columnConfiguration()))
                 .aclConfiguration(toModel(sdk.aclConfiguration()))
+                .sqlConfiguration(toModel(sdk.sqlConfiguration()))
                 .build();
     }
 
@@ -201,6 +213,16 @@ public class DatabaseConverter {
         return AclConfiguration
                 .builder()
                 .allowedGroupsColumnName(sdk.allowedGroupsColumnName())
+                .build();
+    }
+
+    private static SqlConfiguration toModel(software.amazon.awssdk.services.kendra.model.SqlConfiguration sdk) {
+       if (sdk == null) {
+          return null;
+       }
+        return SqlConfiguration
+                .builder()
+                .queryIdentifiersEnclosingOption(sdk.queryIdentifiersEnclosingOptionAsString())
                 .build();
     }
 
