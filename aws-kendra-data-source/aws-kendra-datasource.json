@@ -679,7 +679,7 @@
           "$ref": "#/definitions/SecretArn"
         },
         "ServiceNowBuildVersion": {
-          "$ref": "#/definitions/ServiceNowBuildVersion"
+          "$ref": "#/definitions/ServiceNowBuildVersionType"
         },
         "KnowledgeArticleConfiguration": {
           "$ref": "#/definitions/ServiceNowKnowledgeArticleConfiguration"
@@ -694,7 +694,7 @@
         "ServiceNowBuildVersion"
       ]
     },
-    "ServiceNowBuildVersion": {
+    "ServiceNowBuildVersionType": {
       "type": "string",
       "enum": [
         "LONDON",
