@@ -78,7 +78,7 @@ public class DatabaseConverter {
                 .documentDataColumnName(model.getDocumentDataColumnName())
                 .documentTitleColumnName(model.getDocumentTitleColumnName())
                 .changeDetectingColumns(toSdkStringList(model.getChangeDetectingColumns()))
-                .fieldMappings(toSdk(model.getFieldMappings()))
+                .fieldMappings(FieldMappingConverter.toSdk(model.getFieldMappings()))
                 .build();
     }
 
@@ -163,16 +163,9 @@ public class DatabaseConverter {
         }
         return DataSourceVpcConfiguration
                 .builder()
-                .securityGroupIds(toModelStringList(sdk.securityGroupIds()))
-                .subnetIds(toModelStringList(sdk.subnetIds()))
+                .securityGroupIds(ListConverter.toModel(sdk.securityGroupIds()))
+                .subnetIds(ListConverter.toModel(sdk.subnetIds()))
                 .build();
-    }
-
-    private static List<String> toModelStringList(List<String> stringList) {
-        if (stringList == null || stringList.isEmpty()) {
-            return null;
-        }
-        return stringList.stream().collect(Collectors.toList());
     }
 
     private static ColumnConfiguration toModel(software.amazon.awssdk.services.kendra.model.ColumnConfiguration sdk) {
@@ -184,27 +177,8 @@ public class DatabaseConverter {
                 .documentIdColumnName(sdk.documentIdColumnName())
                 .documentDataColumnName(sdk.documentDataColumnName())
                 .documentTitleColumnName(sdk.documentTitleColumnName())
-                .fieldMappings(toModel(sdk.fieldMappings()))
-                .changeDetectingColumns(toModelStringList(sdk.changeDetectingColumns()))
-                .build();
-    }
-
-    private static List<DataSourceToIndexFieldMapping> toModel(List<software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping> sdk) {
-        if (sdk == null || sdk.isEmpty()) {
-            return null;
-        }
-        return sdk.stream().map(x -> toModel(x)).collect(Collectors.toList());
-    }
-
-    private static DataSourceToIndexFieldMapping toModel(software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping sdk) {
-        if (sdk == null) {
-            return null;
-        }
-        return DataSourceToIndexFieldMapping
-                .builder()
-                .dataSourceFieldName(sdk.dataSourceFieldName())
-                .indexFieldName(sdk.indexFieldName())
-                .dateFieldFormat(sdk.dateFieldFormat())
+                .fieldMappings(FieldMappingConverter.toModel(sdk.fieldMappings()))
+                .changeDetectingColumns(ListConverter.toModel(sdk.changeDetectingColumns()))
                 .build();
     }
 

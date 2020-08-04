@@ -174,7 +174,6 @@ public class SharePointCoverterTest {
         .inclusionPatterns(Arrays.asList("testInclusionPatterns"))
         .exclusionPatterns(Arrays.asList("testExclusionPatterns"))
         .documentTitleFieldName("testDocumentTitleFieldName")
-        .fieldMappings(Arrays.asList())
         .build())
       .build();
 

@@ -217,6 +217,8 @@ public class TranslatorTest {
     @Test
     void testTranslateToSdkDatabase() {
         DatabaseConfiguration databaseConfiguration = DatabaseConfiguration
+                .builder()
+                .build();
         DataSourceConfiguration dataSourceConfiguration = DataSourceConfiguration
                 .builder()
                 .databaseConfiguration(databaseConfiguration)
@@ -229,7 +231,7 @@ public class TranslatorTest {
                         .builder().build())
                 .build();
 
-        assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration, "DATABASE"))
+        assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration, "DATABASE"));
     }
 
     @Test
@@ -257,6 +259,8 @@ public class TranslatorTest {
     @Test
     void testTranslateToModelDatabase() {
         DatabaseConfiguration databaseConfiguration = DatabaseConfiguration
+                .builder()
+                .build();
         DataSourceConfiguration expected = DataSourceConfiguration
                 .builder()
                 .databaseConfiguration(databaseConfiguration)

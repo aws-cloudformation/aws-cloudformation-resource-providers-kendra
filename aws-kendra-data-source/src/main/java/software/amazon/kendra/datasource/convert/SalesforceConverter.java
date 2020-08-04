@@ -162,8 +162,8 @@ public class SalesforceConverter {
                 .standardObjectConfigurations(toModelSalesforceStandardObjectConfigurationList(sdk.standardObjectConfigurations()))
                 .knowledgeArticleConfiguration(toModelSalesforceKnowledgeArticleConfiguration(sdk.knowledgeArticleConfiguration()))
                 .chatterFeedConfiguration(toModelSalesforceChatterFeedConfiguration(sdk.chatterFeedConfiguration()))
-                .includeAttachmentFilePatterns(toModelFilePatterns(sdk.includeAttachmentFilePatterns()))
-                .excludeAttachmentFilePatterns(toModelFilePatterns(sdk.excludeAttachmentFilePatterns()))
+                .includeAttachmentFilePatterns(ListConverter.toModel(sdk.includeAttachmentFilePatterns()))
+                .excludeAttachmentFilePatterns(ListConverter.toModel(sdk.excludeAttachmentFilePatterns()))
                 .build();
     }
 
@@ -180,15 +180,8 @@ public class SalesforceConverter {
                 .customKnowledgeArticleTypeConfigurations(
                         toModelSalesforceCustomKnowledgeArticleTypeConfigurationList(
                                 sdk.customKnowledgeArticleTypeConfigurations()))
-                .includedStates(toModelIncludedStates(sdk.includedStatesAsStrings()))
+                .includedStates(ListConverter.toModel(sdk.includedStatesAsStrings()))
                 .build();
-    }
-
-    static List<String> toModelIncludedStates(List<String> sdk) {
-        if (sdk == null || sdk.isEmpty()) {
-            return null;
-        }
-        return sdk.stream().collect(Collectors.toList());
     }
 
     static software.amazon.kendra.datasource.SalesforceStandardKnowledgeArticleTypeConfiguration
@@ -254,14 +247,6 @@ public class SalesforceConverter {
                 .build();
     }
 
-    static List<String> toModelFilePatterns(List<String> model) {
-        if (model == null || model.isEmpty()) {
-            return null;
-        }
-        return model.stream().collect(Collectors.toList());
-    }
-
-
     static software.amazon.kendra.datasource.SalesforceChatterFeedConfiguration toModelSalesforceChatterFeedConfiguration(
             SalesforceChatterFeedConfiguration sdk) {
         if (sdk == null) {
@@ -272,15 +257,8 @@ public class SalesforceConverter {
                 .documentDataFieldName(sdk.documentDataFieldName())
                 .documentTitleFieldName(sdk.documentTitleFieldName())
                 .fieldMappings(FieldMappingConverter.toModel(sdk.fieldMappings()))
-                .includeFilterTypes(toModelIncludeFilterTypes(sdk.includeFilterTypes()))
+                .includeFilterTypes(ListConverter.toModel(sdk.includeFilterTypesAsStrings()))
                 .build();
-    }
-
-    static List<String> toModelIncludeFilterTypes(List<SalesforceChatterFeedIncludeFilterType> sdk) {
-        if (sdk == null || sdk.isEmpty()) {
-            return null;
-        }
-        return sdk.stream().map(x -> x.toString()).collect(Collectors.toList());
     }
 
 }

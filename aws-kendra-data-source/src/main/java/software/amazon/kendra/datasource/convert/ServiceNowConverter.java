@@ -55,8 +55,8 @@ public class ServiceNowConverter {
                 .documentDataFieldName(sdk.documentDataFieldName())
                 .documentTitleFieldName(sdk.documentTitleFieldName())
                 .fieldMappings(FieldMappingConverter.toModel(sdk.fieldMappings()))
-                .includeAttachmentFilePatterns(StringListConverter.toModelStringList(sdk.includeAttachmentFilePatterns()))
-                .excludeAttachmentFilePatterns(StringListConverter.toModelStringList(sdk.excludeAttachmentFilePatterns()))
+                .includeAttachmentFilePatterns(ListConverter.toModel(sdk.includeAttachmentFilePatterns()))
+                .excludeAttachmentFilePatterns(ListConverter.toModel(sdk.excludeAttachmentFilePatterns()))
                 .build();
     }
 }

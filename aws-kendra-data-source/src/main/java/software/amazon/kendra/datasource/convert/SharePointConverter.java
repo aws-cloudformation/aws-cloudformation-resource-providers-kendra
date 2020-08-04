@@ -23,7 +23,7 @@ public class SharePointConverter {
       .inclusionPatterns(sharePointConfiguration.getInclusionPatterns())
       .exclusionPatterns(sharePointConfiguration.getExclusionPatterns())
       .vpcConfiguration(sdkVpcConfiguration(sharePointConfiguration.getVpcConfiguration()))
-      .fieldMappings(sdkFieldMappings(sharePointConfiguration.getFieldMappings()))
+      .fieldMappings(FieldMappingConverter.toSdk(sharePointConfiguration.getFieldMappings()))
       .documentTitleFieldName(sharePointConfiguration.getDocumentTitleFieldName())
       .build())
     .build();
@@ -41,7 +41,7 @@ public class SharePointConverter {
       .inclusionPatterns(sharePointConfiguration.inclusionPatterns())
       .exclusionPatterns(sharePointConfiguration.exclusionPatterns())
       .vpcConfiguration(modelVpcConfiguration(sharePointConfiguration.vpcConfiguration()))
-      .fieldMappings(modelFieldMappings(sharePointConfiguration.fieldMappings()))
+      .fieldMappings(FieldMappingConverter.toModel(sharePointConfiguration.fieldMappings()))
       .documentTitleFieldName(sharePointConfiguration.documentTitleFieldName())
       .build())
     .build();
@@ -58,26 +58,6 @@ public class SharePointConverter {
       .build();
   }
 
-  static List<software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping> sdkFieldMappings(
-    List<DataSourceToIndexFieldMapping> fieldMappings) {
-    if (fieldMappings == null) {
-     return null;
-    }
-    return fieldMappings.stream()
-     .filter(Objects::nonNull)
-     .map(fieldMapping -> sdkFieldMapping(fieldMapping))
-     .collect(Collectors.toList());
-  }
-
-  static software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping sdkFieldMapping(
-    DataSourceToIndexFieldMapping fieldMapping) {
-    return software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping.builder()
-      .dataSourceFieldName(fieldMapping.getDataSourceFieldName())
-      .dateFieldFormat(fieldMapping.getDateFieldFormat())
-      .indexFieldName(fieldMapping.getIndexFieldName())
-      .build();
-  }
-
   static DataSourceVpcConfiguration modelVpcConfiguration(software.amazon.awssdk.services.kendra.model.DataSourceVpcConfiguration
     dataSourceVpcConfiguration) {
     if (dataSourceVpcConfiguration == null) {
@@ -86,26 +66,6 @@ public class SharePointConverter {
     return DataSourceVpcConfiguration.builder()
       .securityGroupIds(dataSourceVpcConfiguration.securityGroupIds())
       .subnetIds(dataSourceVpcConfiguration.subnetIds())
-      .build();
-  }
-
-  static List<DataSourceToIndexFieldMapping> modelFieldMappings(
-    List<software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping> fieldMappings) {
-    if (fieldMappings == null) {
-     return null;
-    }
-    return fieldMappings.stream()
-     .filter(Objects::nonNull)
-     .map(fieldMapping -> modelFieldMapping(fieldMapping))
-     .collect(Collectors.toList());
-  }
-
-  static DataSourceToIndexFieldMapping modelFieldMapping(
-    software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping fieldMapping) {
-    return DataSourceToIndexFieldMapping.builder()
-      .dataSourceFieldName(fieldMapping.dataSourceFieldName())
-      .dateFieldFormat(fieldMapping.dateFieldFormat())
-      .indexFieldName(fieldMapping.indexFieldName())
       .build();
   }
 

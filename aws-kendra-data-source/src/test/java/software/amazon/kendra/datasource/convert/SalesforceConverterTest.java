@@ -560,11 +560,6 @@ public class SalesforceConverterTest {
     }
 
     @Test
-    void testToModelIncludedStates() {
-        assertThat(SalesforceConverter.toModelIncludedStates(null)).isNull();
-    }
-
-    @Test
     void testToModelSalesforceStandardKnowledgeArticleTypeConfiguration() {
         assertThat(SalesforceConverter.toModelSalesforceStandardKnowledgeArticleTypeConfiguration(null)).isNull();
     }
@@ -577,11 +572,6 @@ public class SalesforceConverterTest {
     @Test
     void testToModelSalesforceStandardObjectConfiguration() {
         assertThat(SalesforceConverter.toModelSalesforceStandardObjectConfiguration(null)).isNull();
-    }
-
-    @Test
-    void testToModelIncludeFilterTypes() {
-        assertThat(SalesforceConverter.toModelIncludeFilterTypes(null)).isNull();
     }
 
 }
