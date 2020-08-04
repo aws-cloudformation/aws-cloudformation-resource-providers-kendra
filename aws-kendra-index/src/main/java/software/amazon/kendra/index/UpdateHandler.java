@@ -27,8 +27,10 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import software.amazon.cloudformation.proxy.delay.Constant;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -82,7 +84,7 @@ public class UpdateHandler extends BaseHandlerStd {
                         // STEP 1.0 [initialize a proxy context]
                         proxy.initiate("AWS-Kendra-Index::Update", proxyClient, model, callbackContext)
                                 // STEP 1.1 [TODO: construct a body of a request]
-                                .translateToServiceRequest(Translator::translateToUpdateRequest)
+                                .translateToServiceRequest(resourceModel -> translateToUpdateRequest(model, proxyClient))
                                 // STEP 1.2 [TODO: make an api call]
                                 .backoffDelay(delay)
                                 .makeServiceCall(this::updateIndex)
@@ -95,6 +97,22 @@ public class UpdateHandler extends BaseHandlerStd {
                 .then(progress -> updateTags(proxyClient, progress, request))
                 // STEP 4 [TODO: describe call/chain to return the resource model]
                 .then(progress -> new ReadHandler(indexArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
+    }
+
+    static UpdateIndexRequest translateToUpdateRequest(final ResourceModel model, ProxyClient<KendraClient> proxyClient) {
+        DescribeIndexRequest describeIndexRequest = Translator.translateToReadRequest(model);
+        DescribeIndexResponse describeIndexResponse = proxyClient.injectCredentialsAndInvokeV2(describeIndexRequest,
+                proxyClient.client()::describeIndex);
+        Map<String, String> attributesDefinedOnIndex = new HashMap<>();
+        if (describeIndexResponse.documentMetadataConfigurations() != null) {
+            attributesDefinedOnIndex = describeIndexResponse.documentMetadataConfigurations()
+                    .stream().collect(Collectors.toMap(x -> x.name(), x -> x.typeAsString()));
+        }
+        try {
+            return Translator.translateToUpdateRequest(model, attributesDefinedOnIndex);
+        } catch (TranslatorValidationException e) {
+            throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME + e.getMessage(), e);
+        }
     }
 
     private boolean stabilize(

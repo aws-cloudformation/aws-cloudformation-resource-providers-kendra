@@ -20,8 +20,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class TranslatorTest {
 
@@ -391,11 +393,13 @@ class TranslatorTest {
     }
 
     @Test
-    void testTranslateToUpdateRequest() {
+    void testTranslateToUpdateRequest() throws TranslatorValidationException {
         String metadataName = "metadataName";
+        String metadataType = "STRING_VALUE";
         DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder =
                 DocumentMetadataConfiguration.builder();
         documentMetadataConfigurationBuilder.name(metadataName);
+        documentMetadataConfigurationBuilder.type(metadataType);
         String name = "name";
         String description = "description";
         String roleArn = "roleArn";
@@ -416,7 +420,9 @@ class TranslatorTest {
                         .storageCapacityUnits(storageCapacityUnits)
                         .build())
                 .build();
-        UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel);
+        Map<String, String> currentAttributes = new HashMap<>();
+        currentAttributes.put(metadataName, metadataType);
+        UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel, currentAttributes);
         assertThat(updateIndexRequest.id()).isEqualTo(id);
         assertThat(updateIndexRequest.description()).isEqualTo(description);
         assertThat(updateIndexRequest.name()).isEqualTo(name);
@@ -427,11 +433,13 @@ class TranslatorTest {
     }
 
     @Test
-    void testTranslateToUpdateRequestDeveloperEdition() {
+    void testTranslateToUpdateRequestDeveloperEdition() throws TranslatorValidationException {
         String metadataName = "metadataName";
+        String metadataType = "STRING_VALUE";
         DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder =
                 DocumentMetadataConfiguration.builder();
         documentMetadataConfigurationBuilder.name(metadataName);
+        documentMetadataConfigurationBuilder.type(metadataType);
         String name = "name";
         String description = "description";
         String roleArn = "roleArn";
@@ -445,7 +453,9 @@ class TranslatorTest {
                 .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
                 .edition(IndexEdition.DEVELOPER_EDITION.toString())
                 .build();
-        UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel);
+        Map<String, String> currentAttributes = new HashMap<>();
+        currentAttributes.put(metadataName, metadataType);
+        UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel, currentAttributes);
         assertThat(updateIndexRequest.id()).isEqualTo(id);
         assertThat(updateIndexRequest.description()).isEqualTo(description);
         assertThat(updateIndexRequest.name()).isEqualTo(name);
@@ -455,14 +465,14 @@ class TranslatorTest {
     }
 
     @Test
-    void testTranslateToUpdateRequestUnsetInCloudFormation() {
+    void testTranslateToUpdateRequestUnsetInCloudFormation() throws TranslatorValidationException {
         String id = "id";
         ResourceModel resourceModel = ResourceModel
                 .builder()
                 .edition(IndexEdition.ENTERPRISE_EDITION.toString())
                 .id(id)
                 .build();
-        UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel);
+        UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel, new HashMap<>());
         assertThat(updateIndexRequest.description()).isEqualTo("");
         assertThat(updateIndexRequest.name()).isEqualTo("");
         assertThat(updateIndexRequest.roleArn()).isEqualTo("");
@@ -644,6 +654,74 @@ class TranslatorTest {
                 capacityUnitsConfiguration = Translator
                 .translateToCapacityUnitsConfiguration(null, IndexEdition.DEVELOPER_EDITION.toString());
         assertThat(capacityUnitsConfiguration).isNull();
+    }
+
+    @Test
+    void testTranslateToSdkDocumentMetadataConfigurationListThrowsValidationException() {
+        DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder =
+                DocumentMetadataConfiguration.builder();
+        String name = "name";
+        String type = "type";
+        documentMetadataConfigurationBuilder.name(name);
+        documentMetadataConfigurationBuilder.type(type);
+
+        Map<String, String> currentAttributes = new HashMap<>();
+        currentAttributes.put("NotDefined", "type");
+
+        assertThrows(TranslatorValidationException.class, () -> {
+            Translator.translateToSdkDocumentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build()), currentAttributes);
+        });
+    }
+
+    @Test
+    void testTranslateToSdkDocumentMetadataConfigurationListAddsDefaultReservedField() throws TranslatorValidationException {
+        DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder =
+                DocumentMetadataConfiguration.builder();
+        String name = "name";
+        String type = "type";
+        documentMetadataConfigurationBuilder.name(name);
+        documentMetadataConfigurationBuilder.type(type);
+
+        Map<String, String> currentAttributes = new HashMap<>();
+        String customAttributeName = "_custom";
+        String customAttributeType = "STRING_VALUE";
+        currentAttributes.put(customAttributeName, customAttributeType);
+
+        List<software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration> sdkList =
+                Translator.translateToSdkDocumentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build()), currentAttributes);
+
+        assertThat(sdkList.size()).isEqualTo(2);
+        assertThat(sdkList.get(1).name()).isEqualTo(customAttributeName);
+        assertThat(sdkList.get(1).typeAsString()).isEqualTo(customAttributeType);
+        assertThat(sdkList.get(1).search()).isNull();
+        assertThat(sdkList.get(1).relevance()).isNull();
+    }
+
+    @Test
+    void testTranslateToSdkDocumentMetadataConfigurationListAllDefined() throws TranslatorValidationException {
+        DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder =
+                DocumentMetadataConfiguration.builder();
+        String name = "name";
+        String type = "type";
+        documentMetadataConfigurationBuilder.name(name);
+        documentMetadataConfigurationBuilder.type(type);
+
+        String customAttributeName = "_custom";
+        String customAttributeType = "type";
+        DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder2 =
+                DocumentMetadataConfiguration.builder();
+        documentMetadataConfigurationBuilder2.name(customAttributeName);
+        documentMetadataConfigurationBuilder2.type(customAttributeType);
+
+        Map<String, String> currentAttributes = new HashMap<>();
+        currentAttributes.put(customAttributeName, customAttributeType);
+
+        List<software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration> sdkList =
+                Translator.translateToSdkDocumentMetadataConfigurationList(
+                        Arrays.asList(documentMetadataConfigurationBuilder.build(), documentMetadataConfigurationBuilder2.build()),
+                        currentAttributes);
+
+        assertThat(sdkList.size()).isEqualTo(2);
     }
 
 }

@@ -22,6 +22,7 @@ import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -167,7 +168,8 @@ public class Translator {
    * @param model resource model
    * @return updateIndexRequest the aws service request to modify a resource
    */
-  static UpdateIndexRequest translateToUpdateRequest(final ResourceModel model) {
+  static UpdateIndexRequest translateToUpdateRequest(final ResourceModel model,
+                                                     Map<String, String> attributesDefinedOnIndex) throws TranslatorValidationException {
     // Null equivalents for partial updates.
     String description = model.getDescription() == null ? "" : model.getDescription();
     String name = model.getName() == null ? "" : model.getName();
@@ -178,7 +180,8 @@ public class Translator {
             .roleArn(roleArn)
             .name(name)
             .description(description)
-            .documentMetadataConfigurationUpdates(translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations()))
+            .documentMetadataConfigurationUpdates(
+                    translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations(), attributesDefinedOnIndex))
             .capacityUnits(translateToCapacityUnitsConfiguration(model.getCapacityUnits(), model.getEdition()))
             .build();
   }
@@ -225,7 +228,53 @@ public class Translator {
             .build();
   }
 
-  static List<DocumentMetadataConfiguration> translateToSdkDocumentMetadataConfigurationList(List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList) {
+  static List<DocumentMetadataConfiguration> translateToSdkDocumentMetadataConfigurationList(
+          List<software.amazon.kendra.index.DocumentMetadataConfiguration> attributesDefinedInCFTemplate,
+          Map<String, String> attributesDefinedOnIndex) throws TranslatorValidationException {
+
+    // Document metadata configuration directly defined/requested in the CloudFormation template
+    List<DocumentMetadataConfiguration> sdkAttributesDefinedInCFTemplate =
+            translateToSdkDocumentMetadataConfigurationList(attributesDefinedInCFTemplate);
+    Map<String, String> sdkAttributesDefinedInCFTemplateNameToTypeMap = sdkAttributesDefinedInCFTemplate
+            .stream().collect(Collectors.toMap(x -> x.name(), x -> x.typeAsString()));
+
+    List<DocumentMetadataConfiguration> sdkDefaultAttributes = new ArrayList<>();
+    for (Map.Entry<String, String> entry : attributesDefinedOnIndex.entrySet()) {
+      // If the attribute is a reserved one (i.e. it is prefixed with "_") ...
+      if (entry.getKey().startsWith("_")) {
+        // and it's not in the requested CloudFormation template,
+        // then provide the default value. This allows customers to add and remove
+        // reserved attributes. When removed, we set/reset the attribute to it's default
+        if (!sdkAttributesDefinedInCFTemplateNameToTypeMap.containsKey(entry.getKey())) {
+          sdkDefaultAttributes.add(
+                  DocumentMetadataConfiguration
+                          .builder()
+                          .name(entry.getKey())
+                          .type(entry.getValue())
+                          .search((Search) null)
+                          .relevance((Relevance) null)
+                          .build());
+        }
+      } else {
+        // otherwise it's a custom field. We don't allow customers to remove
+        // custom fields from their CloudFormation template so check for that here.
+        if (!sdkAttributesDefinedInCFTemplateNameToTypeMap.containsKey(entry.getKey())) {
+          throw new TranslatorValidationException(
+                  String.format("Custom attribute %s cannot be removed", entry.getKey()));
+        }
+      }
+    }
+
+    return Stream.concat(
+            sdkAttributesDefinedInCFTemplate.stream(),
+            sdkDefaultAttributes.stream())
+            .collect(Collectors.toList());
+
+  }
+
+  static List<DocumentMetadataConfiguration> translateToSdkDocumentMetadataConfigurationList(
+          List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList) {
+
     List<DocumentMetadataConfiguration> sdkDocumentMetadataConfigurationList = new ArrayList<>();
     if (modelDocumentMetadataConfigurationList != null && !modelDocumentMetadataConfigurationList.isEmpty()) {
       sdkDocumentMetadataConfigurationList = new ArrayList<>();
