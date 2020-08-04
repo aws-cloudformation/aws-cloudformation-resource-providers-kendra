@@ -609,6 +609,65 @@
       "required": [
         "AllowedGroupsColumnName"
       ]
+    },
+    "OneDriveConfiguration": {
+      "type": "object",
+      "properties": {
+        "TenantDomain": {
+          "$ref": "#/definitions/TenantDomain"
+        },
+        "SecretArn": {
+          "$ref": "#/definitions/SecretArn"
+        },
+        "OneDriveUsers": {
+          "$ref": "#/definitions/OneDriveUsers"
+        },
+        "InclusionPatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "ExclusionPatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "FieldMappings": {
+          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        }
+      },
+      "required": [
+        "TenantDomain",
+        "SecretArn",
+        "OneDriveUsers"
+      ]
+    },
+    "TenantDomain": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\\.)+[a-z]{2,}$"
+    },
+    "OneDriveUsers": {
+      "type": "object",
+      "properties": {
+        "OneDriveUserList": {
+          "$ref": "#/definitions/OneDriveUserList"
+        },
+        "OneDriveUserS3Path": {
+          "$ref": "#/definitions/S3Path"
+        }
+      }
+    },
+    "OneDriveUserList": {
+      "type": "array",
+      "minLength": 1,
+      "maxLength": 100,
+      "items": {
+        "$ref": "#/definitions/OneDriveUser"
+      }
+    },
+    "OneDriveUser": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^(?!\\s).+@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
     }
   },
   "properties": {
