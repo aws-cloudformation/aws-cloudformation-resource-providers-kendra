@@ -162,8 +162,8 @@ public class SalesforceConverter {
                 .standardObjectConfigurations(toModelSalesforceStandardObjectConfigurationList(sdk.standardObjectConfigurations()))
                 .knowledgeArticleConfiguration(toModelSalesforceKnowledgeArticleConfiguration(sdk.knowledgeArticleConfiguration()))
                 .chatterFeedConfiguration(toModelSalesforceChatterFeedConfiguration(sdk.chatterFeedConfiguration()))
-                .includeAttachmentFilePatterns(ListConverter.toModel(sdk.includeAttachmentFilePatterns()))
-                .excludeAttachmentFilePatterns(ListConverter.toModel(sdk.excludeAttachmentFilePatterns()))
+                .includeAttachmentFilePatterns(StringListConverter.toModel(sdk.includeAttachmentFilePatterns()))
+                .excludeAttachmentFilePatterns(StringListConverter.toModel(sdk.excludeAttachmentFilePatterns()))
                 .build();
     }
 
@@ -180,7 +180,7 @@ public class SalesforceConverter {
                 .customKnowledgeArticleTypeConfigurations(
                         toModelSalesforceCustomKnowledgeArticleTypeConfigurationList(
                                 sdk.customKnowledgeArticleTypeConfigurations()))
-                .includedStates(ListConverter.toModel(sdk.includedStatesAsStrings()))
+                .includedStates(StringListConverter.toModel(sdk.includedStatesAsStrings()))
                 .build();
     }
 
@@ -257,7 +257,7 @@ public class SalesforceConverter {
                 .documentDataFieldName(sdk.documentDataFieldName())
                 .documentTitleFieldName(sdk.documentTitleFieldName())
                 .fieldMappings(FieldMappingConverter.toModel(sdk.fieldMappings()))
-                .includeFilterTypes(ListConverter.toModel(sdk.includeFilterTypesAsStrings()))
+                .includeFilterTypes(StringListConverter.toModel(sdk.includeFilterTypesAsStrings()))
                 .build();
     }
 

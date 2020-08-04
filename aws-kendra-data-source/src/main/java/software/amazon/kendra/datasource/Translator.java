@@ -213,8 +213,6 @@ public class Translator {
       return SalesforceConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getSalesforceConfiguration());
     } else if (DataSourceType.DATABASE.toString().equals(dataSourceType)) {
       return DatabaseConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getDatabaseConfiguration());
-    } else if (DataSourceType.SERVICENOW.toString().equals(dataSourceType)){
-      return ServiceNowConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getServiceNowConfiguration());
     } else {
       return null;
     }
@@ -230,8 +228,6 @@ public class Translator {
       return SalesforceConverter.toModelDataSourceConfiguration(dataSourceConfiguration.salesforceConfiguration());
     } else if (DataSourceType.DATABASE.toString().equals(dataSourceType)) {
       return DatabaseConverter.toModelDataSourceConfiguration(dataSourceConfiguration.databaseConfiguration());
-    } else if (DataSourceType.SERVICENOW.toString().equals(dataSourceType)) {
-      return ServiceNowConverter.toModelDataSourceConfiguration(dataSourceConfiguration.serviceNowConfiguration());
     } else {
       return null;
     }

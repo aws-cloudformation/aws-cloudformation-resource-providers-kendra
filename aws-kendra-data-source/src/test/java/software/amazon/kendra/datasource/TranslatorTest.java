@@ -234,27 +234,6 @@ public class TranslatorTest {
         assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration, "DATABASE"));
     }
 
-    @Test
-    void testTranslateToSdkServiceNow() {
-        ServiceNowConfiguration serviceNowConfiguration = ServiceNowConfiguration
-                .builder()
-                .build();
-        DataSourceConfiguration dataSourceConfiguration = DataSourceConfiguration
-                .builder()
-                .serviceNowConfiguration(serviceNowConfiguration)
-                .build();
-
-        software.amazon.awssdk.services.kendra.model.DataSourceConfiguration expected
-                = software.amazon.awssdk.services.kendra.model.DataSourceConfiguration
-                .builder()
-                .serviceNowConfiguration(software.amazon.awssdk.services.kendra.model.ServiceNowConfiguration
-                        .builder()
-                        .build())
-                .build();
-
-        assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration, "SERVICENOW"))
-                .isEqualTo(expected);
-    }
 
     @Test
     void testTranslateToModelDatabase() {
@@ -274,27 +253,6 @@ public class TranslatorTest {
                 .build();
 
         assertThat(Translator.toModelDataSourceConfiguration(dataSourceConfiguration, "DATABASE")).isEqualTo(expected);
-    }
-
-    @Test
-    void testTranslateToModelServiceNow() {
-        ServiceNowConfiguration serviceNowConfiguration = ServiceNowConfiguration
-                .builder()
-                .build();
-        DataSourceConfiguration expected = DataSourceConfiguration
-                .builder()
-                .serviceNowConfiguration(serviceNowConfiguration)
-                .build();
-
-        software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration
-                = software.amazon.awssdk.services.kendra.model.DataSourceConfiguration
-                .builder()
-                .serviceNowConfiguration(software.amazon.awssdk.services.kendra.model.ServiceNowConfiguration
-                        .builder()
-                        .build())
-                .build();
-
-        assertThat(Translator.toModelDataSourceConfiguration(dataSourceConfiguration, "SERVICENOW")).isEqualTo(expected);
     }
 
 }

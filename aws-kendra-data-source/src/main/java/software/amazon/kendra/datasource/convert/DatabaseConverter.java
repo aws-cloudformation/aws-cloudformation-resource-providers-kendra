@@ -163,8 +163,8 @@ public class DatabaseConverter {
         }
         return DataSourceVpcConfiguration
                 .builder()
-                .securityGroupIds(ListConverter.toModel(sdk.securityGroupIds()))
-                .subnetIds(ListConverter.toModel(sdk.subnetIds()))
+                .securityGroupIds(StringListConverter.toModel(sdk.securityGroupIds()))
+                .subnetIds(StringListConverter.toModel(sdk.subnetIds()))
                 .build();
     }
 
@@ -178,7 +178,7 @@ public class DatabaseConverter {
                 .documentDataColumnName(sdk.documentDataColumnName())
                 .documentTitleColumnName(sdk.documentTitleColumnName())
                 .fieldMappings(FieldMappingConverter.toModel(sdk.fieldMappings()))
-                .changeDetectingColumns(ListConverter.toModel(sdk.changeDetectingColumns()))
+                .changeDetectingColumns(StringListConverter.toModel(sdk.changeDetectingColumns()))
                 .build();
     }
 
