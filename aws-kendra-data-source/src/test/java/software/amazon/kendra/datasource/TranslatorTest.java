@@ -15,6 +15,8 @@ import java.util.HashSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import software.amazon.awssdk.services.kendra.model.DataSourceType;
 
+import javax.sql.DataSource;
+
 public class TranslatorTest {
 
     @Test
@@ -214,4 +216,44 @@ public class TranslatorTest {
         assertThat(Translator.translateToCreateRequest(resourceModel)).isEqualTo(expected);
     }
 
+    @Test
+    void testTranslateToSdkDatabase() {
+        DatabaseConfiguration databaseConfiguration = DatabaseConfiguration
+                .builder()
+                .build();
+        DataSourceConfiguration dataSourceConfiguration = DataSourceConfiguration
+                .builder()
+                .databaseConfiguration(databaseConfiguration)
+                .build();
+
+        software.amazon.awssdk.services.kendra.model.DataSourceConfiguration expected
+                = software.amazon.awssdk.services.kendra.model.DataSourceConfiguration
+                .builder()
+                .databaseConfiguration(software.amazon.awssdk.services.kendra.model.DatabaseConfiguration
+                        .builder().build())
+                .build();
+
+        assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration, "DATABASE"))
+                .isEqualTo(expected);
+    }
+
+    @Test
+    void testTranslateToModelDatabase() {
+        DatabaseConfiguration databaseConfiguration = DatabaseConfiguration
+                .builder()
+                .build();
+        DataSourceConfiguration expected = DataSourceConfiguration
+                .builder()
+                .databaseConfiguration(databaseConfiguration)
+                .build();
+
+        software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration
+                = software.amazon.awssdk.services.kendra.model.DataSourceConfiguration
+                .builder()
+                .databaseConfiguration(software.amazon.awssdk.services.kendra.model.DatabaseConfiguration
+                        .builder().build())
+                .build();
+
+        assertThat(Translator.toModelDataSourceConfiguration(dataSourceConfiguration, "DATABASE")).isEqualTo(expected);
+    }
 }

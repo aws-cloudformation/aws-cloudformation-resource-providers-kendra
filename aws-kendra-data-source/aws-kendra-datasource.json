@@ -529,9 +529,9 @@
       "maxLength": 253
     },
     "DatabasePort": {
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 65535
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
     },
     "DatabaseName": {
       "type": "string",

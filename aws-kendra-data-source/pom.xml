@@ -22,7 +22,7 @@
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>kendra</artifactId>
-            <version>2.13.41</version>
+            <version>2.13.66</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/software.amazon.cloudformation/aws-cloudformation-rpdk-java-plugin -->
         <dependency>

@@ -13,6 +13,7 @@ import software.amazon.awssdk.services.kendra.model.Tag;
 import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateDataSourceRequest;
+import software.amazon.kendra.datasource.convert.DatabaseConverter;
 import software.amazon.kendra.datasource.convert.S3Converter;
 import software.amazon.kendra.datasource.convert.SharePointConverter;
 import software.amazon.kendra.datasource.convert.SalesforceConverter;
@@ -209,6 +210,8 @@ public class Translator {
       return SharePointConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getSharePointConfiguration());
     } else if (DataSourceType.SALESFORCE.toString().equals(dataSourceType)){
       return SalesforceConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getSalesforceConfiguration());
+    } else if (DataSourceType.DATABASE.toString().equals(dataSourceType)) {
+      return DatabaseConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getDatabaseConfiguration());
     } else {
       return null;
     }
@@ -222,6 +225,8 @@ public class Translator {
       return SharePointConverter.toModelDataSourceConfiguration(dataSourceConfiguration.sharePointConfiguration());
     } else if (DataSourceType.SALESFORCE.toString().equals(dataSourceType)) {
       return SalesforceConverter.toModelDataSourceConfiguration(dataSourceConfiguration.salesforceConfiguration());
+    } else if (DataSourceType.DATABASE.toString().equals(dataSourceType)) {
+      return DatabaseConverter.toModelDataSourceConfiguration(dataSourceConfiguration.databaseConfiguration());
     } else {
       return null;
     }
