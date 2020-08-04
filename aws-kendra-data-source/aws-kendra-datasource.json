@@ -668,6 +668,93 @@
       "minLength": 1,
       "maxLength": 256,
       "pattern": "^(?!\\s).+@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
+    },
+    "ServiceNowConfiguration": {
+      "type": "object",
+      "properties": {
+        "HostUrl": {
+          "$ref": "#/definitions/ServiceNowHostUrl"
+        },
+        "SecretArn": {
+          "$ref": "#/definitions/SecretArn"
+        },
+        "ServiceNowBuildVersion": {
+          "type": "string",
+          "enum": [
+            "LONDON",
+            "OTHERS"
+          ]
+        },
+        "KnowledgeArticleConfiguration": {
+          "$ref": "#/definitions/ServiceNowKnowledgeArticleConfiguration"
+        },
+        "ServiceCatalogConfiguration": {
+          "$ref": "#/definitions/ServiceNowServiceCatalogConfiguration"
+        }
+      },
+      "required": [
+        "HostUrl",
+        "SecretArn",
+        "ServiceNowBuildVersion"
+      ]
+    },
+    "ServiceNowServiceCatalogConfiguration": {
+      "type": "object",
+      "properties": {
+        "CrawlAttachments": {
+          "type": "boolean"
+        },
+        "IncludeAttachmentFilePatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "ExcludeAttachmentFilePatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "DocumentDataFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "DocumentTitleFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "FieldMappings": {
+          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        }
+      },
+      "required": [
+        "DocumentDataFieldName"
+      ]
+    },
+    "ServiceNowHostUrl": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
+      "pattern": "^(?!(^(https?|ftp|file):\\/\\/))[a-z0-9-]+(\\.service-now\\.com)$"
+    },
+    "ServiceNowKnowledgeArticleConfiguration": {
+      "type": "object",
+      "properties": {
+        "CrawlAttachments": {
+          "type": "boolean"
+        },
+        "IncludeAttachmentFilePatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "ExcludeAttachmentFilePatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "DocumentDataFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "DocumentTitleFieldName": {
+          "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "FieldMappings": {
+          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        }
+      },
+      "required": [
+        "DocumentDataFieldName"
+      ]
     }
   },
   "properties": {
@@ -698,6 +785,8 @@
         "S3",
         "SHAREPOINT",
         "SALESFORCE",
+        "ONEDRIVE",
+        "SERVICENOW",
         "DATABASE"
       ]
     },
@@ -712,6 +801,12 @@
         },
         "SalesforceConfiguration": {
           "$ref": "#/definitions/SalesforceConfiguration"
+        },
+        "OneDriveConfiguration": {
+          "$ref": "#/definitions/OneDriveConfiguration"
+        },
+        "ServiceNowConfiguration": {
+          "$ref": "#/definitions/ServiceNowConfiguration"
         },
         "DatabaseConfiguration": {
           "$ref": "#/definitions/DatabaseConfiguration"
