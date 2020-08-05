@@ -10,7 +10,7 @@ public class OneDriveConverter {
             OneDriveConfiguration model) {
         return DataSourceConfiguration
                 .builder()
-                .oneDriveConfiguration(software.amazon.awssdk.services.kendra.model.OneDriveConfiguration.builder().build())
+                .oneDriveConfiguration(toSdk(model))
                 .build();
     }
 
@@ -54,7 +54,7 @@ public class OneDriveConverter {
     public static software.amazon.kendra.datasource.DataSourceConfiguration toModelDataSourceConfiguration(software.amazon.awssdk.services.kendra.model.OneDriveConfiguration sdk) {
         return software.amazon.kendra.datasource.DataSourceConfiguration
                 .builder()
-                .oneDriveConfiguration(OneDriveConfiguration.builder().build())
+                .oneDriveConfiguration(toModel(sdk))
                 .build();
     }
 
