@@ -20,7 +20,7 @@ public class ListConverter {
         return list.stream().map(x -> func.apply(x)).collect(Collectors.toList());
     }
 
-    // When we translate to a resource model from an SDK object, check if the list is null AND if it's empty
+    // When we translate to a resource model from an SDK object, check if the list is null OR if it's empty
     // for knowing if we should return null.
     // We do this because the SDK initializes fields of type List<String> to the empty list no
     // matter what - thus, if resource model fields are null they'll be the empty list in the SDK object.
