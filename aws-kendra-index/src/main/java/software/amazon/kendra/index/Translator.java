@@ -49,11 +49,7 @@ public class Translator {
             .roleArn(model.getRoleArn())
             .description(model.getDescription())
             .edition(model.getEdition());
-    if (model.getTags() != null && !model.getTags().isEmpty()) {
-      builder.tags(model.getTags().stream().map(
-              x -> Tag.builder().key(x.getKey()).value(x.getValue()).build())
-              .collect(Collectors.toList()));
-    }
+    builder.tags(ListConverter.toSdk(model.getTags(), x -> Tag.builder().key(x.getKey()).value(x.getValue()).build()));
     if (model.getServerSideEncryptionConfiguration() != null
             && (model.getServerSideEncryptionConfiguration().getKmsKeyId() != null)) {
       builder.serverSideEncryptionConfiguration(
@@ -135,7 +131,7 @@ public class Translator {
               .queryCapacityUnits(describeIndexResponse.capacityUnits().queryCapacityUnits())
               .build());
     }
-    List<software.amazon.kendra.index.Tag> tags = software.amazon.kendra.index.convert.ListConverter.toModel(
+    List<software.amazon.kendra.index.Tag> tags = ListConverter.toModel(
             listTagsForResourceResponse.tags(),
             x -> software.amazon.kendra.index.Tag.builder().key(x.key()).value(x.value()).build());
     builder.tags(tags);
@@ -325,7 +321,7 @@ public class Translator {
 
   static List<software.amazon.kendra.index.DocumentMetadataConfiguration> translateFromSdkDocumentMetadataConfigurationList(
           List<DocumentMetadataConfiguration> sdkDocumentMetadataConfigurationList) {
-    return software.amazon.kendra.index.convert.ListConverter.toModel(sdkDocumentMetadataConfigurationList, Translator::toModelDocumentMetadataConfiguration);
+    return ListConverter.toModel(sdkDocumentMetadataConfigurationList, Translator::toModelDocumentMetadataConfiguration);
   }
 
   static software.amazon.kendra.index.DocumentMetadataConfiguration toModelDocumentMetadataConfiguration(DocumentMetadataConfiguration sdk) {

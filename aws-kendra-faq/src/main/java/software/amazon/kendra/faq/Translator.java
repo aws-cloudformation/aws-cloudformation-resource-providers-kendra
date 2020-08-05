@@ -39,11 +39,7 @@ public class Translator {
                     .key(model.getS3Path().getKey())
                     .bucket(model.getS3Path().getBucket())
                     .build());
-    if (model.getTags() != null) {
-      builder.tags(model.getTags().stream()
-              .map(x -> Tag.builder().key(x.getKey()).value(x.getValue()).build())
-              .collect(Collectors.toList()));
-    }
+    builder.tags(ListConverter.toSdk(model.getTags(), x -> Tag.builder().key(x.getKey()).value(x.getValue()).build()));
     return builder.build();
   }
 
@@ -69,15 +65,12 @@ public class Translator {
                     .key(describeFaqResponse.s3Path().key())
                     .bucket(describeFaqResponse.s3Path().bucket())
                     .build());
-    if (listTagsForResourceResponse.tags() != null
-            && !listTagsForResourceResponse.tags().isEmpty()) {
-      builder.tags(listTagsForResourceResponse.tags()
-              .stream().map(x -> software.amazon.kendra.faq.Tag
-                      .builder()
-                      .key(x.key())
-                      .value(x.value())
-                      .build()).collect(Collectors.toList()));
-    }
+
+    builder.tags(ListConverter.toModel(listTagsForResourceResponse.tags(), x -> software.amazon.kendra.faq.Tag
+            .builder()
+            .key(x.key())
+            .value(x.value())
+            .build()));
     return builder.build();
   }
 
