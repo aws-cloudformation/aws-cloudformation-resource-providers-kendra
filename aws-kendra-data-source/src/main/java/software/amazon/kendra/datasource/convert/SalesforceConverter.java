@@ -43,7 +43,7 @@ public class SalesforceConverter {
                 .builder()
                 .documentDataFieldName(model.getDocumentDataFieldName())
                 .documentTitleFieldName(model.getDocumentTitleFieldName())
-                .fieldMappings(FieldMappingConverter.toSdk(model.getFieldMappings()))
+                .fieldMappings(ListConverter.toSdk(model.getFieldMappings(), FieldMappingConverter::toSdk))
                 .includeFilterTypes(ListConverter.toSdk(model.getIncludeFilterTypes(), SalesforceChatterFeedIncludeFilterType::fromValue))
                 .build();
     }
@@ -54,7 +54,7 @@ public class SalesforceConverter {
                 .name(model.getName())
                 .documentDataFieldName(model.getDocumentDataFieldName())
                 .documentTitleFieldName(model.getDocumentTitleFieldName())
-                .fieldMappings(FieldMappingConverter.toSdk(model.getFieldMappings()))
+                .fieldMappings(ListConverter.toSdk(model.getFieldMappings(), FieldMappingConverter::toSdk))
                 .build();
     }
 
@@ -86,7 +86,7 @@ public class SalesforceConverter {
                 .builder()
                 .documentDataFieldName(model.getDocumentDataFieldName())
                 .documentTitleFieldName(model.getDocumentTitleFieldName())
-                .fieldMappings(FieldMappingConverter.toSdk(model.getFieldMappings()))
+                .fieldMappings(ListConverter.toSdk(model.getFieldMappings(), FieldMappingConverter::toSdk))
                 .build();
     }
 
@@ -100,7 +100,7 @@ public class SalesforceConverter {
                 .name(model.getName())
                 .documentDataFieldName(model.getDocumentDataFieldName())
                 .documentTitleFieldName(model.getDocumentTitleFieldName())
-                .fieldMappings(FieldMappingConverter.toSdk(model.getFieldMappings()))
+                .fieldMappings(ListConverter.toSdk(model.getFieldMappings(), FieldMappingConverter::toSdk))
                 .build();
     }
 
@@ -155,7 +155,7 @@ public class SalesforceConverter {
                 .builder()
                 .documentDataFieldName(sdk.documentDataFieldName())
                 .documentTitleFieldName(sdk.documentTitleFieldName())
-                .fieldMappings(FieldMappingConverter.toModel(sdk.fieldMappings()))
+                .fieldMappings(ListConverter.toSdk(sdk.fieldMappings(), FieldMappingConverter::toModel))
                 .build();
     }
 
@@ -170,7 +170,7 @@ public class SalesforceConverter {
                 .name(sdk.name())
                 .documentDataFieldName(sdk.documentDataFieldName())
                 .documentTitleFieldName(sdk.documentTitleFieldName())
-                .fieldMappings(FieldMappingConverter.toModel(sdk.fieldMappings()))
+                .fieldMappings(ListConverter.toSdk(sdk.fieldMappings(), FieldMappingConverter::toModel))
                 .build();
 
     }
@@ -186,7 +186,7 @@ public class SalesforceConverter {
                 .name(sdk.nameAsString())
                 .documentDataFieldName(sdk.documentDataFieldName())
                 .documentTitleFieldName(sdk.documentTitleFieldName())
-                .fieldMappings(FieldMappingConverter.toModel(sdk.fieldMappings()))
+                .fieldMappings(ListConverter.toSdk(sdk.fieldMappings(), FieldMappingConverter::toModel))
                 .build();
     }
 
@@ -199,7 +199,7 @@ public class SalesforceConverter {
                 .builder()
                 .documentDataFieldName(sdk.documentDataFieldName())
                 .documentTitleFieldName(sdk.documentTitleFieldName())
-                .fieldMappings(FieldMappingConverter.toModel(sdk.fieldMappings()))
+                .fieldMappings(ListConverter.toSdk(sdk.fieldMappings(), FieldMappingConverter::toModel))
                 .includeFilterTypes(StringListConverter.toModel(sdk.includeFilterTypesAsStrings()))
                 .build();
     }

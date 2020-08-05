@@ -78,7 +78,7 @@ public class DatabaseConverter {
                 .documentDataColumnName(model.getDocumentDataColumnName())
                 .documentTitleColumnName(model.getDocumentTitleColumnName())
                 .changeDetectingColumns(toSdkStringList(model.getChangeDetectingColumns()))
-                .fieldMappings(FieldMappingConverter.toSdk(model.getFieldMappings()))
+                .fieldMappings(ListConverter.toSdk(model.getFieldMappings(), FieldMappingConverter::toSdk))
                 .build();
     }
 
@@ -159,7 +159,7 @@ public class DatabaseConverter {
                 .documentIdColumnName(sdk.documentIdColumnName())
                 .documentDataColumnName(sdk.documentDataColumnName())
                 .documentTitleColumnName(sdk.documentTitleColumnName())
-                .fieldMappings(FieldMappingConverter.toModel(sdk.fieldMappings()))
+                .fieldMappings(ListConverter.toSdk(sdk.fieldMappings(), FieldMappingConverter::toModel))
                 .changeDetectingColumns(StringListConverter.toModel(sdk.changeDetectingColumns()))
                 .build();
     }

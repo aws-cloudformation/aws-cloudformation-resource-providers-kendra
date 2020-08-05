@@ -7,14 +7,7 @@ import java.util.stream.Collectors;
 
 public class FieldMappingConverter {
 
-    public static List<software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping> toSdk(List<DataSourceToIndexFieldMapping> model) {
-        if (model == null) {
-            return null;
-        }
-        return model.stream().map(x -> toSdk(x)).collect(Collectors.toList());
-    }
-
-    private static software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping toSdk(DataSourceToIndexFieldMapping model) {
+    public static software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping toSdk(DataSourceToIndexFieldMapping model) {
         if (model == null ) {
             return null;
         }
@@ -26,14 +19,7 @@ public class FieldMappingConverter {
                 .build();
     }
 
-    public static List<DataSourceToIndexFieldMapping> toModel(List<software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping> sdk) {
-        if (sdk == null || sdk.isEmpty()) {
-            return null;
-        }
-        return sdk.stream().map(x -> toModel(x)).collect(Collectors.toList());
-    }
-
-    private static DataSourceToIndexFieldMapping toModel(software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping sdk) {
+    public static DataSourceToIndexFieldMapping toModel(software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping sdk) {
         if (sdk == null) {
             return null;
         }
