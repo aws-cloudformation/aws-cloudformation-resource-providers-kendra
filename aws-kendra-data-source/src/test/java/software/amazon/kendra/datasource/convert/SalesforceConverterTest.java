@@ -287,28 +287,13 @@ public class SalesforceConverterTest {
     }
 
     @Test
-    void testToSdkSalesforceChatterFeedIncludeFilterType() {
-        assertThat(SalesforceConverter.toSdkSalesforceChatterFeedIncludeFilterType(null)).isNull();
-    }
-
-    @Test
     void testToSdkSalesforceStandardKnowledgeArticleTypeConfiguration() {
         assertThat(SalesforceConverter.toSdkSalesforceStandardKnowledgeArticleTypeConfiguration(null)).isNull();
     }
 
     @Test
-    void testToSdkSalesforceKnowledgeArticleStateList() {
-        assertThat(SalesforceConverter.toSdkSalesforceKnowledgeArticleStateList(null)).isNull();
-    }
-
-    @Test
     void testToSdkSalesforceCustomKnowledgeArticleTypeConfiguration() {
         assertThat(SalesforceConverter.toSdkSalesforceCustomKnowledgeArticleTypeConfiguration(null)).isNull();
-    }
-
-    @Test
-    void testToSdkSalesforceCustomKnowledgeArticleTypeConfigurationList() {
-        assertThat(SalesforceConverter.toSdkSalesforceCustomKnowledgeArticleTypeConfigurationList(null)).isNull();
     }
 
     // Tests to model from SDK
@@ -560,33 +545,13 @@ public class SalesforceConverterTest {
     }
 
     @Test
-    void testToModelIncludedStates() {
-        assertThat(SalesforceConverter.toModelIncludedStates(null)).isNull();
-    }
-
-    @Test
     void testToModelSalesforceStandardKnowledgeArticleTypeConfiguration() {
         assertThat(SalesforceConverter.toModelSalesforceStandardKnowledgeArticleTypeConfiguration(null)).isNull();
     }
 
     @Test
-    void testToModelSalesforceCustomKnowledgeArticleTypeConfigurationList() {
-        assertThat(SalesforceConverter.toModelSalesforceCustomKnowledgeArticleTypeConfigurationList(null)).isNull();
-    }
-
-    @Test
     void testToModelSalesforceStandardObjectConfiguration() {
         assertThat(SalesforceConverter.toModelSalesforceStandardObjectConfiguration(null)).isNull();
-    }
-
-    @Test
-    void testToModelDataSourceToIndexFieldMappingList() {
-        assertThat(SalesforceConverter.toModelDataSourceToIndexFieldMappingList(null)).isNull();
-    }
-
-    @Test
-    void testToModelIncludeFilterTypes() {
-        assertThat(SalesforceConverter.toModelIncludeFilterTypes(null)).isNull();
     }
 
 }

@@ -14,6 +14,7 @@ import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateDataSourceRequest;
 import software.amazon.kendra.datasource.convert.DatabaseConverter;
+import software.amazon.kendra.datasource.convert.ListConverter;
 import software.amazon.kendra.datasource.convert.S3Converter;
 import software.amazon.kendra.datasource.convert.SharePointConverter;
 import software.amazon.kendra.datasource.convert.SalesforceConverter;
@@ -81,22 +82,20 @@ public class Translator {
                                                  final ListTagsForResourceResponse listTagsForResourceResponse,
                                                  final String dataSourceArn) {
     ResourceModel.ResourceModelBuilder builder = ResourceModel.builder()
-        .id(describeDataSourceResponse.id())
-        .arn(dataSourceArn)
-        .name(describeDataSourceResponse.name())
-        .description(describeDataSourceResponse.description())
-        .indexId(describeDataSourceResponse.indexId())
-        .roleArn(describeDataSourceResponse.roleArn())
-        .schedule(describeDataSourceResponse.schedule())
-        .type(describeDataSourceResponse.typeAsString())
-        .dataSourceConfiguration(toModelDataSourceConfiguration(describeDataSourceResponse.configuration(),
-          describeDataSourceResponse.typeAsString()));
-    if (listTagsForResourceResponse.tags() != null && !listTagsForResourceResponse.tags().isEmpty()) {
-      List<software.amazon.kendra.datasource.Tag> tags = listTagsForResourceResponse.tags().stream()
-              .map(x -> software.amazon.kendra.datasource.Tag.builder().key(x.key()).value(x.value()).build())
-              .collect(Collectors.toList());
-      builder.tags(tags);
-    }
+            .id(describeDataSourceResponse.id())
+            .arn(dataSourceArn)
+            .name(describeDataSourceResponse.name())
+            .description(describeDataSourceResponse.description())
+            .indexId(describeDataSourceResponse.indexId())
+            .roleArn(describeDataSourceResponse.roleArn())
+            .schedule(describeDataSourceResponse.schedule())
+            .type(describeDataSourceResponse.typeAsString())
+            .dataSourceConfiguration(toModelDataSourceConfiguration(describeDataSourceResponse.configuration(),
+                    describeDataSourceResponse.typeAsString()));
+    List<software.amazon.kendra.datasource.Tag> tags = ListConverter.toModel(
+            listTagsForResourceResponse.tags(),
+            x -> software.amazon.kendra.datasource.Tag.builder().key(x.key()).value(x.value()).build());
+    builder.tags(tags);
     return builder.build();
   }
 
