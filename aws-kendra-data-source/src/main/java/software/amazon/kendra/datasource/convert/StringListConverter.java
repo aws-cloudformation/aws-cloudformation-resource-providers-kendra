@@ -3,6 +3,7 @@ package software.amazon.kendra.datasource.convert;
 import java.util.List;
 import java.util.function.Function;
 
+// Helper class for string lists that need to be converted.
 public class StringListConverter {
 
     public static List<String> toSdk(List<String> list) {
