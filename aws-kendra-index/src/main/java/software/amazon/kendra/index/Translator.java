@@ -131,8 +131,7 @@ public class Translator {
               .queryCapacityUnits(describeIndexResponse.capacityUnits().queryCapacityUnits())
               .build());
     }
-    List<software.amazon.kendra.index.Tag> tags = ListConverter.toModel(
-            listTagsForResourceResponse.tags(),
+    List<software.amazon.kendra.index.Tag> tags = ListConverter.toModel(listTagsForResourceResponse.tags(),
             x -> software.amazon.kendra.index.Tag.builder().key(x.key()).value(x.value()).build());
     builder.tags(tags);
     List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList =
@@ -325,6 +324,9 @@ public class Translator {
   }
 
   static software.amazon.kendra.index.DocumentMetadataConfiguration toModelDocumentMetadataConfiguration(DocumentMetadataConfiguration sdk) {
+    if (sdk == null) {
+      return null;
+    }
     software.amazon.kendra.index.DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder
             model = software.amazon.kendra.index.DocumentMetadataConfiguration.builder();
     model.name(sdk.name());
