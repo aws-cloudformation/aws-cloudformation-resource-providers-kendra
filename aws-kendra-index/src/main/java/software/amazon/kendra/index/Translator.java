@@ -135,17 +135,13 @@ public class Translator {
               .queryCapacityUnits(describeIndexResponse.capacityUnits().queryCapacityUnits())
               .build());
     }
-    if (listTagsForResourceResponse.tags() != null && !listTagsForResourceResponse.tags().isEmpty()) {
-      List<software.amazon.kendra.index.Tag> tags = listTagsForResourceResponse.tags().stream()
-              .map(x -> software.amazon.kendra.index.Tag.builder().key(x.key()).value(x.value()).build())
-              .collect(Collectors.toList());
-      builder.tags(tags);
-    }
+    List<software.amazon.kendra.index.Tag> tags = software.amazon.kendra.index.convert.ListConverter.toModel(
+            listTagsForResourceResponse.tags(),
+            x -> software.amazon.kendra.index.Tag.builder().key(x.key()).value(x.value()).build());
+    builder.tags(tags);
     List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList =
             translateFromSdkDocumentMetadataConfigurationList(describeIndexResponse.documentMetadataConfigurations());
-    if (!modelDocumentMetadataConfigurationList.isEmpty()) {
-      builder.documentMetadataConfigurations(modelDocumentMetadataConfigurationList);
-    }
+    builder.documentMetadataConfigurations(modelDocumentMetadataConfigurationList);
 
     return builder.build();
   }
@@ -329,28 +325,24 @@ public class Translator {
 
   static List<software.amazon.kendra.index.DocumentMetadataConfiguration> translateFromSdkDocumentMetadataConfigurationList(
           List<DocumentMetadataConfiguration> sdkDocumentMetadataConfigurationList) {
-    List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList =
-            new ArrayList<>();
-    if (sdkDocumentMetadataConfigurationList != null && !sdkDocumentMetadataConfigurationList.isEmpty()) {
-      modelDocumentMetadataConfigurationList = new ArrayList<>();
-      for (DocumentMetadataConfiguration sdkDocumentMetadataConfiguration : sdkDocumentMetadataConfigurationList) {
-        software.amazon.kendra.index.DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder
-                modelDocumentMetadataConfigurationBuilder = software.amazon.kendra.index.DocumentMetadataConfiguration.builder();
-        modelDocumentMetadataConfigurationBuilder.name(sdkDocumentMetadataConfiguration.name());
-        modelDocumentMetadataConfigurationBuilder.type(sdkDocumentMetadataConfiguration.typeAsString());
-        software.amazon.kendra.index.Relevance modelRelevance =
-                translateFromSdkRelevance(sdkDocumentMetadataConfiguration.relevance());
-        if (modelRelevance != null) {
-          modelDocumentMetadataConfigurationBuilder.relevance(modelRelevance);
-        }
-        software.amazon.kendra.index.Search modelSearch = translateFromSdkSearch(sdkDocumentMetadataConfiguration.search());
-        if (modelSearch != null) {
-          modelDocumentMetadataConfigurationBuilder.search(modelSearch);
-        }
-        modelDocumentMetadataConfigurationList.add(modelDocumentMetadataConfigurationBuilder.build());
-      }
+    return software.amazon.kendra.index.convert.ListConverter.toModel(sdkDocumentMetadataConfigurationList, Translator::toModelDocumentMetadataConfiguration);
+  }
+
+  static software.amazon.kendra.index.DocumentMetadataConfiguration toModelDocumentMetadataConfiguration(DocumentMetadataConfiguration sdk) {
+    software.amazon.kendra.index.DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder
+            model = software.amazon.kendra.index.DocumentMetadataConfiguration.builder();
+    model.name(sdk.name());
+    model.type(sdk.typeAsString());
+    software.amazon.kendra.index.Relevance modelRelevance =
+            translateFromSdkRelevance(sdk.relevance());
+    if (modelRelevance != null) {
+      model.relevance(modelRelevance);
     }
-    return modelDocumentMetadataConfigurationList;
+    software.amazon.kendra.index.Search modelSearch = translateFromSdkSearch(sdk.search());
+    if (modelSearch != null) {
+      model.search(modelSearch);
+    }
+    return model.build();
   }
 
   private static software.amazon.kendra.index.Relevance translateFromSdkRelevance(Relevance sdkRelevance) {
