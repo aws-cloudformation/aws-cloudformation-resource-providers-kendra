@@ -83,7 +83,7 @@ public class UpdateHandler extends BaseHandlerStd {
         return describeDataSourceResponse;
     }
 
-   /**
+    /**
     * Implement client invocation of the update request through the proxyClient, which is already initialised with
     * caller credentials, correct region and retry settings
     * @param updateDataSourceRequest the aws service request to update a resource
