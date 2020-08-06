@@ -50,7 +50,16 @@ public class DeleteHandler extends BaseHandlerStd {
                                 // STEP 2.3 [TODO: stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]
                                 // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
                                 .stabilize(this::stabilizedOnDelete)
-                                .success());
+                                .done(this::setResourceModelToNullAndReturnSuccess));
+    }
+
+    private ProgressEvent<ResourceModel, CallbackContext> setResourceModelToNullAndReturnSuccess(
+            DeleteFaqRequest deleteFaqRequest,
+            DeleteFaqResponse deleteFaqResponse,
+            ProxyClient<KendraClient> proxyClient,
+            ResourceModel resourceModel,
+            CallbackContext callbackContext) {
+        return ProgressEvent.defaultSuccessHandler(null);
     }
 
     private DeleteFaqResponse deleteFaq(
