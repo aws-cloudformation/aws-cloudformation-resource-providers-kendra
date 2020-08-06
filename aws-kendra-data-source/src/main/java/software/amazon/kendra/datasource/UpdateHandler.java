@@ -57,26 +57,30 @@ public class UpdateHandler extends BaseHandlerStd {
         final ResourceModel model = request.getDesiredResourceState();
 
         return ProgressEvent.progress(model, callbackContext)
-           // STEP 1 [first update/stabilize progress chain - required for resource update]
-            .then(progress ->
-               // STEP 1.0 [initialize a proxy context]
-                proxy.initiate("AWS-Kendra-DataSource::Update", proxyClient, model, callbackContext)
+                .then(progress ->
+                        proxy.initiate("AWS-Kendra-DataSource::ValidateResourceExists", proxyClient, model, callbackContext)
+                                .translateToServiceRequest(Translator::translateToReadRequest)
+                                .makeServiceCall(this::validateResourceExists)
+                                .progress()
+                )
+                .then(progress ->
+                        proxy.initiate("AWS-Kendra-DataSource::Update", proxyClient, model, callbackContext)
+                                .translateToServiceRequest(Translator::translateToUpdateRequest)
+                                .makeServiceCall(this::updateDataSource)
+                                .stabilize(this::stabilize)
+                                .progress())
+                .then(progress -> updateTags(proxyClient, progress, request))
+                .then(progress -> new ReadHandler(dataSourceArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
+    }
 
-               // STEP 1.1 [construct a body of a request]
-               .translateToServiceRequest(Translator::translateToUpdateRequest)
-
-               // STEP 1.2 [ make an api call]
-               .makeServiceCall(this::updateDataSource)
-
-               // STEP 1.3 [stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]
-               // stabilization step may or may not be needed after each API call
-               // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
-               .stabilize(this::stabilize)
-               .progress())
-            // STEP 3 [Add/remove tags]
-            .then(progress -> updateTags(proxyClient, progress, request))
-            // STEP 4 [describe call/chain to return the resource model]
-            .then(progress -> new ReadHandler(dataSourceArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
+    private DescribeDataSourceResponse validateResourceExists(DescribeDataSourceRequest describeDataSourceRequest, ProxyClient<KendraClient> proxyClient) {
+        DescribeDataSourceResponse describeDataSourceResponse;
+        try {
+            describeDataSourceResponse = proxyClient.injectCredentialsAndInvokeV2(describeDataSourceRequest, proxyClient.client()::describeDataSource);
+        } catch (ResourceNotFoundException e) {
+            throw new CfnNotFoundException(ResourceModel.TYPE_NAME, describeDataSourceRequest.id(), e);
+        }
+        return describeDataSourceResponse;
     }
 
    /**

@@ -135,7 +135,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
-        verify(proxyClient.client(), times(2)).describeDataSource(any(DescribeDataSourceRequest.class));
+        verify(proxyClient.client(), times(3)).describeDataSource(any(DescribeDataSourceRequest.class));
     }
 
     @Test
@@ -203,7 +203,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
-        verify(proxyClient.client(), times(3)).describeDataSource(any(DescribeDataSourceRequest.class));
+        verify(proxyClient.client(), times(4)).describeDataSource(any(DescribeDataSourceRequest.class));
     }
 
     @Test
@@ -378,7 +378,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
-        verify(proxyClient.client(), times(2)).describeDataSource(any(DescribeDataSourceRequest.class));
+        verify(proxyClient.client(), times(3)).describeDataSource(any(DescribeDataSourceRequest.class));
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).tagResource(any(TagResourceRequest.class));
     }
@@ -448,7 +448,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
-        verify(proxyClient.client(), times(2)).describeDataSource(any(DescribeDataSourceRequest.class));
+        verify(proxyClient.client(), times(3)).describeDataSource(any(DescribeDataSourceRequest.class));
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).untagResource(any(UntagResourceRequest.class));
     }
@@ -530,7 +530,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
-        verify(proxyClient.client(), times(2)).describeDataSource(any(DescribeDataSourceRequest.class));
+        verify(proxyClient.client(), times(3)).describeDataSource(any(DescribeDataSourceRequest.class));
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).tagResource(any(TagResourceRequest.class));
         verify(proxyClient.client(), times(1)).untagResource(any(UntagResourceRequest.class));
@@ -582,7 +582,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         });
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
-        verify(proxyClient.client(), times(1)).describeDataSource(any(DescribeDataSourceRequest.class));
+        verify(proxyClient.client(), times(2)).describeDataSource(any(DescribeDataSourceRequest.class));
     }
 
     @Test
@@ -632,6 +632,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
         });
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
-        verify(proxyClient.client(), times(1)).describeDataSource(any(DescribeDataSourceRequest.class));
+        verify(proxyClient.client(), times(2)).describeDataSource(any(DescribeDataSourceRequest.class));
     }
 }

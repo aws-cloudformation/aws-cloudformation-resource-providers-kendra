@@ -8,6 +8,7 @@ import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
 import software.amazon.awssdk.services.kendra.model.IndexStatus;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.kendra.model.ServiceQuotaExceededException;
 import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
@@ -16,6 +17,7 @@ import software.amazon.awssdk.services.kendra.model.UpdateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
+import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
 import software.amazon.cloudformation.exceptions.CfnServiceLimitExceededException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
@@ -79,24 +81,32 @@ public class UpdateHandler extends BaseHandlerStd {
         // https://github.com/aws-cloudformation/cloudformation-cli-java-plugin/blob/master/src/main/java/software/amazon/cloudformation/proxy/CallChain.java
 
         return ProgressEvent.progress(model, callbackContext)
-                // STEP 1 [first update/stabilize progress chain - required for resource update]
+                // First validate the resource actually exists per the contract requirements
+                // https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
                 .then(progress ->
-                        // STEP 1.0 [initialize a proxy context]
+                        proxy.initiate("AWS-Kendra-Index::ValidateResourceExists", proxyClient, model, callbackContext)
+                                .translateToServiceRequest(resourceModel -> Translator.translateToReadRequest(model))
+                                .makeServiceCall(this::validateResourceExists)
+                                .progress())
+                .then(progress ->
                         proxy.initiate("AWS-Kendra-Index::Update", proxyClient, model, callbackContext)
-                                // STEP 1.1 [TODO: construct a body of a request]
                                 .translateToServiceRequest(resourceModel -> translateToUpdateRequest(model, proxyClient))
-                                // STEP 1.2 [TODO: make an api call]
                                 .backoffDelay(delay)
                                 .makeServiceCall(this::updateIndex)
-                                // STEP 1.3 [TODO: stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]
-                                // stabilization step may or may not be needed after each API call
-                                // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
                                 .stabilize(this::stabilize)
                                 .progress())
-                // STEP 3 Add/remove tags
                 .then(progress -> updateTags(proxyClient, progress, request))
-                // STEP 4 [TODO: describe call/chain to return the resource model]
                 .then(progress -> new ReadHandler(indexArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
+    }
+
+    private DescribeIndexResponse validateResourceExists(DescribeIndexRequest describeIndexRequest, ProxyClient<KendraClient> proxyClient) {
+        DescribeIndexResponse describeIndexResponse;
+        try {
+            describeIndexResponse = proxyClient.injectCredentialsAndInvokeV2(describeIndexRequest,proxyClient.client()::describeIndex);
+        } catch (ResourceNotFoundException e) {
+            throw new CfnNotFoundException(ResourceModel.TYPE_NAME, describeIndexRequest.id(), e);
+        }
+        return describeIndexResponse;
     }
 
     static UpdateIndexRequest translateToUpdateRequest(final ResourceModel model, ProxyClient<KendraClient> proxyClient) {
@@ -141,6 +151,8 @@ public class UpdateHandler extends BaseHandlerStd {
             final UpdateIndexRequest updateIndexRequest,
             final ProxyClient<KendraClient> proxyClient) {
         UpdateIndexResponse updateIndexResponse;
+        // In this code block we assume the previous DescribeIndex API call validated the resource exists and so doesn't
+        // catch and re-throw here.
         try {
             updateIndexResponse = proxyClient.injectCredentialsAndInvokeV2(updateIndexRequest, proxyClient.client()::updateIndex);
         } catch (ValidationException e) {
