@@ -88,31 +88,42 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceModel model = ResourceModel.builder()
              .id(TEST_ID)
-             .indexId(TEST_INDEX_ID)
-             .name(TEST_DATA_SOURCE_NAME)
-             .schedule(TEST_SCHEDULE)
-             .roleArn(TEST_ROLE_ARN)
-             .description(TEST_DESCRIPTION)
-             .build();
+                .indexId(TEST_INDEX_ID)
+                .name(TEST_DATA_SOURCE_NAME)
+                .schedule(TEST_SCHEDULE)
+                .roleArn(TEST_ROLE_ARN)
+                .description(TEST_DESCRIPTION)
+                .build();
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-             .desiredResourceState(model)
-             .build();
+                .desiredResourceState(model)
+                .build();
 
         when(proxyClient.client().updateDataSource(any(UpdateDataSourceRequest.class)))
-            .thenReturn(UpdateDataSourceResponse.builder().build());
+                .thenReturn(UpdateDataSourceResponse.builder().build());
 
         when(proxyClient.client().describeDataSource(any(DescribeDataSourceRequest.class)))
-             .thenReturn(DescribeDataSourceResponse.builder()
-                 .id(TEST_ID)
-                 .indexId(TEST_INDEX_ID)
-                 .name(TEST_DATA_SOURCE_NAME)
-                 .schedule(TEST_SCHEDULE)
-                 .description(TEST_DESCRIPTION)
-                 .roleArn(TEST_ROLE_ARN)
-                 .type(TEST_DATA_SOURCE_TYPE)
-                 .status(DataSourceStatus.ACTIVE)
-                 .build());
+                .thenReturn(DescribeDataSourceResponse.builder()
+                                .id(TEST_ID)
+                                .indexId(TEST_INDEX_ID)
+                                .name(TEST_DATA_SOURCE_NAME)
+                                .schedule(TEST_SCHEDULE)
+                                .description(TEST_DESCRIPTION)
+                                .roleArn(TEST_ROLE_ARN)
+                                .type(TEST_DATA_SOURCE_TYPE)
+                                .status(DataSourceStatus.ACTIVE)
+                                .build(),
+                        DescribeDataSourceResponse.builder()
+                                .id(TEST_ID)
+                                .indexId(TEST_INDEX_ID)
+                                .name(TEST_DATA_SOURCE_NAME)
+                                .schedule(TEST_SCHEDULE)
+                                .description(TEST_DESCRIPTION)
+                                .roleArn(TEST_ROLE_ARN)
+                                .type(TEST_DATA_SOURCE_TYPE)
+                                .status(DataSourceStatus.ACTIVE)
+                                .build()
+                );
         when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
             .thenReturn(ListTagsForResourceResponse.builder().build());
 
@@ -135,7 +146,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
-        verify(proxyClient.client(), times(2)).describeDataSource(any(DescribeDataSourceRequest.class));
+        verify(proxyClient.client(), times(3)).describeDataSource(any(DescribeDataSourceRequest.class));
     }
 
     @Test
@@ -158,24 +169,35 @@ public class UpdateHandlerTest extends AbstractTestBase {
          when(proxyClient.client().updateDataSource(any(UpdateDataSourceRequest.class)))
              .thenReturn(UpdateDataSourceResponse.builder().build());
 
-         when(proxyClient.client().describeDataSource(any(DescribeDataSourceRequest.class)))
-             .thenReturn(DescribeDataSourceResponse.builder()
-                 .id(TEST_ID)
-                 .indexId(TEST_INDEX_ID)
-                 .name(TEST_DATA_SOURCE_NAME)
-                 .schedule(TEST_SCHEDULE)
-                 .description(TEST_DESCRIPTION)
-                 .roleArn(TEST_ROLE_ARN)
-                 .type(TEST_DATA_SOURCE_TYPE)
-                 .status(DataSourceStatus.UPDATING)
-                 .build(),
-                 DescribeDataSourceResponse.builder()
-                 .id(TEST_ID)
-                 .indexId(TEST_INDEX_ID)
-                 .name(TEST_DATA_SOURCE_NAME)
-                 .schedule(TEST_SCHEDULE)
-                 .description(TEST_DESCRIPTION)
-                 .roleArn(TEST_ROLE_ARN)
+        when(proxyClient.client().describeDataSource(any(DescribeDataSourceRequest.class)))
+                .thenReturn(
+                        DescribeDataSourceResponse.builder()
+                                .id(TEST_ID)
+                                .indexId(TEST_INDEX_ID)
+                                .name(TEST_DATA_SOURCE_NAME)
+                                .schedule(TEST_SCHEDULE)
+                                .description(TEST_DESCRIPTION)
+                                .roleArn(TEST_ROLE_ARN)
+                                .type(TEST_DATA_SOURCE_TYPE)
+                                .status(DataSourceStatus.ACTIVE)
+                                .build(),
+                        DescribeDataSourceResponse.builder()
+                                .id(TEST_ID)
+                                .indexId(TEST_INDEX_ID)
+                                .name(TEST_DATA_SOURCE_NAME)
+                                .schedule(TEST_SCHEDULE)
+                                .description(TEST_DESCRIPTION)
+                                .roleArn(TEST_ROLE_ARN)
+                                .type(TEST_DATA_SOURCE_TYPE)
+                                .status(DataSourceStatus.UPDATING)
+                                .build(),
+                        DescribeDataSourceResponse.builder()
+                                .id(TEST_ID)
+                                .indexId(TEST_INDEX_ID)
+                                .name(TEST_DATA_SOURCE_NAME)
+                                .schedule(TEST_SCHEDULE)
+                                .description(TEST_DESCRIPTION)
+                                .roleArn(TEST_ROLE_ARN)
                  .type(TEST_DATA_SOURCE_TYPE)
                  .status(DataSourceStatus.ACTIVE)
                  .build()
@@ -203,7 +225,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
-        verify(proxyClient.client(), times(3)).describeDataSource(any(DescribeDataSourceRequest.class));
+        verify(proxyClient.client(), times(4)).describeDataSource(any(DescribeDataSourceRequest.class));
     }
 
     @Test
@@ -230,6 +252,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
          assertThrows(CfnInvalidRequestException.class, () -> {
              handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
          });
+        verify(proxyClient.client(), times(1)).describeDataSource(any(DescribeDataSourceRequest.class));
     }
 
     @Test
@@ -256,6 +279,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
          assertThrows(CfnNotFoundException.class, () -> {
              handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
          });
+        verify(proxyClient.client(), times(1)).describeDataSource(any(DescribeDataSourceRequest.class));
     }
 
     @Test
@@ -282,6 +306,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
          assertThrows(CfnResourceConflictException.class, () -> {
              handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
          });
+        verify(proxyClient.client(), times(1)).describeDataSource(any(DescribeDataSourceRequest.class));
     }
 
     @Test
@@ -308,6 +333,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
          assertThrows(CfnGeneralServiceException.class, () -> {
              handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
          });
+        verify(proxyClient.client(), times(1)).describeDataSource(any(DescribeDataSourceRequest.class));
     }
 
     @Test
@@ -378,7 +404,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
-        verify(proxyClient.client(), times(2)).describeDataSource(any(DescribeDataSourceRequest.class));
+        verify(proxyClient.client(), times(3)).describeDataSource(any(DescribeDataSourceRequest.class));
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).tagResource(any(TagResourceRequest.class));
     }
@@ -448,7 +474,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
-        verify(proxyClient.client(), times(2)).describeDataSource(any(DescribeDataSourceRequest.class));
+        verify(proxyClient.client(), times(3)).describeDataSource(any(DescribeDataSourceRequest.class));
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).untagResource(any(UntagResourceRequest.class));
     }
@@ -530,7 +556,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
-        verify(proxyClient.client(), times(2)).describeDataSource(any(DescribeDataSourceRequest.class));
+        verify(proxyClient.client(), times(3)).describeDataSource(any(DescribeDataSourceRequest.class));
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).tagResource(any(TagResourceRequest.class));
         verify(proxyClient.client(), times(1)).untagResource(any(UntagResourceRequest.class));
@@ -582,7 +608,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         });
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
-        verify(proxyClient.client(), times(1)).describeDataSource(any(DescribeDataSourceRequest.class));
+        verify(proxyClient.client(), times(2)).describeDataSource(any(DescribeDataSourceRequest.class));
     }
 
     @Test
@@ -632,6 +658,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
         });
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
-        verify(proxyClient.client(), times(1)).describeDataSource(any(DescribeDataSourceRequest.class));
+        verify(proxyClient.client(), times(2)).describeDataSource(any(DescribeDataSourceRequest.class));
     }
 }
