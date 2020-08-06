@@ -255,4 +255,89 @@ public class TranslatorTest {
         assertThat(Translator.toModelDataSourceConfiguration(dataSourceConfiguration, "DATABASE")).isEqualTo(expected);
     }
 
+    @Test
+    void testTranslateToModelServiceNow() {
+        ServiceNowConfiguration serviceNowConfiguration = ServiceNowConfiguration
+                .builder()
+                .build();
+        DataSourceConfiguration expected = DataSourceConfiguration
+                .builder()
+                .serviceNowConfiguration(serviceNowConfiguration)
+                .build();
+
+        software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration
+                = software.amazon.awssdk.services.kendra.model.DataSourceConfiguration
+                .builder()
+                .serviceNowConfiguration(software.amazon.awssdk.services.kendra.model.ServiceNowConfiguration
+                        .builder()
+                        .build())
+                .build();
+
+        assertThat(Translator.toModelDataSourceConfiguration(dataSourceConfiguration, "SERVICENOW")).isEqualTo(expected);
+    }
+
+    @Test
+    void testTranslateToSdkServiceNow() {
+        ServiceNowConfiguration serviceNowConfiguration = ServiceNowConfiguration
+                .builder()
+                .build();
+        DataSourceConfiguration dataSourceConfiguration = DataSourceConfiguration
+                .builder()
+                .serviceNowConfiguration(serviceNowConfiguration)
+                .build();
+
+        software.amazon.awssdk.services.kendra.model.DataSourceConfiguration expected
+                = software.amazon.awssdk.services.kendra.model.DataSourceConfiguration
+                .builder()
+                .serviceNowConfiguration(software.amazon.awssdk.services.kendra.model.ServiceNowConfiguration
+                        .builder()
+                        .build())
+                .build();
+
+        assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration, "SERVICENOW"))
+                .isEqualTo(expected);
+    }
+
+    @Test
+    void testTranslateToModelOneDrive() {
+        OneDriveConfiguration oneDriveConfiguration = OneDriveConfiguration
+                .builder()
+                .build();
+        DataSourceConfiguration expected = DataSourceConfiguration
+                .builder()
+                .oneDriveConfiguration(oneDriveConfiguration)
+                .build();
+
+        software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration
+                = software.amazon.awssdk.services.kendra.model.DataSourceConfiguration
+                .builder()
+                .oneDriveConfiguration(software.amazon.awssdk.services.kendra.model.OneDriveConfiguration
+                        .builder()
+                        .build())
+                .build();
+
+        assertThat(Translator.toModelDataSourceConfiguration(dataSourceConfiguration, "ONEDRIVE")).isEqualTo(expected);
+    }
+
+    @Test
+    void testTranslateToSdkOneDrive() {
+        OneDriveConfiguration oneDriveConfiguration = OneDriveConfiguration
+                .builder()
+                .build();
+        DataSourceConfiguration dataSourceConfiguration = DataSourceConfiguration
+                .builder()
+                .oneDriveConfiguration(oneDriveConfiguration)
+                .build();
+
+        software.amazon.awssdk.services.kendra.model.DataSourceConfiguration expected
+                = software.amazon.awssdk.services.kendra.model.DataSourceConfiguration
+                .builder()
+                .oneDriveConfiguration(software.amazon.awssdk.services.kendra.model.OneDriveConfiguration
+                        .builder()
+                        .build())
+                .build();
+
+        assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration, "ONEDRIVE"))
+                .isEqualTo(expected);
+    }
 }
