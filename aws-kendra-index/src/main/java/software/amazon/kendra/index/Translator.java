@@ -180,6 +180,11 @@ public class Translator {
   static CapacityUnitsConfiguration translateToCapacityUnitsConfiguration(
           software.amazon.kendra.index.CapacityUnitsConfiguration modelCapacityUnitsConfiguration,
           String indexEdition) {
+    // For developer edition we can't provide CapacityUnitsConfiguration, including it's null
+    // equivalent. Thus, return null.
+    if (indexEdition.equals(IndexEdition.DEVELOPER_EDITION.toString())) {
+      return null;
+    }
     if (modelCapacityUnitsConfiguration != null) {
       return CapacityUnitsConfiguration
               .builder()
@@ -187,21 +192,15 @@ public class Translator {
               .queryCapacityUnits(modelCapacityUnitsConfiguration.getQueryCapacityUnits())
               .build();
     } else {
-      // If the edition type is enterprise, then provide the null equivalent. But if the edition is developer,
-      // then provide null - this is because for developer editions we can't provide CapacityUnitsConfiguration
-      // without getting a validation exception.
-      if (indexEdition.equals(IndexEdition.ENTERPRISE_EDITION.toString())) {
-        // Null equivalent for partial updates.
-        return CapacityUnitsConfiguration
-                .builder()
-                .queryCapacityUnits(0)
-                .storageCapacityUnits(0)
-                .build();
-      } else {
-        return null;
-      }
+      // Null equivalent.
+      return CapacityUnitsConfiguration
+              .builder()
+              .queryCapacityUnits(0)
+              .storageCapacityUnits(0)
+              .build();
     }
   }
+
 
   /**
    * Request to update some other properties that could not be provisioned through first update request

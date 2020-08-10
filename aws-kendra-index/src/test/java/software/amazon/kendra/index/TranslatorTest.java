@@ -657,6 +657,15 @@ class TranslatorTest {
     }
 
     @Test
+    void testTranslateToCapacityUnitsConfigurationSetDeveloperEdition() {
+        software.amazon.awssdk.services.kendra.model.CapacityUnitsConfiguration
+                capacityUnitsConfiguration = Translator
+                .translateToCapacityUnitsConfiguration(CapacityUnitsConfiguration.builder().build(),
+                        IndexEdition.DEVELOPER_EDITION.toString());
+        assertThat(capacityUnitsConfiguration).isNull();
+    }
+
+    @Test
     void testTranslateToSdkDocumentMetadataConfigurationListThrowsValidationException() {
         DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder =
                 DocumentMetadataConfiguration.builder();
