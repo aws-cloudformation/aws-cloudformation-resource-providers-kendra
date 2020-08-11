@@ -125,11 +125,17 @@ public class Translator {
                       .build());
     }
     if (describeIndexResponse.capacityUnits() != null) {
-      builder.capacityUnits(software.amazon.kendra.index.CapacityUnitsConfiguration
-              .builder()
-              .storageCapacityUnits(describeIndexResponse.capacityUnits().storageCapacityUnits())
-              .queryCapacityUnits(describeIndexResponse.capacityUnits().queryCapacityUnits())
-              .build());
+      CapacityUnitsConfiguration capacityUnitsConfiguration = describeIndexResponse.capacityUnits();
+      // If VCU is equal to the null equivalent (ie storage and query capacity units
+      // are both equal to 0, then don't set VCU in the model.
+      if (capacityUnitsConfiguration.queryCapacityUnits() != 0
+              || capacityUnitsConfiguration.storageCapacityUnits() != 0) {
+        builder.capacityUnits(software.amazon.kendra.index.CapacityUnitsConfiguration
+                .builder()
+                .storageCapacityUnits(describeIndexResponse.capacityUnits().storageCapacityUnits())
+                .queryCapacityUnits(describeIndexResponse.capacityUnits().queryCapacityUnits())
+                .build());
+      }
     }
     List<software.amazon.kendra.index.Tag> tags = ListConverter.toModel(listTagsForResourceResponse.tags(),
             x -> software.amazon.kendra.index.Tag.builder().key(x.key()).value(x.value()).build());

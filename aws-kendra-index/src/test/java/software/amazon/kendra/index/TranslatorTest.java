@@ -16,6 +16,7 @@ import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -608,6 +609,26 @@ class TranslatorTest {
         assertThat(actual.getCapacityUnits().getQueryCapacityUnits()).isEqualTo(queryCapacityUnits);
         assertThat(actual.getCapacityUnits().getStorageCapacityUnits()).isEqualTo(storageCapacityUnits);
         assertThat(actual.getTags().size()).isEqualTo(1);
+    }
+
+    @Test
+    void testTranslateFromReadResponseNullEquivalentVCU() {
+        DescribeIndexResponse describeIndexResponse = DescribeIndexResponse
+                .builder()
+                .edition(IndexEdition.DEVELOPER_EDITION)
+                .capacityUnits(software.amazon.awssdk.services.kendra.model.CapacityUnitsConfiguration
+                        .builder()
+                        .queryCapacityUnits(0)
+                        .storageCapacityUnits(0)
+                        .build())
+                .build();
+        ResourceModel actual = Translator.translateFromReadResponse(
+                describeIndexResponse,
+                ListTagsForResourceResponse
+                        .builder()
+                        .build(),
+                "arn");
+        assertThat(actual.getCapacityUnits()).isNull();
     }
 
     @Test
