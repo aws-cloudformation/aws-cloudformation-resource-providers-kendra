@@ -126,8 +126,8 @@ public class Translator {
     }
     if (describeIndexResponse.capacityUnits() != null) {
       CapacityUnitsConfiguration capacityUnitsConfiguration = describeIndexResponse.capacityUnits();
-      // If VCU is equal to the null equivalent (ie storage and query capacity units
-      // are both equal to 0, then don't set VCU in the model.
+      // If VCU is equal to its null equivalent (ie storage and query capacity units
+      // are both equal to 0), then don't set VCU in the resource model.
       if (capacityUnitsConfiguration.queryCapacityUnits() != 0
               || capacityUnitsConfiguration.storageCapacityUnits() != 0) {
         builder.capacityUnits(software.amazon.kendra.index.CapacityUnitsConfiguration
