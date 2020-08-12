@@ -96,6 +96,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
             .desiredResourceState(model)
+            .previousResourceState(ResourceModel.builder().build())
             .build();
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
@@ -134,7 +135,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
-        verify(proxyClient.client(), times(4)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
     }
 
@@ -156,6 +157,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
+                .previousResourceState(ResourceModel.builder().build())
                 .build();
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
@@ -214,7 +216,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
-        verify(proxyClient.client(), times(5)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
     }
 
@@ -237,13 +239,14 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
+                .previousResourceState(ResourceModel.builder().build())
                 .build();
 
         assertThrows(CfnInvalidRequestException.class, () -> {
             handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
         });
 
-        verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
     }
 
@@ -267,12 +270,13 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
+                .previousResourceState(ResourceModel.builder().build())
                 .build();
 
         assertThrows(CfnResourceConflictException.class, () -> {
             handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
         });
-        verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
     }
 
@@ -298,6 +302,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
+                .previousResourceState(ResourceModel.builder().build())
                 .build();
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
@@ -341,7 +346,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
-        verify(proxyClient.client(), times(4)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).tagResource(any(TagResourceRequest.class));
     }
@@ -364,6 +369,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
+                .previousResourceState(ResourceModel.builder().build())
                 .build();
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
@@ -408,7 +414,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
-        verify(proxyClient.client(), times(4)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).untagResource(any(UntagResourceRequest.class));
     }
@@ -435,6 +441,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
+                .previousResourceState(ResourceModel.builder().build())
                 .build();
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
@@ -485,7 +492,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
-        verify(proxyClient.client(), times(4)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).tagResource(any(TagResourceRequest.class));
         verify(proxyClient.client(), times(1)).untagResource(any(UntagResourceRequest.class));
@@ -530,6 +537,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
+                .previousResourceState(ResourceModel.builder().build())
                 .build();
 
         assertThrows(CfnInvalidRequestException.class, () -> {
@@ -537,7 +545,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         });
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
-        verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
     }
 
     @Test
@@ -579,6 +587,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
+                .previousResourceState(ResourceModel.builder().build())
                 .build();
 
         assertThrows(CfnInvalidRequestException.class, () -> {
@@ -586,7 +595,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         });
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
-        verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
     }
 
     @Test
@@ -609,12 +618,13 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
+                .previousResourceState(ResourceModel.builder().build())
                 .build();
 
         assertThrows(CfnServiceLimitExceededException.class, () -> {
             handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
         });
-        verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
     }
 
@@ -631,6 +641,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
+                .previousResourceState(ResourceModel.builder().build())
                 .build();
 
         assertThrows(CfnNotFoundException.class, () -> {
