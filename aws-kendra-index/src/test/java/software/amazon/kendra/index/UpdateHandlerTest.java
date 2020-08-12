@@ -96,7 +96,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
             .desiredResourceState(model)
-            .previousResourceState(ResourceModel.builder().build())
             .build();
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
@@ -157,7 +156,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
-                .previousResourceState(ResourceModel.builder().build())
                 .build();
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
@@ -232,7 +230,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
-                .previousResourceState(ResourceModel.builder().build())
                 .build();
 
         assertThrows(CfnInvalidRequestException.class, () -> {
@@ -263,7 +260,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
-                .previousResourceState(ResourceModel.builder().build())
                 .build();
 
         assertThrows(CfnResourceConflictException.class, () -> {
@@ -295,7 +291,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
-                .previousResourceState(ResourceModel.builder().build())
                 .build();
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
@@ -362,7 +357,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
-                .previousResourceState(ResourceModel.builder().build())
                 .build();
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
@@ -434,7 +428,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
-                .previousResourceState(ResourceModel.builder().build())
                 .build();
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
@@ -530,7 +523,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
-                .previousResourceState(ResourceModel.builder().build())
                 .build();
 
         assertThrows(CfnInvalidRequestException.class, () -> {
@@ -580,7 +572,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
-                .previousResourceState(ResourceModel.builder().build())
                 .build();
 
         assertThrows(CfnInvalidRequestException.class, () -> {
@@ -611,7 +602,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
-                .previousResourceState(ResourceModel.builder().build())
                 .build();
 
         assertThrows(CfnServiceLimitExceededException.class, () -> {
@@ -634,7 +624,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
-                .previousResourceState(ResourceModel.builder().build())
                 .build();
 
         assertThrows(CfnNotFoundException.class, () -> {
