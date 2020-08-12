@@ -148,6 +148,9 @@ public class Translator {
     String description = currModel.getDescription() == null ? "" : currModel.getDescription();
     String name = currModel.getName() == null ? "" : currModel.getName();
     String roleArn = currModel.getRoleArn() == null ? "" : currModel.getRoleArn();
+    // Handle null previous resource model
+    List<software.amazon.kendra.index.DocumentMetadataConfiguration> prevDocumentMetadataConfiguration =
+            prevModel == null ? new ArrayList<>() : prevModel.getDocumentMetadataConfigurations();
     return UpdateIndexRequest
             .builder()
             .id(currModel.getId())
@@ -157,7 +160,7 @@ public class Translator {
             .documentMetadataConfigurationUpdates(
                     translateToSdkDocumentMetadataConfigurationList(
                             currModel.getDocumentMetadataConfigurations(),
-                            prevModel.getDocumentMetadataConfigurations()))
+                            prevDocumentMetadataConfiguration))
             .capacityUnits(translateToCapacityUnitsConfiguration(currModel.getCapacityUnits(), currModel.getEdition()))
             .build();
   }
