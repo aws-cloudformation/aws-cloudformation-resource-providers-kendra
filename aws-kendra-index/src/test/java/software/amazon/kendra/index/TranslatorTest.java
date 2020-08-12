@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -421,7 +420,10 @@ class TranslatorTest {
                         .storageCapacityUnits(storageCapacityUnits)
                         .build())
                 .build();
-        ResourceModel prevModel = ResourceModel.builder().build();
+        ResourceModel prevModel = ResourceModel
+                .builder()
+                .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                .build();
         UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel, prevModel);
         assertThat(updateIndexRequest.id()).isEqualTo(id);
         assertThat(updateIndexRequest.description()).isEqualTo(description);
@@ -455,12 +457,7 @@ class TranslatorTest {
                 .build();
         ResourceModel prevModel = ResourceModel
                 .builder()
-                .name(name)
-                .id(id)
-                .description(description)
-                .roleArn(roleArn)
                 .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
-                .edition(IndexEdition.DEVELOPER_EDITION.toString())
                 .build();
         UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel, prevModel);
         assertThat(updateIndexRequest.id()).isEqualTo(id);
