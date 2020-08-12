@@ -164,26 +164,26 @@ public class Translator {
 
   /**
    * Request to update properties of a previously created resource
-   * @param model resource model
+   * @param currModel resource model
    * @return updateIndexRequest the aws service request to modify a resource
    */
-  static UpdateIndexRequest translateToUpdateRequest(final ResourceModel model,
+  static UpdateIndexRequest translateToUpdateRequest(final ResourceModel currModel,
                                                      final ResourceModel prevModel) throws TranslatorValidationException {
     // Null equivalents for partial updates.
-    String description = model.getDescription() == null ? "" : model.getDescription();
-    String name = model.getName() == null ? "" : model.getName();
-    String roleArn = model.getRoleArn() == null ? "" : model.getRoleArn();
+    String description = currModel.getDescription() == null ? "" : currModel.getDescription();
+    String name = currModel.getName() == null ? "" : currModel.getName();
+    String roleArn = currModel.getRoleArn() == null ? "" : currModel.getRoleArn();
     return UpdateIndexRequest
             .builder()
-            .id(model.getId())
+            .id(currModel.getId())
             .roleArn(roleArn)
             .name(name)
             .description(description)
             .documentMetadataConfigurationUpdates(
                     translateToSdkDocumentMetadataConfigurationList(
-                            model.getDocumentMetadataConfigurations(),
+                            currModel.getDocumentMetadataConfigurations(),
                             prevModel.getDocumentMetadataConfigurations()))
-            .capacityUnits(translateToCapacityUnitsConfiguration(model.getCapacityUnits(), model.getEdition()))
+            .capacityUnits(translateToCapacityUnitsConfiguration(currModel.getCapacityUnits(), currModel.getEdition()))
             .build();
   }
 
