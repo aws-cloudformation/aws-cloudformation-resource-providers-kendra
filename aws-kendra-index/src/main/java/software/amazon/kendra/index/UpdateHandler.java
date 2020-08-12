@@ -18,6 +18,7 @@ import software.amazon.awssdk.services.kendra.model.ValidationException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
+import software.amazon.cloudformation.exceptions.CfnNotUpdatableException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
 import software.amazon.cloudformation.exceptions.CfnServiceLimitExceededException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
@@ -31,6 +32,8 @@ import software.amazon.cloudformation.proxy.delay.Constant;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -75,8 +78,7 @@ public class UpdateHandler extends BaseHandlerStd {
 
         final ResourceModel model = request.getDesiredResourceState();
 
-        // TODO: Adjust Progress Chain according to your implementation
-        // https://github.com/aws-cloudformation/cloudformation-cli-java-plugin/blob/master/src/main/java/software/amazon/cloudformation/proxy/CallChain.java
+        verifyNonUpdatableFields(model, request.getPreviousResourceState());
 
         return ProgressEvent.progress(model, callbackContext)
                 // First validate the resource actually exists per the contract requirements
@@ -208,4 +210,20 @@ public class UpdateHandler extends BaseHandlerStd {
         return ProgressEvent.progress(resourceModel, callbackContext);
     }
 
+   /**
+    * Checks the if the create only fields have been updated and throws an exception if it is the case
+    * @param currModel the current resource model
+    * @param prevModel the previous resource model
+    */
+    private void verifyNonUpdatableFields(ResourceModel currModel, ResourceModel prevModel) {
+        if (prevModel != null) {
+            if (!Optional.ofNullable(currModel.getEdition()).equals(Optional.ofNullable(prevModel.getEdition()))) {
+                throw new CfnNotUpdatableException(ResourceModel.TYPE_NAME, "Edition");
+            }
+            if (!Optional.ofNullable(currModel.getServerSideEncryptionConfiguration()).equals(
+              Optional.ofNullable(prevModel.getServerSideEncryptionConfiguration()))) {
+                throw new CfnNotUpdatableException(ResourceModel.TYPE_NAME, "ServerSideEncryptionConfiguration");
+            }
+        }
+    }
 }

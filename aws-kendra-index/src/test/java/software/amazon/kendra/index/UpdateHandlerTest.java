@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.AfterEach;
 import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.services.kendra.model.ConflictException;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
@@ -24,6 +23,7 @@ import software.amazon.awssdk.services.kendra.model.UpdateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
+import software.amazon.cloudformation.exceptions.CfnNotUpdatableException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
 import software.amazon.cloudformation.exceptions.CfnServiceLimitExceededException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
@@ -70,12 +70,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
         proxy = new AmazonWebServicesClientProxy(logger, MOCK_CREDENTIALS, () -> Duration.ofSeconds(600).toMillis());
         sdkClient = mock(KendraClient.class);
         proxyClient = MOCK_PROXY(proxy, sdkClient);
-    }
-
-    @AfterEach
-    public void post_execute() {
-        verify(sdkClient, atLeastOnce()).serviceName();
-        verifyNoMoreInteractions(sdkClient);
     }
 
     @Test
@@ -136,6 +130,8 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
         verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(sdkClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(sdkClient);
     }
 
     @Test
@@ -209,6 +205,8 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
         verify(proxyClient.client(), times(4)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(sdkClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(sdkClient);
     }
 
     @Test
@@ -238,6 +236,8 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
+        verify(sdkClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(sdkClient);
     }
 
     @Test
@@ -267,6 +267,8 @@ public class UpdateHandlerTest extends AbstractTestBase {
         });
         verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
+        verify(sdkClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(sdkClient);
     }
 
     @Test
@@ -337,6 +339,8 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).tagResource(any(TagResourceRequest.class));
+        verify(sdkClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(sdkClient);
     }
 
     @Test
@@ -404,6 +408,8 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).untagResource(any(UntagResourceRequest.class));
+        verify(sdkClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(sdkClient);
     }
 
     @Test
@@ -482,6 +488,8 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).tagResource(any(TagResourceRequest.class));
         verify(proxyClient.client(), times(1)).untagResource(any(UntagResourceRequest.class));
+        verify(sdkClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(sdkClient);
     }
 
     @Test
@@ -531,6 +539,8 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
         verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
+        verify(sdkClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(sdkClient);
     }
 
     @Test
@@ -580,6 +590,8 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
         verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
+        verify(sdkClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(sdkClient);
     }
 
     @Test
@@ -609,6 +621,8 @@ public class UpdateHandlerTest extends AbstractTestBase {
         });
         verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
+        verify(sdkClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(sdkClient);
     }
 
     @Test
@@ -630,5 +644,64 @@ public class UpdateHandlerTest extends AbstractTestBase {
             handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
         });
         verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
+        verify(sdkClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(sdkClient);
+    }
+
+    @Test
+    public void handleRequest_FailWith_CfnNotUpdatableException_forEdition() {
+        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder, testDelay);
+
+        final ResourceModel model = ResourceModel
+                .builder()
+                .edition(IndexEdition.ENTERPRISE_EDITION.toString())
+                .build();
+
+        final ResourceModel prevModel = ResourceModel
+                .builder()
+                .edition("Invalid")
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .previousResourceState(prevModel)
+                .build();
+
+        assertThrows(CfnNotUpdatableException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
+    }
+
+    @Test
+    public void handleRequest_FailWith_CfnNotUpdatableException_forServerSideEncryptionConfiguration() {
+        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder, testDelay);
+        final ServerSideEncryptionConfiguration serverSideEncryptionConfiguration = ServerSideEncryptionConfiguration.builder()
+            .kmsKeyId("kmsKeyId")
+            .build();
+
+        final ServerSideEncryptionConfiguration oldServerSideEncryptionConfiguration = ServerSideEncryptionConfiguration.builder()
+            .kmsKeyId("oldKmsKeyId")
+            .build();
+
+        final ResourceModel model = ResourceModel
+                .builder()
+                .edition(IndexEdition.ENTERPRISE_EDITION.toString())
+                .serverSideEncryptionConfiguration(serverSideEncryptionConfiguration)
+                .build();
+
+        final ResourceModel prevModel = ResourceModel
+                .builder()
+                .edition(IndexEdition.ENTERPRISE_EDITION.toString())
+                .serverSideEncryptionConfiguration(oldServerSideEncryptionConfiguration)
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .previousResourceState(prevModel)
+                .build();
+
+        assertThrows(CfnNotUpdatableException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
     }
 }
