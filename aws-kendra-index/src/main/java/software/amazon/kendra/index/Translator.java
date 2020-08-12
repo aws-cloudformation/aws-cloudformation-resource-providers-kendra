@@ -39,11 +39,6 @@ import java.util.stream.Stream;
 
 public class Translator {
 
-  /**
-   * Request to create a resource
-   * @param model resource model
-   * @return createIndexRequest the aws service request to create a resource
-   */
   static CreateIndexRequest translateToCreateRequest(final ResourceModel model) {
     final CreateIndexRequest.Builder builder = CreateIndexRequest
             .builder()
@@ -90,11 +85,6 @@ public class Translator {
             .build();
   }
 
-  /**
-   * Request to read a resource
-   * @param model resource model
-   * @return describeIndexRequest the aws service request to describe a resource
-   */
   static DescribeIndexRequest translateToReadRequest(final ResourceModel model) {
     final DescribeIndexRequest describeIndexRequest = DescribeIndexRequest.builder()
             .id(model.getId())
@@ -102,11 +92,6 @@ public class Translator {
     return describeIndexRequest;
   }
 
-  /**
-   * Translates resource object from sdk into a resource model
-   * @param describeIndexResponse the aws service describe resource response
-   * @return model resource model
-   */
   static ResourceModel translateFromReadResponse(final DescribeIndexResponse describeIndexResponse,
                                                  final ListTagsForResourceResponse listTagsForResourceResponse,
                                                  String arn) {
@@ -149,11 +134,6 @@ public class Translator {
     return builder.build();
   }
 
-  /**
-   * Request to delete a resource
-   * @param model resource model
-   * @return deleteIndexRequest the aws service request to delete a resource
-   */
   static DeleteIndexRequest translateToDeleteRequest(final ResourceModel model) {
     final DeleteIndexRequest deleteIndexRequest = DeleteIndexRequest
             .builder()
@@ -162,11 +142,6 @@ public class Translator {
     return deleteIndexRequest;
   }
 
-  /**
-   * Request to update properties of a previously created resource
-   * @param currModel resource model
-   * @return updateIndexRequest the aws service request to modify a resource
-   */
   static UpdateIndexRequest translateToUpdateRequest(final ResourceModel currModel,
                                                      final ResourceModel prevModel) throws TranslatorValidationException {
     // Null equivalents for partial updates.
@@ -212,11 +187,6 @@ public class Translator {
   }
 
 
-  /**
-   * Request to update some other properties that could not be provisioned through first update request
-   * @param model resource model
-   * @return updateIndexRequest the aws service request to modify a resource
-   */
   static UpdateIndexRequest translateToPostCreateUpdateRequest(final ResourceModel model) {
     // We only need to update attributes we couldn't set during create.
     return UpdateIndexRequest
@@ -389,11 +359,6 @@ public class Translator {
     }
   }
 
-  /**
-   * Request to list resources
-   * @param nextToken token passed to the aws service list resources request
-   * @return listIndicesRequest the aws service request to list resources within aws account
-   */
   static ListIndicesRequest translateToListRequest(final String nextToken) {
     final ListIndicesRequest listIndicesRequest = ListIndicesRequest
             .builder()
@@ -402,11 +367,6 @@ public class Translator {
     return listIndicesRequest;
   }
 
-  /**
-   * Translates resource objects from sdk into a resource model (primary identifier only)
-   * @param listIndicesResponse the aws service describe resource response
-   * @return list of resource models
-   */
   static List<ResourceModel> translateFromListResponse(final ListIndicesResponse listIndicesResponse) {
     // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/2077c92299aeb9a68ae8f4418b5e932b12a8b186/aws-logs-loggroup/src/main/java/com/aws/logs/loggroup/Translator.java#L75-L82
     return streamOfOrEmpty(listIndicesResponse.indexConfigurationSummaryItems())
