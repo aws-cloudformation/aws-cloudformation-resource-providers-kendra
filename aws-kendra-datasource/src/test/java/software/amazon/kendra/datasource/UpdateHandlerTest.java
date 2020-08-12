@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.AfterEach;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.services.kendra.model.ConflictException;
@@ -24,6 +23,7 @@ import software.amazon.awssdk.services.kendra.model.ValidationException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
+import software.amazon.cloudformation.exceptions.CfnNotUpdatableException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
@@ -56,6 +56,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
     private static final String TEST_DESCRIPTION = "testDescription";
     private static final String TEST_SCHEDULE = "testSchedule";
     private static final String TEST_DATA_SOURCE_TYPE = "testDataSourceType";
+    private static final String PREV_TEST_DATA_SOURCE_TYPE = "prevTestDataSourceType";
 
     TestDataSourceArnBuilder testDataSourceArnBuilder = new TestDataSourceArnBuilder();
 
@@ -74,13 +75,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
         awsKendraClient = mock(KendraClient.class);
         proxyClient = MOCK_PROXY(proxy, awsKendraClient);
     }
-
-    @AfterEach
-    public void post_execute() {
-        verify(awsKendraClient, atLeastOnce()).serviceName();
-        verifyNoMoreInteractions(awsKendraClient);
-    }
-
 
     @Test
     public void handleRequest_SimpleSuccess() {
@@ -147,6 +141,10 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
         verify(proxyClient.client(), times(3)).describeDataSource(any(DescribeDataSourceRequest.class));
+
+        verify(awsKendraClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(awsKendraClient);
+
     }
 
     @Test
@@ -226,6 +224,10 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
         verify(proxyClient.client(), times(4)).describeDataSource(any(DescribeDataSourceRequest.class));
+
+        verify(awsKendraClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(awsKendraClient);
+
     }
 
     @Test
@@ -253,6 +255,9 @@ public class UpdateHandlerTest extends AbstractTestBase {
              handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
          });
         verify(proxyClient.client(), times(1)).describeDataSource(any(DescribeDataSourceRequest.class));
+
+        verify(awsKendraClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(awsKendraClient);
     }
 
     @Test
@@ -280,6 +285,10 @@ public class UpdateHandlerTest extends AbstractTestBase {
              handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
          });
         verify(proxyClient.client(), times(1)).describeDataSource(any(DescribeDataSourceRequest.class));
+
+        verify(awsKendraClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(awsKendraClient);
+
     }
 
     @Test
@@ -307,6 +316,9 @@ public class UpdateHandlerTest extends AbstractTestBase {
              handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
          });
         verify(proxyClient.client(), times(1)).describeDataSource(any(DescribeDataSourceRequest.class));
+
+        verify(awsKendraClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(awsKendraClient);
     }
 
     @Test
@@ -334,6 +346,9 @@ public class UpdateHandlerTest extends AbstractTestBase {
              handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
          });
         verify(proxyClient.client(), times(1)).describeDataSource(any(DescribeDataSourceRequest.class));
+
+        verify(awsKendraClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(awsKendraClient);
     }
 
     @Test
@@ -407,6 +422,9 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(3)).describeDataSource(any(DescribeDataSourceRequest.class));
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).tagResource(any(TagResourceRequest.class));
+
+        verify(awsKendraClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(awsKendraClient);
     }
 
     @Test
@@ -477,6 +495,9 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(3)).describeDataSource(any(DescribeDataSourceRequest.class));
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).untagResource(any(UntagResourceRequest.class));
+
+        verify(awsKendraClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(awsKendraClient);
     }
 
     @Test
@@ -560,6 +581,9 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).tagResource(any(TagResourceRequest.class));
         verify(proxyClient.client(), times(1)).untagResource(any(UntagResourceRequest.class));
+
+        verify(awsKendraClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(awsKendraClient);
     }
 
     @Test
@@ -609,6 +633,9 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
         verify(proxyClient.client(), times(2)).describeDataSource(any(DescribeDataSourceRequest.class));
+
+        verify(awsKendraClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(awsKendraClient);
     }
 
     @Test
@@ -659,5 +686,42 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
         verify(proxyClient.client(), times(2)).describeDataSource(any(DescribeDataSourceRequest.class));
+
+        verify(awsKendraClient, atLeastOnce()).serviceName();
+        verifyNoMoreInteractions(awsKendraClient);
+    }
+
+    @Test
+    public void handleRequest_FailWith_CfnNotUpdatableException() {
+        final UpdateHandler handler = new UpdateHandler(testDataSourceArnBuilder);
+
+        final ResourceModel model = ResourceModel.builder()
+            .id(TEST_ID)
+            .indexId(TEST_INDEX_ID)
+            .name(TEST_DATA_SOURCE_NAME)
+            .schedule(TEST_SCHEDULE)
+            .roleArn(TEST_ROLE_ARN)
+            .description(TEST_DESCRIPTION)
+            .type(TEST_DATA_SOURCE_TYPE)
+            .build();
+
+        final ResourceModel prevModel = ResourceModel.builder()
+            .id(TEST_ID)
+            .indexId(TEST_INDEX_ID)
+            .name(TEST_DATA_SOURCE_NAME)
+            .schedule(TEST_SCHEDULE)
+            .roleArn(TEST_ROLE_ARN)
+            .description(TEST_DESCRIPTION)
+            .type(PREV_TEST_DATA_SOURCE_TYPE)
+            .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .previousResourceState(prevModel)
+                .build();
+
+        assertThrows(CfnNotUpdatableException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
     }
 }

@@ -15,6 +15,7 @@ import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.TagResourceResponse;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
+import software.amazon.cloudformation.exceptions.CfnNotUpdatableException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -25,8 +26,8 @@ import java.time.Duration;
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -412,4 +413,155 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(1)).describeFaq(any(DescribeFaqRequest.class));
     }
 
+    @Test
+    public void handleRequest_FailWith_CfnNotUpdatableException_forIndexId() {
+        final UpdateHandler handler = new UpdateHandler(faqArnBuilder);
+        String indexId = "indexId";
+        String prevIndexId = "prevIndexId";
+        final ResourceModel model = ResourceModel
+                .builder()
+                .indexId(indexId)
+                .build();
+
+        final ResourceModel prevModel = ResourceModel
+                .builder()
+                .indexId(prevIndexId)
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .previousResourceState(prevModel)
+                .build();
+
+        assertThrows(CfnNotUpdatableException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
+    }
+
+    @Test
+    public void handleRequest_FailWith_CfnNotUpdatableException_forName() {
+        final UpdateHandler handler = new UpdateHandler(faqArnBuilder);
+        String name = "name";
+        String prevName = "prevName";
+        String indexId = "indexId";
+        final ResourceModel model = ResourceModel
+                .builder()
+                .name(name)
+                .indexId(indexId)
+                .build();
+
+        final ResourceModel prevModel = ResourceModel
+                .builder()
+                .indexId(indexId)
+                .name(prevName)
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .previousResourceState(prevModel)
+                .build();
+
+        assertThrows(CfnNotUpdatableException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
+    }
+
+    @Test
+    public void handleRequest_FailWith_CfnNotUpdatableException_forS3Path() {
+        final UpdateHandler handler = new UpdateHandler(faqArnBuilder);
+        String indexId = "indexId";
+        String s3Key = "s3Key";
+        String s3Bucket = "s3Bucket";
+        String oldS3Bucket = "oldS3Bucket";
+        S3Path s3Path = S3Path
+                .builder()
+                .key(s3Key)
+                .bucket(s3Bucket)
+                .build();
+        S3Path oldS3Path = S3Path
+                .builder()
+                .key(s3Key)
+                .bucket(oldS3Bucket)
+                .build();
+
+
+        final ResourceModel model = ResourceModel
+                .builder()
+                .s3Path(s3Path)
+                .indexId(indexId)
+                .build();
+
+        final ResourceModel prevModel = ResourceModel
+                .builder()
+                .indexId(indexId)
+                .s3Path(oldS3Path)
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .previousResourceState(prevModel)
+                .build();
+
+        assertThrows(CfnNotUpdatableException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
+    }
+
+    @Test
+    public void handleRequest_FailWith_CfnNotUpdatableException_forDescription() {
+        final UpdateHandler handler = new UpdateHandler(faqArnBuilder);
+        String indexId = "indexId";
+        String description = "description";
+        String oldDescription = "oldDescription";
+
+        final ResourceModel model = ResourceModel
+                .builder()
+                .description(description)
+                .indexId(indexId)
+                .build();
+
+        final ResourceModel prevModel = ResourceModel
+                .builder()
+                .description(oldDescription)
+                .indexId(indexId)
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .previousResourceState(prevModel)
+                .build();
+
+        assertThrows(CfnNotUpdatableException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
+    }
+
+    @Test
+    public void handleRequest_FailWith_CfnNotUpdatableException_forRoleArn() {
+        final UpdateHandler handler = new UpdateHandler(faqArnBuilder);
+        String indexId = "indexId";
+        String roleArn = "roleArn";
+        String oldRoleArn = "oldRoleArn";
+
+        final ResourceModel model = ResourceModel
+                .builder()
+                .roleArn(roleArn)
+                .indexId(indexId)
+                .build();
+
+        final ResourceModel prevModel = ResourceModel
+                .builder()
+                .roleArn(oldRoleArn)
+                .indexId(indexId)
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(model)
+                .previousResourceState(prevModel)
+                .build();
+
+        assertThrows(CfnNotUpdatableException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
+    }
 }
