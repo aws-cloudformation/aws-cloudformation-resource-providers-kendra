@@ -21,6 +21,8 @@ import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,11 +39,6 @@ import java.util.stream.Stream;
 
 public class Translator {
 
-  /**
-   * Request to create a resource
-   * @param model resource model
-   * @return createIndexRequest the aws service request to create a resource
-   */
   static CreateIndexRequest translateToCreateRequest(final ResourceModel model) {
     final CreateIndexRequest.Builder builder = CreateIndexRequest
             .builder()
@@ -88,11 +85,6 @@ public class Translator {
             .build();
   }
 
-  /**
-   * Request to read a resource
-   * @param model resource model
-   * @return describeIndexRequest the aws service request to describe a resource
-   */
   static DescribeIndexRequest translateToReadRequest(final ResourceModel model) {
     final DescribeIndexRequest describeIndexRequest = DescribeIndexRequest.builder()
             .id(model.getId())
@@ -100,11 +92,6 @@ public class Translator {
     return describeIndexRequest;
   }
 
-  /**
-   * Translates resource object from sdk into a resource model
-   * @param describeIndexResponse the aws service describe resource response
-   * @return model resource model
-   */
   static ResourceModel translateFromReadResponse(final DescribeIndexResponse describeIndexResponse,
                                                  final ListTagsForResourceResponse listTagsForResourceResponse,
                                                  String arn) {
@@ -147,11 +134,6 @@ public class Translator {
     return builder.build();
   }
 
-  /**
-   * Request to delete a resource
-   * @param model resource model
-   * @return deleteIndexRequest the aws service request to delete a resource
-   */
   static DeleteIndexRequest translateToDeleteRequest(final ResourceModel model) {
     final DeleteIndexRequest deleteIndexRequest = DeleteIndexRequest
             .builder()
@@ -160,26 +142,26 @@ public class Translator {
     return deleteIndexRequest;
   }
 
-  /**
-   * Request to update properties of a previously created resource
-   * @param model resource model
-   * @return updateIndexRequest the aws service request to modify a resource
-   */
-  static UpdateIndexRequest translateToUpdateRequest(final ResourceModel model,
-                                                     Map<String, String> attributesDefinedOnIndex) throws TranslatorValidationException {
+  static UpdateIndexRequest translateToUpdateRequest(final ResourceModel currModel,
+                                                     final ResourceModel prevModel) throws TranslatorValidationException {
     // Null equivalents for partial updates.
-    String description = model.getDescription() == null ? "" : model.getDescription();
-    String name = model.getName() == null ? "" : model.getName();
-    String roleArn = model.getRoleArn() == null ? "" : model.getRoleArn();
+    String description = currModel.getDescription() == null ? "" : currModel.getDescription();
+    String name = currModel.getName() == null ? "" : currModel.getName();
+    String roleArn = currModel.getRoleArn() == null ? "" : currModel.getRoleArn();
+    // Handle null previous resource model
+    List<software.amazon.kendra.index.DocumentMetadataConfiguration> prevDocumentMetadataConfiguration =
+            prevModel == null ? new ArrayList<>() : prevModel.getDocumentMetadataConfigurations();
     return UpdateIndexRequest
             .builder()
-            .id(model.getId())
+            .id(currModel.getId())
             .roleArn(roleArn)
             .name(name)
             .description(description)
             .documentMetadataConfigurationUpdates(
-                    translateToSdkDocumentMetadataConfigurationList(model.getDocumentMetadataConfigurations(), attributesDefinedOnIndex))
-            .capacityUnits(translateToCapacityUnitsConfiguration(model.getCapacityUnits(), model.getEdition()))
+                    translateToSdkDocumentMetadataConfigurationList(
+                            currModel.getDocumentMetadataConfigurations(),
+                            prevDocumentMetadataConfiguration))
+            .capacityUnits(translateToCapacityUnitsConfiguration(currModel.getCapacityUnits(), currModel.getEdition()))
             .build();
   }
 
@@ -208,11 +190,6 @@ public class Translator {
   }
 
 
-  /**
-   * Request to update some other properties that could not be provisioned through first update request
-   * @param model resource model
-   * @return updateIndexRequest the aws service request to modify a resource
-   */
   static UpdateIndexRequest translateToPostCreateUpdateRequest(final ResourceModel model) {
     // We only need to update attributes we couldn't set during create.
     return UpdateIndexRequest
@@ -225,23 +202,25 @@ public class Translator {
   }
 
   static List<DocumentMetadataConfiguration> translateToSdkDocumentMetadataConfigurationList(
-          List<software.amazon.kendra.index.DocumentMetadataConfiguration> attributesDefinedInCFTemplate,
-          Map<String, String> attributesDefinedOnIndex) throws TranslatorValidationException {
+          List<software.amazon.kendra.index.DocumentMetadataConfiguration> curr,
+          List<software.amazon.kendra.index.DocumentMetadataConfiguration> prev) throws TranslatorValidationException {
 
-    // Document metadata configuration directly defined/requested in the CloudFormation template
-    List<DocumentMetadataConfiguration> sdkAttributesDefinedInCFTemplate =
-            translateToSdkDocumentMetadataConfigurationList(attributesDefinedInCFTemplate);
-    Map<String, String> sdkAttributesDefinedInCFTemplateNameToTypeMap = sdkAttributesDefinedInCFTemplate
-            .stream().collect(Collectors.toMap(x -> x.name(), x -> x.typeAsString()));
-
+    Map<String, String> previousMetadataNames = new HashMap<>();
+    if (prev != null && !prev.isEmpty()) {
+      previousMetadataNames = prev.stream().collect(Collectors.toMap(x -> x.getName(), x -> x.getType()));
+    }
+    Set<String> currMetadataNames = new HashSet<>();
+    if (curr != null && !curr.isEmpty()) {
+      currMetadataNames = curr.stream().map(x -> x.getName()).collect(Collectors.toSet());
+    }
     List<DocumentMetadataConfiguration> sdkDefaultAttributes = new ArrayList<>();
-    for (Map.Entry<String, String> entry : attributesDefinedOnIndex.entrySet()) {
+    for (Map.Entry<String, String> entry : previousMetadataNames.entrySet()) {
       // If the attribute is a reserved one (i.e. it is prefixed with "_") ...
       if (entry.getKey().startsWith("_")) {
         // and it's not in the requested CloudFormation template,
         // then provide the default value. This allows customers to add and remove
         // reserved attributes. When removed, we set/reset the attribute to it's default
-        if (!sdkAttributesDefinedInCFTemplateNameToTypeMap.containsKey(entry.getKey())) {
+        if (!currMetadataNames.contains(entry.getKey())) {
           sdkDefaultAttributes.add(
                   DocumentMetadataConfiguration
                           .builder()
@@ -254,12 +233,16 @@ public class Translator {
       } else {
         // otherwise it's a custom field. We don't allow customers to remove
         // custom fields from their CloudFormation template so check for that here.
-        if (!sdkAttributesDefinedInCFTemplateNameToTypeMap.containsKey(entry.getKey())) {
+        if (!currMetadataNames.contains(entry.getKey())) {
           throw new TranslatorValidationException(
                   String.format("Custom attribute %s cannot be removed", entry.getKey()));
         }
       }
     }
+
+    // Document metadata configuration directly defined/requested in the CloudFormation template
+    List<DocumentMetadataConfiguration> sdkAttributesDefinedInCFTemplate =
+            translateToSdkDocumentMetadataConfigurationList(curr);
 
     return Stream.concat(
             sdkAttributesDefinedInCFTemplate.stream(),
@@ -379,11 +362,6 @@ public class Translator {
     }
   }
 
-  /**
-   * Request to list resources
-   * @param nextToken token passed to the aws service list resources request
-   * @return listIndicesRequest the aws service request to list resources within aws account
-   */
   static ListIndicesRequest translateToListRequest(final String nextToken) {
     final ListIndicesRequest listIndicesRequest = ListIndicesRequest
             .builder()
@@ -392,11 +370,6 @@ public class Translator {
     return listIndicesRequest;
   }
 
-  /**
-   * Translates resource objects from sdk into a resource model (primary identifier only)
-   * @param listIndicesResponse the aws service describe resource response
-   * @return list of resource models
-   */
   static List<ResourceModel> translateFromListResponse(final ListIndicesResponse listIndicesResponse) {
     // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/2077c92299aeb9a68ae8f4418b5e932b12a8b186/aws-logs-loggroup/src/main/java/com/aws/logs/loggroup/Translator.java#L75-L82
     return streamOfOrEmpty(listIndicesResponse.indexConfigurationSummaryItems())

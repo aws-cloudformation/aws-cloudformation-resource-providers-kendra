@@ -30,7 +30,6 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import software.amazon.cloudformation.proxy.delay.Constant;
 
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -91,7 +90,7 @@ public class UpdateHandler extends BaseHandlerStd {
                                 .progress())
                 .then(progress ->
                         proxy.initiate("AWS-Kendra-Index::Update", proxyClient, model, callbackContext)
-                                .translateToServiceRequest(resourceModel -> translateToUpdateRequest(model, proxyClient))
+                                .translateToServiceRequest(resourceModel -> translateToUpdateRequest(model, request.getPreviousResourceState()))
                                 .backoffDelay(delay)
                                 .makeServiceCall(this::updateIndex)
                                 .stabilize(this::stabilize)
@@ -110,17 +109,10 @@ public class UpdateHandler extends BaseHandlerStd {
         return describeIndexResponse;
     }
 
-    static UpdateIndexRequest translateToUpdateRequest(final ResourceModel model, ProxyClient<KendraClient> proxyClient) {
-        DescribeIndexRequest describeIndexRequest = Translator.translateToReadRequest(model);
-        DescribeIndexResponse describeIndexResponse = proxyClient.injectCredentialsAndInvokeV2(describeIndexRequest,
-                proxyClient.client()::describeIndex);
-        Map<String, String> attributesDefinedOnIndex = new HashMap<>();
-        if (describeIndexResponse.documentMetadataConfigurations() != null) {
-            attributesDefinedOnIndex = describeIndexResponse.documentMetadataConfigurations()
-                    .stream().collect(Collectors.toMap(x -> x.name(), x -> x.typeAsString()));
-        }
+    static UpdateIndexRequest translateToUpdateRequest(final ResourceModel model,
+                                                       final ResourceModel prevModel) {
         try {
-            return Translator.translateToUpdateRequest(model, attributesDefinedOnIndex);
+            return Translator.translateToUpdateRequest(model, prevModel);
         } catch (TranslatorValidationException e) {
             throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME + e.getMessage(), e);
         }

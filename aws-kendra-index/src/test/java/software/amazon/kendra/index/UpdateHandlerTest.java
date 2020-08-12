@@ -128,7 +128,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
-        verify(proxyClient.client(), times(4)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(sdkClient, atLeastOnce()).serviceName();
         verifyNoMoreInteractions(sdkClient);
@@ -158,13 +158,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .thenReturn(UpdateIndexResponse.builder().build());
         when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
                 .thenReturn(
-                        DescribeIndexResponse.builder()
-                                .id(id)
-                                .name(name)
-                                .roleArn(roleArn)
-                                .edition(indexEdition)
-                                .status(IndexStatus.ACTIVE.toString())
-                                .build(),
                         DescribeIndexResponse.builder()
                                 .id(id)
                                 .name(name)
@@ -210,7 +203,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
-        verify(proxyClient.client(), times(5)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(4)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(sdkClient, atLeastOnce()).serviceName();
         verifyNoMoreInteractions(sdkClient);
@@ -241,7 +234,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
             handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
         });
 
-        verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
         verify(sdkClient, atLeastOnce()).serviceName();
         verifyNoMoreInteractions(sdkClient);
@@ -272,7 +265,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThrows(CfnResourceConflictException.class, () -> {
             handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
         });
-        verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
         verify(sdkClient, atLeastOnce()).serviceName();
         verifyNoMoreInteractions(sdkClient);
@@ -343,7 +336,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
-        verify(proxyClient.client(), times(4)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).tagResource(any(TagResourceRequest.class));
         verify(sdkClient, atLeastOnce()).serviceName();
@@ -412,7 +405,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
-        verify(proxyClient.client(), times(4)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).untagResource(any(UntagResourceRequest.class));
         verify(sdkClient, atLeastOnce()).serviceName();
@@ -491,7 +484,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
-        verify(proxyClient.client(), times(4)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).tagResource(any(TagResourceRequest.class));
         verify(proxyClient.client(), times(1)).untagResource(any(UntagResourceRequest.class));
@@ -545,7 +538,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         });
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
-        verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
         verify(sdkClient, atLeastOnce()).serviceName();
         verifyNoMoreInteractions(sdkClient);
     }
@@ -596,7 +589,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         });
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
-        verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
         verify(sdkClient, atLeastOnce()).serviceName();
         verifyNoMoreInteractions(sdkClient);
     }
@@ -626,7 +619,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThrows(CfnServiceLimitExceededException.class, () -> {
             handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
         });
-        verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
         verify(sdkClient, atLeastOnce()).serviceName();
         verifyNoMoreInteractions(sdkClient);

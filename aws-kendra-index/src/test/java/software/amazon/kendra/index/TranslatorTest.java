@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -421,9 +420,11 @@ class TranslatorTest {
                         .storageCapacityUnits(storageCapacityUnits)
                         .build())
                 .build();
-        Map<String, String> currentAttributes = new HashMap<>();
-        currentAttributes.put(metadataName, metadataType);
-        UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel, currentAttributes);
+        ResourceModel prevModel = ResourceModel
+                .builder()
+                .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                .build();
+        UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel, prevModel);
         assertThat(updateIndexRequest.id()).isEqualTo(id);
         assertThat(updateIndexRequest.description()).isEqualTo(description);
         assertThat(updateIndexRequest.name()).isEqualTo(name);
@@ -454,9 +455,11 @@ class TranslatorTest {
                 .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
                 .edition(IndexEdition.DEVELOPER_EDITION.toString())
                 .build();
-        Map<String, String> currentAttributes = new HashMap<>();
-        currentAttributes.put(metadataName, metadataType);
-        UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel, currentAttributes);
+        ResourceModel prevModel = ResourceModel
+                .builder()
+                .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                .build();
+        UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel, prevModel);
         assertThat(updateIndexRequest.id()).isEqualTo(id);
         assertThat(updateIndexRequest.description()).isEqualTo(description);
         assertThat(updateIndexRequest.name()).isEqualTo(name);
@@ -473,7 +476,7 @@ class TranslatorTest {
                 .edition(IndexEdition.ENTERPRISE_EDITION.toString())
                 .id(id)
                 .build();
-        UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel, new HashMap<>());
+        UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel, ResourceModel.builder().build());
         assertThat(updateIndexRequest.description()).isEqualTo("");
         assertThat(updateIndexRequest.name()).isEqualTo("");
         assertThat(updateIndexRequest.roleArn()).isEqualTo("");
@@ -695,11 +698,16 @@ class TranslatorTest {
         documentMetadataConfigurationBuilder.name(name);
         documentMetadataConfigurationBuilder.type(type);
 
-        Map<String, String> currentAttributes = new HashMap<>();
-        currentAttributes.put("NotDefined", "type");
+        DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder2 =
+                DocumentMetadataConfiguration.builder();
+        documentMetadataConfigurationBuilder2.name("NotDefined");
+        documentMetadataConfigurationBuilder2.type("type");
+
 
         assertThrows(TranslatorValidationException.class, () -> {
-            Translator.translateToSdkDocumentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build()), currentAttributes);
+            Translator.translateToSdkDocumentMetadataConfigurationList(
+                    Arrays.asList(documentMetadataConfigurationBuilder.build()),
+                    Arrays.asList(documentMetadataConfigurationBuilder2.build()));
         });
     }
 
@@ -712,13 +720,18 @@ class TranslatorTest {
         documentMetadataConfigurationBuilder.name(name);
         documentMetadataConfigurationBuilder.type(type);
 
-        Map<String, String> currentAttributes = new HashMap<>();
+        DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder2 =
+                DocumentMetadataConfiguration.builder();
         String customAttributeName = "_custom";
         String customAttributeType = "STRING_VALUE";
-        currentAttributes.put(customAttributeName, customAttributeType);
+        documentMetadataConfigurationBuilder2.name(customAttributeName);
+        documentMetadataConfigurationBuilder2.type(customAttributeType);
+
 
         List<software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration> sdkList =
-                Translator.translateToSdkDocumentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build()), currentAttributes);
+                Translator.translateToSdkDocumentMetadataConfigurationList(
+                        Arrays.asList(documentMetadataConfigurationBuilder.build(), documentMetadataConfigurationBuilder2.build()),
+                        new ArrayList<>());
 
         assertThat(sdkList.size()).isEqualTo(2);
         assertThat(sdkList.get(1).name()).isEqualTo(customAttributeName);
@@ -743,13 +756,12 @@ class TranslatorTest {
         documentMetadataConfigurationBuilder2.name(customAttributeName);
         documentMetadataConfigurationBuilder2.type(customAttributeType);
 
-        Map<String, String> currentAttributes = new HashMap<>();
-        currentAttributes.put(customAttributeName, customAttributeType);
 
         List<software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration> sdkList =
                 Translator.translateToSdkDocumentMetadataConfigurationList(
-                        Arrays.asList(documentMetadataConfigurationBuilder.build(), documentMetadataConfigurationBuilder2.build()),
-                        currentAttributes);
+                        Arrays.asList(
+                                documentMetadataConfigurationBuilder.build(),
+                                documentMetadataConfigurationBuilder2.build()), new ArrayList<>());
 
         assertThat(sdkList.size()).isEqualTo(2);
     }
