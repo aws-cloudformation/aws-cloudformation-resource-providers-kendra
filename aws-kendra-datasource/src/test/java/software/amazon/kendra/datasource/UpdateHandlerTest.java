@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.jupiter.api.AfterEach;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.services.kendra.model.ConflictException;
@@ -76,6 +77,11 @@ public class UpdateHandlerTest extends AbstractTestBase {
         proxyClient = MOCK_PROXY(proxy, awsKendraClient);
     }
 
+    @AfterEach
+    public void post_execute() {
+        verifyNoMoreInteractions(awsKendraClient);
+    }
+
     @Test
     public void handleRequest_SimpleSuccess() {
         final UpdateHandler handler = new UpdateHandler(testDataSourceArnBuilder);
@@ -143,7 +149,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(3)).describeDataSource(any(DescribeDataSourceRequest.class));
 
         verify(awsKendraClient, atLeastOnce()).serviceName();
-        verifyNoMoreInteractions(awsKendraClient);
 
     }
 
@@ -226,8 +231,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(4)).describeDataSource(any(DescribeDataSourceRequest.class));
 
         verify(awsKendraClient, atLeastOnce()).serviceName();
-        verifyNoMoreInteractions(awsKendraClient);
-
     }
 
     @Test
@@ -257,7 +260,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(1)).describeDataSource(any(DescribeDataSourceRequest.class));
 
         verify(awsKendraClient, atLeastOnce()).serviceName();
-        verifyNoMoreInteractions(awsKendraClient);
     }
 
     @Test
@@ -287,7 +289,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(1)).describeDataSource(any(DescribeDataSourceRequest.class));
 
         verify(awsKendraClient, atLeastOnce()).serviceName();
-        verifyNoMoreInteractions(awsKendraClient);
 
     }
 
@@ -318,7 +319,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(1)).describeDataSource(any(DescribeDataSourceRequest.class));
 
         verify(awsKendraClient, atLeastOnce()).serviceName();
-        verifyNoMoreInteractions(awsKendraClient);
     }
 
     @Test
@@ -348,7 +348,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(1)).describeDataSource(any(DescribeDataSourceRequest.class));
 
         verify(awsKendraClient, atLeastOnce()).serviceName();
-        verifyNoMoreInteractions(awsKendraClient);
     }
 
     @Test
@@ -424,7 +423,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(1)).tagResource(any(TagResourceRequest.class));
 
         verify(awsKendraClient, atLeastOnce()).serviceName();
-        verifyNoMoreInteractions(awsKendraClient);
     }
 
     @Test
@@ -497,7 +495,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(1)).untagResource(any(UntagResourceRequest.class));
 
         verify(awsKendraClient, atLeastOnce()).serviceName();
-        verifyNoMoreInteractions(awsKendraClient);
     }
 
     @Test
@@ -583,7 +580,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(1)).untagResource(any(UntagResourceRequest.class));
 
         verify(awsKendraClient, atLeastOnce()).serviceName();
-        verifyNoMoreInteractions(awsKendraClient);
     }
 
     @Test
@@ -635,7 +631,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(2)).describeDataSource(any(DescribeDataSourceRequest.class));
 
         verify(awsKendraClient, atLeastOnce()).serviceName();
-        verifyNoMoreInteractions(awsKendraClient);
     }
 
     @Test
@@ -688,7 +683,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(2)).describeDataSource(any(DescribeDataSourceRequest.class));
 
         verify(awsKendraClient, atLeastOnce()).serviceName();
-        verifyNoMoreInteractions(awsKendraClient);
     }
 
     @Test
