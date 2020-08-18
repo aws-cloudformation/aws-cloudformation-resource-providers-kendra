@@ -135,7 +135,7 @@ public class CreateHandler extends BaseHandlerStd {
         try {
             createIndexResponse = proxyClient.injectCredentialsAndInvokeV2(createIndexRequest, proxyClient.client()::createIndex);
         } catch (ValidationException e) {
-            throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME + e.getMessage(), e);
+            throw new CfnInvalidRequestException(e.getMessage(), e);
         } catch (ConflictException e) {
             throw new CfnResourceConflictException(e);
         } catch (ServiceQuotaExceededException e) {
@@ -169,7 +169,7 @@ public class CreateHandler extends BaseHandlerStd {
             updateIndexResponse = proxyClient.injectCredentialsAndInvokeV2(updateIndexRequest,
                     proxyClient.client()::updateIndex);
         } catch (ValidationException e) {
-            throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME + e.getMessage(), e);
+            throw new CfnInvalidRequestException(e.getMessage(), e);
         } catch (ServiceQuotaExceededException e) {
             throw new CfnServiceLimitExceededException(ResourceModel.TYPE_NAME, e.getMessage(), e.getCause());
         } catch (final AwsServiceException e) {

@@ -93,7 +93,7 @@ public class CreateHandler extends BaseHandlerStd {
             createDataSourceResponse = proxyClient.injectCredentialsAndInvokeV2(createDataSourceRequest,
              proxyClient.client()::createDataSource);
         } catch(final ValidationException e) {
-            throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME + e.getMessage(), e);
+            throw new CfnInvalidRequestException(e.getMessage(), e);
         } catch (final ConflictException e) {
             throw new CfnResourceConflictException(e);
         } catch (final AwsServiceException e) {
