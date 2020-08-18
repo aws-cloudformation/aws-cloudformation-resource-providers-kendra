@@ -114,7 +114,7 @@ public class UpdateHandler extends BaseHandlerStd {
         try {
             return Translator.translateToUpdateRequest(model, prevModel);
         } catch (TranslatorValidationException e) {
-            throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME + e.getMessage(), e);
+            throw new CfnInvalidRequestException(e.getMessage(), e);
         }
     }
 
@@ -149,7 +149,7 @@ public class UpdateHandler extends BaseHandlerStd {
         try {
             updateIndexResponse = proxyClient.injectCredentialsAndInvokeV2(updateIndexRequest, proxyClient.client()::updateIndex);
         } catch (ValidationException e) {
-            throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME + e.getMessage(), e);
+            throw new CfnInvalidRequestException(e.getMessage(), e);
         } catch (ConflictException e) {
             throw new CfnResourceConflictException(e);
         } catch (ServiceQuotaExceededException e) {
@@ -194,7 +194,7 @@ public class UpdateHandler extends BaseHandlerStd {
             try {
                 proxyClient.injectCredentialsAndInvokeV2(tagResourceRequest, proxyClient.client()::tagResource);
             } catch (ValidationException e) {
-                throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME, e);
+                throw new CfnInvalidRequestException(e.getMessage(), e);
             }
         }
 
@@ -204,7 +204,7 @@ public class UpdateHandler extends BaseHandlerStd {
             try {
                 proxyClient.injectCredentialsAndInvokeV2(untagResourceRequest, proxyClient.client()::untagResource);
             } catch (ValidationException e) {
-                throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME, e);
+                throw new CfnInvalidRequestException(e.getMessage(), e);
             }
         }
         return ProgressEvent.progress(resourceModel, callbackContext);

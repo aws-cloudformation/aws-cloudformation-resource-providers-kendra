@@ -110,7 +110,7 @@ public class CreateHandler extends BaseHandlerStd {
         try {
             createFaqResponse = proxyClient.injectCredentialsAndInvokeV2(createFaqRequest, proxyClient.client()::createFaq);
         } catch (ValidationException e) {
-            throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME + e.getMessage(), e);
+            throw new CfnInvalidRequestException(e.getMessage(), e);
         } catch (ConflictException e) {
             throw new CfnResourceConflictException(e);
         } catch (final AwsServiceException e) {

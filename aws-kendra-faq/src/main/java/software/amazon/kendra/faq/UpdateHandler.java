@@ -80,7 +80,7 @@ public class UpdateHandler extends BaseHandlerStd {
             try {
                 proxyClient.injectCredentialsAndInvokeV2(tagResourceRequest, proxyClient.client()::tagResource);
             } catch (ValidationException e) {
-                throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME, e);
+                throw new CfnInvalidRequestException(e.getMessage(), e);
             }
         }
 
@@ -90,7 +90,7 @@ public class UpdateHandler extends BaseHandlerStd {
             try {
                 proxyClient.injectCredentialsAndInvokeV2(untagResourceRequest, proxyClient.client()::untagResource);
             } catch (ValidationException e) {
-                throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME, e);
+                throw new CfnInvalidRequestException(e.getMessage(), e);
             }
         }
 

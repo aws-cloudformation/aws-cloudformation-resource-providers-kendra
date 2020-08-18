@@ -101,7 +101,7 @@ public class UpdateHandler extends BaseHandlerStd {
         try {
             updateDataSourceResponse = proxyClient.injectCredentialsAndInvokeV2(updateDataSourceRequest, proxyClient.client()::updateDataSource);
         } catch (ValidationException e) {
-            throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME + e.getMessage(), e);
+            throw new CfnInvalidRequestException(e.getMessage(), e);
         } catch (ResourceNotFoundException e) {
             throw new CfnNotFoundException(ResourceModel.TYPE_NAME, updateDataSourceRequest.id(), e);
         } catch (ConflictException e) {
@@ -171,7 +171,7 @@ public class UpdateHandler extends BaseHandlerStd {
             try {
                 proxyClient.injectCredentialsAndInvokeV2(tagResourceRequest, proxyClient.client()::tagResource);
             } catch (ValidationException e) {
-                throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME, e);
+                throw new CfnInvalidRequestException(e.getMessage(), e);
             }
         }
 
@@ -181,7 +181,7 @@ public class UpdateHandler extends BaseHandlerStd {
             try {
                 proxyClient.injectCredentialsAndInvokeV2(untagResourceRequest, proxyClient.client()::untagResource);
             } catch (ValidationException e) {
-                throw new CfnInvalidRequestException(ResourceModel.TYPE_NAME, e);
+                throw new CfnInvalidRequestException(e.getMessage(), e);
             }
         }
         return ProgressEvent.progress(resourceModel, callbackContext);
