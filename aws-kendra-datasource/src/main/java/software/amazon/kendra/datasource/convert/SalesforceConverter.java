@@ -21,6 +21,9 @@ public class SalesforceConverter {
     }
 
     static SalesforceConfiguration toSdk(software.amazon.kendra.datasource.SalesforceConfiguration model) {
+        if (model == null) {
+            return null;
+        }
         return SalesforceConfiguration.builder()
                 .serverUrl(model.getServerUrl())
                 .secretArn(model.getSecretArn())
@@ -112,7 +115,11 @@ public class SalesforceConverter {
                 .build();
     }
 
+
     static software.amazon.kendra.datasource.SalesforceConfiguration toModel(SalesforceConfiguration sdk) {
+        if (sdk == null) {
+            return null;
+        }
         return software.amazon.kendra.datasource.SalesforceConfiguration
                 .builder()
                 .serverUrl(sdk.serverUrl())
