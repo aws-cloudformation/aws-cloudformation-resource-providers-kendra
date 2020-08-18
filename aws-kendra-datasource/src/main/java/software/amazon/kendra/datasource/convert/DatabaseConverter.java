@@ -4,7 +4,6 @@ import software.amazon.kendra.datasource.AclConfiguration;
 import software.amazon.kendra.datasource.ColumnConfiguration;
 import software.amazon.kendra.datasource.ConnectionConfiguration;
 import software.amazon.kendra.datasource.DataSourceConfiguration;
-import software.amazon.kendra.datasource.DataSourceToIndexFieldMapping;
 import software.amazon.kendra.datasource.DataSourceVpcConfiguration;
 import software.amazon.kendra.datasource.DatabaseConfiguration;
 import software.amazon.kendra.datasource.SqlConfiguration;

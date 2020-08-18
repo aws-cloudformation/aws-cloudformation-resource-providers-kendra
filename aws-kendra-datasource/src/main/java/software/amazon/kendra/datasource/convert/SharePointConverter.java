@@ -9,18 +9,25 @@ public class SharePointConverter {
   public static software.amazon.awssdk.services.kendra.model.DataSourceConfiguration toSdkDataSourceConfiguration(
           SharePointConfiguration sharePointConfiguration) {
     return software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
-            .sharePointConfiguration(software.amazon.awssdk.services.kendra.model.SharePointConfiguration.builder()
-                    .sharePointVersion(sharePointConfiguration.getSharePointVersion())
-                    .urls(sharePointConfiguration.getUrls())
-                    .secretArn(sharePointConfiguration.getSecretArn())
-                    .crawlAttachments(sharePointConfiguration.getCrawlAttachments())
-                    .useChangeLog(sharePointConfiguration.getUseChangeLog())
-                    .inclusionPatterns(sharePointConfiguration.getInclusionPatterns())
-                    .exclusionPatterns(sharePointConfiguration.getExclusionPatterns())
-                    .vpcConfiguration(sdkVpcConfiguration(sharePointConfiguration.getVpcConfiguration()))
-                    .fieldMappings(ListConverter.toSdk(sharePointConfiguration.getFieldMappings(), FieldMappingConverter::toSdk))
-                    .documentTitleFieldName(sharePointConfiguration.getDocumentTitleFieldName())
-                    .build())
+            .sharePointConfiguration(toSdk(sharePointConfiguration))
+            .build();
+  }
+
+  private static software.amazon.awssdk.services.kendra.model.SharePointConfiguration toSdk(SharePointConfiguration model) {
+    if (model == null) {
+      return null;
+    }
+    return software.amazon.awssdk.services.kendra.model.SharePointConfiguration.builder()
+            .sharePointVersion(model.getSharePointVersion())
+            .urls(model.getUrls())
+            .secretArn(model.getSecretArn())
+            .crawlAttachments(model.getCrawlAttachments())
+            .useChangeLog(model.getUseChangeLog())
+            .inclusionPatterns(model.getInclusionPatterns())
+            .exclusionPatterns(model.getExclusionPatterns())
+            .vpcConfiguration(sdkVpcConfiguration(model.getVpcConfiguration()))
+            .fieldMappings(ListConverter.toSdk(model.getFieldMappings(), FieldMappingConverter::toSdk))
+            .documentTitleFieldName(model.getDocumentTitleFieldName())
             .build();
   }
 
