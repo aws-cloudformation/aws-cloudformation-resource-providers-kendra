@@ -30,14 +30,20 @@ public class S3Converter {
   public static DataSourceConfiguration toModelDataSourceConfiguration(
           software.amazon.awssdk.services.kendra.model.S3DataSourceConfiguration s3DataSourceConfiguration) {
     return DataSourceConfiguration.builder()
-            .s3Configuration(S3DataSourceConfiguration.builder()
-                    .bucketName(s3DataSourceConfiguration.bucketName())
-                    .inclusionPrefixes(StringListConverter.toModel(s3DataSourceConfiguration.inclusionPrefixes()))
-                    .exclusionPatterns(StringListConverter.toModel(s3DataSourceConfiguration.exclusionPatterns()))
-                    .accessControlListConfiguration(modelAccessControlListConfiguration(s3DataSourceConfiguration.accessControlListConfiguration()))
-                    .documentsMetadataConfiguration(modelDocumentsMetadataConfiguration(s3DataSourceConfiguration.documentsMetadataConfiguration()))
-                    .build()
-            )
+            .s3Configuration(toModel(s3DataSourceConfiguration))
+            .build();
+  }
+
+  private static S3DataSourceConfiguration toModel(software.amazon.awssdk.services.kendra.model.S3DataSourceConfiguration sdk) {
+    if (sdk == null) {
+      return null;
+    }
+    return S3DataSourceConfiguration.builder()
+            .bucketName(sdk.bucketName())
+            .inclusionPrefixes(StringListConverter.toModel(sdk.inclusionPrefixes()))
+            .exclusionPatterns(StringListConverter.toModel(sdk.exclusionPatterns()))
+            .accessControlListConfiguration(modelAccessControlListConfiguration(sdk.accessControlListConfiguration()))
+            .documentsMetadataConfiguration(modelDocumentsMetadataConfiguration(sdk.documentsMetadataConfiguration()))
             .build();
   }
 

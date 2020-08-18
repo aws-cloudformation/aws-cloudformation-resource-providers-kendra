@@ -34,18 +34,25 @@ public class SharePointConverter {
   public static DataSourceConfiguration toModelDataSourceConfiguration(
           software.amazon.awssdk.services.kendra.model.SharePointConfiguration sharePointConfiguration) {
     return DataSourceConfiguration.builder()
-            .sharePointConfiguration(SharePointConfiguration.builder()
-                    .sharePointVersion(sharePointConfiguration.sharePointVersion().toString())
-                    .urls(sharePointConfiguration.urls())
-                    .secretArn(sharePointConfiguration.secretArn())
-                    .crawlAttachments(sharePointConfiguration.crawlAttachments())
-                    .useChangeLog(sharePointConfiguration.useChangeLog())
-                    .inclusionPatterns(sharePointConfiguration.inclusionPatterns())
-                    .exclusionPatterns(sharePointConfiguration.exclusionPatterns())
-                    .vpcConfiguration(modelVpcConfiguration(sharePointConfiguration.vpcConfiguration()))
-                    .fieldMappings(ListConverter.toModel(sharePointConfiguration.fieldMappings(), FieldMappingConverter::toModel))
-                    .documentTitleFieldName(sharePointConfiguration.documentTitleFieldName())
-                    .build())
+            .sharePointConfiguration(toModel(sharePointConfiguration))
+            .build();
+  }
+
+  private static SharePointConfiguration toModel(software.amazon.awssdk.services.kendra.model.SharePointConfiguration sdk) {
+    if (sdk == null) {
+      return null;
+    }
+    return SharePointConfiguration.builder()
+            .sharePointVersion(sdk.sharePointVersion().toString())
+            .urls(sdk.urls())
+            .secretArn(sdk.secretArn())
+            .crawlAttachments(sdk.crawlAttachments())
+            .useChangeLog(sdk.useChangeLog())
+            .inclusionPatterns(sdk.inclusionPatterns())
+            .exclusionPatterns(sdk.exclusionPatterns())
+            .vpcConfiguration(modelVpcConfiguration(sdk.vpcConfiguration()))
+            .fieldMappings(ListConverter.toModel(sdk.fieldMappings(), FieldMappingConverter::toModel))
+            .documentTitleFieldName(sdk.documentTitleFieldName())
             .build();
   }
 
