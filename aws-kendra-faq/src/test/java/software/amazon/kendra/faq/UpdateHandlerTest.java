@@ -12,9 +12,11 @@ import software.amazon.awssdk.services.kendra.model.DescribeFaqResponse;
 import software.amazon.awssdk.services.kendra.model.FaqStatus;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
+import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.TagResourceResponse;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
+import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnNotUpdatableException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
@@ -28,6 +30,7 @@ import java.util.Arrays;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -130,7 +133,8 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
-        verify(proxyClient.client(), times(1)).describeFaq(any(DescribeFaqRequest.class));
+        verify(proxyClient.client(), times(2)).describeFaq(any(DescribeFaqRequest.class));
+        verify(kendraClient, atLeastOnce()).serviceName();
     }
 
     @Test
@@ -220,7 +224,8 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1))
                 .tagResource(any(TagResourceRequest.class));
-        verify(proxyClient.client(), times(1)).describeFaq(any(DescribeFaqRequest.class));
+        verify(proxyClient.client(), times(2)).describeFaq(any(DescribeFaqRequest.class));
+        verify(kendraClient, atLeastOnce()).serviceName();
     }
 
     @Test
@@ -310,7 +315,8 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1))
                 .untagResource(any(UntagResourceRequest.class));
-        verify(proxyClient.client(), times(1)).describeFaq(any(DescribeFaqRequest.class));
+        verify(proxyClient.client(), times(2)).describeFaq(any(DescribeFaqRequest.class));
+        verify(kendraClient, atLeastOnce()).serviceName();
     }
 
     @Test
@@ -412,7 +418,8 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .untagResource(any(UntagResourceRequest.class));
         verify(proxyClient.client(), times(1))
                 .tagResource(any(TagResourceRequest.class));
-        verify(proxyClient.client(), times(1)).describeFaq(any(DescribeFaqRequest.class));
+        verify(proxyClient.client(), times(2)).describeFaq(any(DescribeFaqRequest.class));
+        verify(kendraClient, atLeastOnce()).serviceName();
     }
 
     @Test
@@ -565,5 +572,30 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThrows(CfnNotUpdatableException.class, () -> {
             handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
         });
+    }
+
+    @Test
+    public void handleRequest_ThrowsNotFoundException() {
+        final UpdateHandler handler = new UpdateHandler(faqArnBuilder);
+
+        String faqId = "faqId";
+        String indexId = "indexId";
+        ResourceModel resourceModel = ResourceModel
+                .builder()
+                .id(faqId)
+                .indexId(indexId)
+                .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+                .desiredResourceState(resourceModel)
+                .build();
+
+        when(proxyClient.client().describeFaq(any(DescribeFaqRequest.class)))
+                        .thenThrow(ResourceNotFoundException.builder().build());
+
+        assertThrows(CfnNotFoundException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
+        verify(kendraClient, atLeastOnce()).serviceName();
     }
 }
