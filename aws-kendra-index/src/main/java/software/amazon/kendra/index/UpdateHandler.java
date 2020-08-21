@@ -7,7 +7,6 @@ import software.amazon.awssdk.services.kendra.model.ConflictException;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
 import software.amazon.awssdk.services.kendra.model.IndexStatus;
-import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.kendra.model.ServiceQuotaExceededException;
 import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
@@ -31,8 +30,6 @@ import software.amazon.cloudformation.proxy.delay.Constant;
 
 import java.time.Duration;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -172,22 +169,21 @@ public class UpdateHandler extends BaseHandlerStd {
             final ProxyClient<KendraClient> proxyClient,
             final ProgressEvent<ResourceModel, CallbackContext> progress,
             ResourceHandlerRequest<ResourceModel> request) {
-        ResourceModel resourceModel = progress.getResourceModel();
         CallbackContext callbackContext = progress.getCallbackContext();
+        ResourceModel currResourceModel = request.getDesiredResourceState();
+        ResourceModel prevResourceModel = request.getPreviousResourceState();
         Set<Tag> currentTags;
-        if (resourceModel.getTags() != null) {
-            currentTags = resourceModel.getTags().stream().collect(Collectors.toSet());
+        if (currResourceModel.getTags() != null) {
+            currentTags = currResourceModel.getTags().stream().collect(Collectors.toSet());
         } else {
             currentTags = new HashSet<>();
         }
 
         String arn = indexArnBuilder.build(request);
-        ListTagsForResourceRequest listTagsForResourceRequest = Translator.translateToListTagsRequest(arn);
-        List<software.amazon.awssdk.services.kendra.model.Tag> existingTagsSdk = proxyClient.injectCredentialsAndInvokeV2(
-                listTagsForResourceRequest, proxyClient.client()::listTagsForResource).tags();
-        Set<Tag> existingTags = existingTagsSdk.stream().map(x -> Tag.builder().key(x.key()).value(x.value()).build())
-                .collect(Collectors.toSet());
-
+        Set<Tag> existingTags = new HashSet<>();
+        if (prevResourceModel != null && prevResourceModel.getTags() != null) {
+            existingTags = prevResourceModel.getTags().stream().collect(Collectors.toSet());
+        }
         final Set<Tag> tagsToAdd = Sets.difference(currentTags, existingTags);
         if (!tagsToAdd.isEmpty()) {
             TagResourceRequest tagResourceRequest = Translator.translateToTagResourceRequest(tagsToAdd, arn);
@@ -207,7 +203,7 @@ public class UpdateHandler extends BaseHandlerStd {
                 throw new CfnInvalidRequestException(e.getMessage(), e);
             }
         }
-        return ProgressEvent.progress(resourceModel, callbackContext);
+        return ProgressEvent.progress(currResourceModel, callbackContext);
     }
 
    /**

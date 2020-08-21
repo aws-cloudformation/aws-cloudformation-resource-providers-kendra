@@ -129,8 +129,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
 
-        verify(proxyClient.client(), times(2))
-                .listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).describeFaq(any(DescribeFaqRequest.class));
     }
 
@@ -168,7 +167,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .build();
 
         when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
-                .thenReturn(ListTagsForResourceResponse.builder().build())
                 .thenReturn(ListTagsForResourceResponse
                         .builder()
                         .tags(software.amazon.awssdk.services.kendra.model.Tag
@@ -219,8 +217,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
 
-        verify(proxyClient.client(), times(2))
-                .listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1))
                 .tagResource(any(TagResourceRequest.class));
         verify(proxyClient.client(), times(1)).describeFaq(any(DescribeFaqRequest.class));
@@ -232,8 +229,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         String faqId = "faqId";
         String indexId = "indexId";
-        String key = "key";
-        String value = "value";
         String name = "name";
         String description = "description";
         String roleArn = "roleArn";
@@ -254,19 +249,25 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .s3Path(s3Path)
                 .build();
 
+        String key = "key";
+        String value = "value";
+        ResourceModel prevModel = ResourceModel
+                .builder()
+                .id(faqId)
+                .indexId(indexId)
+                .name(name)
+                .description(description)
+                .roleArn(roleArn)
+                .s3Path(s3Path)
+                .tags(Arrays.asList(Tag.builder().key(key).value(value).build()))
+                .build();
+
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(resourceModel)
+                .previousResourceState(prevModel)
                 .build();
 
         when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
-                .thenReturn(ListTagsForResourceResponse
-                        .builder()
-                        .tags(software.amazon.awssdk.services.kendra.model.Tag
-                                .builder()
-                                .key(key)
-                                .value(value)
-                                .build())
-                        .build())
                 .thenReturn(ListTagsForResourceResponse.builder().build());
 
         when(proxyClient.client().describeFaq(any(DescribeFaqRequest.class)))
@@ -306,8 +307,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
 
-        verify(proxyClient.client(), times(2))
-                .listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1))
                 .untagResource(any(UntagResourceRequest.class));
         verify(proxyClient.client(), times(1)).describeFaq(any(DescribeFaqRequest.class));
@@ -341,22 +341,25 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .s3Path(s3Path)
                 .tags(Arrays.asList(Tag.builder().key(tagKeyToAdd).value(tagValueToAdd).build()))
                 .build();
+        String tagKeyToRemove = "keyToRemove";
+        String tagValueToRemove = "valueToRemove";
+        ResourceModel prevModel = ResourceModel
+                .builder()
+                .id(faqId)
+                .indexId(indexId)
+                .name(name)
+                .description(description)
+                .roleArn(roleArn)
+                .s3Path(s3Path)
+                .tags(Arrays.asList(Tag.builder().key(tagKeyToRemove).value(tagValueToRemove).build()))
+                .build();
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(resourceModel)
+                .previousResourceState(prevModel)
                 .build();
 
-        String tagKeyToRemove = "keyToRemove";
-        String tagValueToRemove = "valueToRemove";
         when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
-                .thenReturn(ListTagsForResourceResponse
-                        .builder()
-                        .tags(software.amazon.awssdk.services.kendra.model.Tag
-                                .builder()
-                                .key(tagKeyToRemove)
-                                .value(tagValueToRemove)
-                                .build())
-                        .build())
                 .thenReturn(ListTagsForResourceResponse
                         .builder()
                         .tags(software.amazon.awssdk.services.kendra.model.Tag
@@ -404,8 +407,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
 
-        verify(proxyClient.client(), times(2))
-                .listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1))
                 .untagResource(any(UntagResourceRequest.class));
         verify(proxyClient.client(), times(1))

@@ -113,7 +113,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
                         .builder()
                         .tags((java.util.Collection<software.amazon.awssdk.services.kendra.model.Tag>) null)
                         .build());
-
         final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
 
         assertThat(response).isNotNull();
@@ -135,7 +134,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
         verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
-        verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(sdkClient, atLeastOnce()).serviceName();
     }
 
@@ -209,7 +208,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
         verify(proxyClient.client(), times(4)).describeIndex(any(DescribeIndexRequest.class));
-        verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(sdkClient, atLeastOnce()).serviceName();
     }
 
@@ -309,7 +308,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
                         .build());
 
         when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
-                .thenReturn(ListTagsForResourceResponse.builder().build())
                 .thenReturn(ListTagsForResourceResponse
                         .builder()
                         .tags(Arrays.asList(software.amazon.awssdk.services.kendra.model.Tag
@@ -339,7 +337,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
         verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
-        verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).tagResource(any(TagResourceRequest.class));
         verify(sdkClient, atLeastOnce()).serviceName();
     }
@@ -360,8 +358,17 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .edition(indexEdition)
                 .build();
 
+        String key = "key";
+        String value = "value";
+        final ResourceModel prevModel = ResourceModel
+                .builder()
+                .tags(Arrays.asList(Tag.builder().key(key).value(value).build()))
+                .edition(indexEdition)
+                .build();
+
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
+                .previousResourceState(prevModel)
                 .build();
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
@@ -375,14 +382,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                         .status(IndexStatus.ACTIVE.toString())
                         .build());
 
-        String key = "key";
-        String value = "value";
         when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
-                .thenReturn(ListTagsForResourceResponse
-                        .builder()
-                        .tags(Arrays.asList(software.amazon.awssdk.services.kendra.model.Tag
-                                .builder().key(key).value(value).build()))
-                        .build())
                 .thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().untagResource(any(UntagResourceRequest.class)))
                 .thenReturn(UntagResourceResponse.builder().build());
@@ -407,7 +407,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
         verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
-        verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).untagResource(any(UntagResourceRequest.class));
         verify(sdkClient, atLeastOnce()).serviceName();
     }
@@ -432,8 +432,17 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .edition(indexEdition)
                 .build();
 
+        String keyRemove = "keyRemove";
+        String valueRemove = "valueRemove";
+        final ResourceModel prevModel = ResourceModel
+                .builder()
+                .edition(indexEdition)
+                .tags(Arrays.asList(Tag.builder().key(keyRemove).value(valueRemove).build()))
+                .build();
+
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
+                .previousResourceState(prevModel)
                 .build();
 
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
@@ -443,18 +452,11 @@ public class UpdateHandlerTest extends AbstractTestBase {
                         .id(id)
                         .name(name)
                         .roleArn(roleArn)
-                        .edition(indexEdition.toString())
+                        .edition(indexEdition)
                         .status(IndexStatus.ACTIVE.toString())
                         .build());
 
-        String keyRemove = "keyRemove";
-        String valueRemove = "valueRemove";
         when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
-                .thenReturn(ListTagsForResourceResponse
-                        .builder()
-                        .tags(Arrays.asList(software.amazon.awssdk.services.kendra.model.Tag
-                                .builder().key(keyRemove).value(valueRemove).build()))
-                        .build())
                 .thenReturn(ListTagsForResourceResponse
                         .builder()
                         .tags(Arrays.asList(software.amazon.awssdk.services.kendra.model.Tag
@@ -473,7 +475,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .builder()
                 .id(id)
                 .arn(testIndexArnBuilder.build(request))
-                .edition(indexEdition.toString())
+                .edition(indexEdition)
                 .roleArn(roleArn)
                 .name(name)
                 .tags(tagsToAdd)
@@ -485,7 +487,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
         verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
-        verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).tagResource(any(TagResourceRequest.class));
         verify(proxyClient.client(), times(1)).untagResource(any(UntagResourceRequest.class));
         verify(sdkClient, atLeastOnce()).serviceName();
@@ -522,9 +524,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
                         .status(IndexStatus.ACTIVE.toString())
                         .build());
 
-        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
-                .thenReturn(ListTagsForResourceResponse.builder().build());
-
         when(proxyClient.client().tagResource(any(TagResourceRequest.class)))
                 .thenThrow(ValidationException.builder().build());
 
@@ -557,6 +556,12 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .edition(indexEdition)
                 .build();
 
+        final ResourceModel prevModel = ResourceModel
+                .builder()
+                .edition(indexEdition)
+                .tags(Arrays.asList(Tag.builder().key("key").value("value").build()))
+                .build();
+
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
                 .thenReturn(UpdateIndexResponse.builder().build());
         when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
@@ -568,18 +573,12 @@ public class UpdateHandlerTest extends AbstractTestBase {
                         .status(IndexStatus.ACTIVE.toString())
                         .build());
 
-        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
-                .thenReturn(ListTagsForResourceResponse
-                        .builder()
-                        .tags(Arrays.asList(software.amazon.awssdk.services.kendra.model.Tag
-                                .builder().key("key").value("value").build()))
-                        .build());
-
         when(proxyClient.client().untagResource(any(UntagResourceRequest.class)))
                 .thenThrow(ValidationException.builder().build());
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
+                .previousResourceState(prevModel)
                 .build();
 
         assertThrows(CfnInvalidRequestException.class, () -> {
