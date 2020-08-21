@@ -2,10 +2,14 @@ package software.amazon.kendra.faq;
 
 import com.google.common.collect.Sets;
 import software.amazon.awssdk.services.kendra.KendraClient;
+import software.amazon.awssdk.services.kendra.model.DescribeFaqRequest;
+import software.amazon.awssdk.services.kendra.model.DescribeFaqResponse;
+import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
+import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnNotUpdatableException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
@@ -49,9 +53,24 @@ public class UpdateHandler extends BaseHandlerStd {
         // https://github.com/aws-cloudformation/cloudformation-cli-java-plugin/blob/master/src/main/java/software/amazon/cloudformation/proxy/CallChain.java
 
         return ProgressEvent.progress(model, callbackContext)
+                .then(progress ->
+                        proxy.initiate("AWS-Kendra-Faq::ValidateResourceExists", proxyClient, model, callbackContext)
+                                .translateToServiceRequest(resourceModel -> Translator.translateToReadRequest(model))
+                                .makeServiceCall(this::validateResourceExists)
+                                .progress())
                 // STEP 1 [first update/stabilize progress chain - required for resource update]
                 .then(progress -> updateTags(proxyClient, progress, request))
                 .then(progress -> new ReadHandler(faqArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
+    }
+
+    private DescribeFaqResponse validateResourceExists(DescribeFaqRequest describeFaqRequest, ProxyClient<KendraClient> proxyClient) {
+        DescribeFaqResponse describeFaqResponse;
+        try {
+            describeFaqResponse = proxyClient.injectCredentialsAndInvokeV2(describeFaqRequest,proxyClient.client()::describeFaq);
+        } catch (ResourceNotFoundException e) {
+            throw new CfnNotFoundException(ResourceModel.TYPE_NAME, describeFaqRequest.id(), e);
+        }
+        return describeFaqResponse;
     }
 
     private ProgressEvent<ResourceModel, CallbackContext> updateTags(
