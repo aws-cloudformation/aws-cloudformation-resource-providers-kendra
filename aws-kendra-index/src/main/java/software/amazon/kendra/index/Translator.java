@@ -39,14 +39,13 @@ import java.util.stream.Stream;
 
 public class Translator {
 
-  static CreateIndexRequest translateToCreateRequest(final ResourceModel model, final String clientRequestToken) {
+  static CreateIndexRequest translateToCreateRequest(final ResourceModel model) {
     final CreateIndexRequest.Builder builder = CreateIndexRequest
             .builder()
             .name(model.getName())
             .roleArn(model.getRoleArn())
             .description(model.getDescription())
-            .edition(model.getEdition())
-            .clientToken(clientRequestToken);
+            .edition(model.getEdition());
     builder.tags(ListConverter.toSdk(model.getTags(), x -> Tag.builder().key(x.getKey()).value(x.getValue()).build()));
     if (model.getServerSideEncryptionConfiguration() != null
             && (model.getServerSideEncryptionConfiguration().getKmsKeyId() != null)) {

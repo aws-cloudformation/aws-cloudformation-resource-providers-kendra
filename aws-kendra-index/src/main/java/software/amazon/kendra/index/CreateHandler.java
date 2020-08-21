@@ -87,7 +87,7 @@ public class CreateHandler extends BaseHandlerStd {
                         // If your service API throws 'ResourceAlreadyExistsException' for create requests then CreateHandler can return just proxy.initiate construction
                         // STEP 2.0 [initialize a proxy context]
                         proxy.initiate("AWS-Kendra-Index::Create", proxyClient, request.getDesiredResourceState(), callbackContext)
-                                .translateToServiceRequest((resourceModel) -> Translator.translateToCreateRequest(resourceModel, request.getClientRequestToken()))
+                                .translateToServiceRequest(Translator::translateToCreateRequest)
                                 .makeServiceCall(this::createIndex)
                                 .done(this::setId)
                 )

@@ -241,7 +241,7 @@ class TranslatorTest {
     }
 
     @Test
-    void testTranslateToCreateRequestNameRoleDescriptionClientTokenEdition() {
+    void testTranslateToCreateRequestNameRoleDescriptionEdition() {
         String name = "name";
         String description = "description";
         String roleArn = "roleArn";
@@ -253,13 +253,11 @@ class TranslatorTest {
                 .roleArn(roleArn)
                 .edition(edition)
                 .build();
-        String clientRequestToken = "clientRequestToken";
-        CreateIndexRequest actualCreateIndexRequest = Translator.translateToCreateRequest(resourceModel, clientRequestToken);
+        CreateIndexRequest actualCreateIndexRequest = Translator.translateToCreateRequest(resourceModel);
         assertThat(actualCreateIndexRequest.description()).isEqualTo(description);
         assertThat(actualCreateIndexRequest.name()).isEqualTo(name);
         assertThat(actualCreateIndexRequest.editionAsString()).isEqualTo(edition);
         assertThat(actualCreateIndexRequest.roleArn()).isEqualTo(roleArn);
-        assertThat(actualCreateIndexRequest.clientToken()).isEqualTo(clientRequestToken);
     }
 
     @Test
@@ -271,7 +269,7 @@ class TranslatorTest {
                 .builder()
                 .tags(Arrays.asList(tag))
                 .build();
-        CreateIndexRequest actualCreateIndexRequest = Translator.translateToCreateRequest(resourceModel, null);
+        CreateIndexRequest actualCreateIndexRequest = Translator.translateToCreateRequest(resourceModel);
         assertThat(actualCreateIndexRequest.tags().size()).isEqualTo(1);
         assertThat(actualCreateIndexRequest.tags().get(0).key()).isEqualTo(key);
         assertThat(actualCreateIndexRequest.tags().get(0).value()).isEqualTo(value);
@@ -288,7 +286,7 @@ class TranslatorTest {
                 .builder()
                 .serverSideEncryptionConfiguration(serverSideEncryptionConfiguration)
                 .build();
-        CreateIndexRequest actualCreateIndexRequest = Translator.translateToCreateRequest(resourceModel, null);
+        CreateIndexRequest actualCreateIndexRequest = Translator.translateToCreateRequest(resourceModel);
         assertThat(actualCreateIndexRequest.serverSideEncryptionConfiguration().kmsKeyId()).isEqualTo(kmsKeyId);
     }
 
@@ -301,7 +299,7 @@ class TranslatorTest {
                 .builder()
                 .serverSideEncryptionConfiguration(serverSideEncryptionConfiguration)
                 .build();
-        CreateIndexRequest actualCreateIndexRequest = Translator.translateToCreateRequest(resourceModel, null);
+        CreateIndexRequest actualCreateIndexRequest = Translator.translateToCreateRequest(resourceModel);
         assertThat(actualCreateIndexRequest.serverSideEncryptionConfiguration()).isNull();
     }
 
