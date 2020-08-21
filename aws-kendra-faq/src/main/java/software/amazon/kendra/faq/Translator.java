@@ -34,11 +34,14 @@ public class Translator {
             .indexId(model.getIndexId())
             .description(model.getDescription())
             .name(model.getName())
-            .roleArn(model.getRoleArn())
-            .s3Path(S3Path.builder()
-                    .key(model.getS3Path().getKey())
-                    .bucket(model.getS3Path().getBucket())
-                    .build());
+            .roleArn(model.getRoleArn());
+    if (model.getS3Path() != null) {
+      builder.s3Path(
+              S3Path.builder()
+                      .key(model.getS3Path().getKey())
+                      .bucket(model.getS3Path().getBucket())
+                      .build());
+    }
     builder.tags(ListConverter.toSdk(model.getTags(), x -> Tag.builder().key(x.getKey()).value(x.getValue()).build()));
     return builder.build();
   }
@@ -60,11 +63,13 @@ public class Translator {
             .arn(arn)
             .description(describeFaqResponse.description())
             .name(describeFaqResponse.name())
-            .roleArn(describeFaqResponse.roleArn())
-            .s3Path(software.amazon.kendra.faq.S3Path.builder()
-                    .key(describeFaqResponse.s3Path().key())
-                    .bucket(describeFaqResponse.s3Path().bucket())
-                    .build());
+            .roleArn(describeFaqResponse.roleArn());
+    if (describeFaqResponse.s3Path() != null) {
+      builder.s3Path(software.amazon.kendra.faq.S3Path.builder()
+              .key(describeFaqResponse.s3Path().key())
+              .bucket(describeFaqResponse.s3Path().bucket())
+              .build());
+    }
 
     builder.tags(ListConverter.toModel(listTagsForResourceResponse.tags(), x -> software.amazon.kendra.faq.Tag
             .builder()
