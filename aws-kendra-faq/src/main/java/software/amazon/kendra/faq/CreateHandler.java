@@ -22,6 +22,8 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static software.amazon.kendra.faq.ApiName.CREATE_FAQ;
+
 public class CreateHandler extends BaseHandlerStd {
     protected static final BiFunction<ResourceModel, ProxyClient<KendraClient>, ResourceModel> EMPTY_CALL =
             (model, proxyClient) -> model;
@@ -120,7 +122,7 @@ public class CreateHandler extends BaseHandlerStd {
              * Each BaseHandlerException maps to a specific error code, and you should map service exceptions as closely as possible
              * to more specific error codes
              */
-            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e);
+            throw new CfnGeneralServiceException(CREATE_FAQ, e);
         }
 
         logger.log(String.format("%s successfully created.", ResourceModel.TYPE_NAME));

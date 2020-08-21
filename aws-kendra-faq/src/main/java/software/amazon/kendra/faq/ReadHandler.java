@@ -17,6 +17,9 @@ import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
+import static software.amazon.kendra.faq.ApiName.DESCRIBE_FAQ;
+import static software.amazon.kendra.faq.ApiName.LIST_TAGS_FOR_RESOURCE;
+
 public class ReadHandler extends BaseHandlerStd {
     private Logger logger;
     private FaqArnBuilder faqArnBuilder;
@@ -53,7 +56,7 @@ public class ReadHandler extends BaseHandlerStd {
             listTagsForResourceResponse = proxyClient.injectCredentialsAndInvokeV2(listTagsForResourceRequest,
                     proxyClient.client()::listTagsForResource);
         } catch (ResourceInUseException e) {
-            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e);
+            throw new CfnGeneralServiceException(LIST_TAGS_FOR_RESOURCE, e);
         }
         return constructResourceModelFromResponse(describeFaqResponse, listTagsForResourceResponse, faqArn);
     }
@@ -81,7 +84,7 @@ public class ReadHandler extends BaseHandlerStd {
              * Each BaseHandlerException maps to a specific error code, and you should map service exceptions as closely as possible
              * to more specific error codes
              */
-            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e); // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/commit/2077c92299aeb9a68ae8f4418b5e932b12a8b186#diff-5761e3a9f732dc1ef84103dc4bc93399R56-R63
+            throw new CfnGeneralServiceException(DESCRIBE_FAQ, e); // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/commit/2077c92299aeb9a68ae8f4418b5e932b12a8b186#diff-5761e3a9f732dc1ef84103dc4bc93399R56-R63
         }
 
         logger.log(String.format("%s has successfully been read.", ResourceModel.TYPE_NAME));

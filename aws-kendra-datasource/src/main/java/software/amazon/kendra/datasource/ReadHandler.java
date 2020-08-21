@@ -16,6 +16,9 @@ import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
+import static software.amazon.kendra.datasource.ApiName.DESCRIBE_DATASOURCE;
+import static software.amazon.kendra.datasource.ApiName.LIST_TAGS_FOR_RESOURCE;
+
 public class ReadHandler extends BaseHandlerStd {
 
     private Logger logger;
@@ -48,7 +51,7 @@ public class ReadHandler extends BaseHandlerStd {
         } catch (ResourceNotFoundException e) {
             throw new CfnNotFoundException(ResourceModel.TYPE_NAME, describeDataSourceRequest.id(), e);
         } catch (final AwsServiceException e) {
-            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e);
+            throw new CfnGeneralServiceException(DESCRIBE_DATASOURCE, e);
         }
         // STEP 4 [Add List Tags for DataSource]
         String dataSourceArn = dataSourceArnBuilder.build(request);
@@ -58,7 +61,7 @@ public class ReadHandler extends BaseHandlerStd {
             listTagsForResourceResponse = proxyClient.injectCredentialsAndInvokeV2(listTagsForResourceRequest,
                     proxyClient.client()::listTagsForResource);
         } catch (ResourceInUseException e) {
-            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e);
+            throw new CfnGeneralServiceException(LIST_TAGS_FOR_RESOURCE, e);
         }
         return constructResourceModelFromResponse(describeDataSourceResponse, listTagsForResourceResponse, dataSourceArn);
     }
