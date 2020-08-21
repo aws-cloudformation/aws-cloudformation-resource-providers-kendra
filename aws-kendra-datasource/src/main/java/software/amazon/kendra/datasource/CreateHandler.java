@@ -22,6 +22,8 @@ import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
+import static software.amazon.kendra.datasource.ApiName.CREATE_DATASOURCE;
+
 public class CreateHandler extends BaseHandlerStd {
 
     protected static final BiFunction<ResourceModel, ProxyClient<KendraClient>, ResourceModel> EMPTY_CALL =
@@ -103,7 +105,7 @@ public class CreateHandler extends BaseHandlerStd {
              * Each BaseHandlerException maps to a specific error code, and you should map service exceptions as closely as possible
              * to more specific error codes
              */
-            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e);
+            throw new CfnGeneralServiceException(CREATE_DATASOURCE, e);
         }
 
         logger.log(String.format("%s successfully created.", ResourceModel.TYPE_NAME));

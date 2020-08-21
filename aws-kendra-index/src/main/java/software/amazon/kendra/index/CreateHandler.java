@@ -29,6 +29,9 @@ import java.time.Duration;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static software.amazon.kendra.index.ApiName.CREATE_INDEX;
+import static software.amazon.kendra.index.ApiName.UPDATE_INDEX;
+
 public class CreateHandler extends BaseHandlerStd {
 
     private static final Constant STABILIZATION_DELAY = Constant.of()
@@ -147,7 +150,7 @@ public class CreateHandler extends BaseHandlerStd {
              * Each BaseHandlerException maps to a specific error code, and you should map service exceptions as closely as possible
              * to more specific error codes
              */
-            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME + e.getMessage(), e);
+            throw new CfnGeneralServiceException(CREATE_INDEX, e);
         }
 
         logger.log(String.format("%s successfully created.", ResourceModel.TYPE_NAME));
@@ -179,7 +182,7 @@ public class CreateHandler extends BaseHandlerStd {
              * Each BaseHandlerException maps to a specific error code, and you should map service exceptions as closely as possible
              * to more specific error codes
              */
-            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e);
+            throw new CfnGeneralServiceException(UPDATE_INDEX, e);
         }
 
         logger.log(String.format("%s successfully updated.", ResourceModel.TYPE_NAME));

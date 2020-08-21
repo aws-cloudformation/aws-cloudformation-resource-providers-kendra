@@ -16,6 +16,9 @@ import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ProxyClient;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
+import static software.amazon.kendra.index.ApiName.DESCRIBE_INDEX;
+import static software.amazon.kendra.index.ApiName.LIST_TAGS_FOR_RESOURCE;
+
 public class ReadHandler extends BaseHandlerStd {
 
     private Logger logger;
@@ -57,7 +60,7 @@ public class ReadHandler extends BaseHandlerStd {
              * Each BaseHandlerException maps to a specific error code, and you should map service exceptions as closely as possible
              * to more specific error codes
              */
-            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME + e.getMessage(), e); // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/commit/2077c92299aeb9a68ae8f4418b5e932b12a8b186#diff-5761e3a9f732dc1ef84103dc4bc93399R56-R63
+            throw new CfnGeneralServiceException(DESCRIBE_INDEX, e); // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/commit/2077c92299aeb9a68ae8f4418b5e932b12a8b186#diff-5761e3a9f732dc1ef84103dc4bc93399R56-R63
         }
 
         String indexArn = indexArnBuilder.build(request);
@@ -67,7 +70,7 @@ public class ReadHandler extends BaseHandlerStd {
             listTagsForResourceResponse = proxyClient.injectCredentialsAndInvokeV2(listTagsForResourceRequest,
                     proxyClient.client()::listTagsForResource);
         } catch (ResourceInUseException e) {
-            throw new CfnGeneralServiceException(ResourceModel.TYPE_NAME, e);
+            throw new CfnGeneralServiceException(LIST_TAGS_FOR_RESOURCE, e);
         }
 
         return constructResourceModelFromResponse(describeIndexResponse, listTagsForResourceResponse, indexArn);
