@@ -146,6 +146,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(3)).describeDataSource(any(DescribeDataSourceRequest.class));
 
         verify(awsKendraClient, atLeastOnce()).serviceName();
@@ -229,6 +230,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
         verify(proxyClient.client(), times(4)).describeDataSource(any(DescribeDataSourceRequest.class));
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
 
         verify(awsKendraClient, atLeastOnce()).serviceName();
     }
@@ -385,7 +387,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
             .build());
 
         when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
-            .thenReturn(ListTagsForResourceResponse.builder().build())
             .thenReturn(ListTagsForResourceResponse
                 .builder()
                 .tags(Arrays.asList(software.amazon.awssdk.services.kendra.model.Tag
@@ -419,7 +420,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
         verify(proxyClient.client(), times(3)).describeDataSource(any(DescribeDataSourceRequest.class));
-        verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).tagResource(any(TagResourceRequest.class));
 
         verify(awsKendraClient, atLeastOnce()).serviceName();
@@ -428,8 +429,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
     @Test
     public void handleRequest_RemoveTags() {
         final UpdateHandler handler = new UpdateHandler(testDataSourceArnBuilder);
-        String key = "key";
-        String value = "value";
         final ResourceModel model = ResourceModel.builder()
             .id(TEST_ID)
             .indexId(TEST_INDEX_ID)
@@ -439,8 +438,15 @@ public class UpdateHandlerTest extends AbstractTestBase {
             .description(TEST_DESCRIPTION)
             .build();
 
+        String key = "key";
+        String value = "value";
+        final ResourceModel prevModel = ResourceModel.builder()
+                .tags(Arrays.asList(Tag.builder().key(key).value(value).build()))
+                .build();
+
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
           .desiredResourceState(model)
+          .previousResourceState(prevModel)
           .build();
 
         when(proxyClient.client().updateDataSource(any(UpdateDataSourceRequest.class)))
@@ -458,11 +464,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
             .build());
 
         when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
-            .thenReturn(ListTagsForResourceResponse
-                .builder()
-                .tags(Arrays.asList(software.amazon.awssdk.services.kendra.model.Tag
-                    .builder().key(key).value(value).build()))
-                .build())
             .thenReturn(ListTagsForResourceResponse.builder().build());
         when(proxyClient.client().untagResource(any(UntagResourceRequest.class)))
             .thenReturn(UntagResourceResponse.builder().build());
@@ -491,7 +492,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
         verify(proxyClient.client(), times(3)).describeDataSource(any(DescribeDataSourceRequest.class));
-        verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).untagResource(any(UntagResourceRequest.class));
 
         verify(awsKendraClient, atLeastOnce()).serviceName();
@@ -513,8 +514,16 @@ public class UpdateHandlerTest extends AbstractTestBase {
             .tags(tagsToAdd)
             .build();
 
+        String keyRemove = "keyRemove";
+        String valueRemove = "valueRemove";
+        final ResourceModel prevModel = ResourceModel.builder()
+                .id(TEST_ID)
+                .tags(Arrays.asList(Tag.builder().key(keyRemove).value(valueRemove).build()))
+                .build();
+
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
           .desiredResourceState(model)
+          .previousResourceState(prevModel)
           .build();
 
         when(proxyClient.client().updateDataSource(any(UpdateDataSourceRequest.class)))
@@ -531,15 +540,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
             .status(DataSourceStatus.ACTIVE)
             .build());
 
-        String keyRemove = "keyRemove";
-        String valueRemove = "valueRemove";
-
         when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
-            .thenReturn(ListTagsForResourceResponse
-                .builder()
-                .tags(Arrays.asList(software.amazon.awssdk.services.kendra.model.Tag
-                    .builder().key(keyRemove).value(valueRemove).build()))
-                .build())
             .thenReturn(ListTagsForResourceResponse
                 .builder()
                 .tags(Arrays.asList(software.amazon.awssdk.services.kendra.model.Tag
@@ -575,7 +576,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).updateDataSource(any(UpdateDataSourceRequest.class));
         verify(proxyClient.client(), times(3)).describeDataSource(any(DescribeDataSourceRequest.class));
-        verify(proxyClient.client(), times(2)).listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).tagResource(any(TagResourceRequest.class));
         verify(proxyClient.client(), times(1)).untagResource(any(UntagResourceRequest.class));
 
@@ -612,12 +613,8 @@ public class UpdateHandlerTest extends AbstractTestBase {
             .status(DataSourceStatus.ACTIVE)
             .build());
 
-        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
-                .thenReturn(ListTagsForResourceResponse.builder().build());
-
         when(proxyClient.client().tagResource(any(TagResourceRequest.class)))
                 .thenThrow(ValidationException.builder().build());
-
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
           .desiredResourceState(model)
@@ -636,8 +633,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
     @Test
     public void handleRequest_FailWith_UntagResourceThrowsException() {
         final UpdateHandler handler = new UpdateHandler(testDataSourceArnBuilder);
-        String key = "key";
-        String value = "value";
 
         final ResourceModel model = ResourceModel.builder()
             .id(TEST_ID)
@@ -647,6 +642,12 @@ public class UpdateHandlerTest extends AbstractTestBase {
             .roleArn(TEST_ROLE_ARN)
             .description(TEST_DESCRIPTION)
             .build();
+
+        String key = "key";
+        String value = "value";
+        final ResourceModel prevModel = ResourceModel.builder()
+                .tags(Arrays.asList(Tag.builder().key(key).value(value).build()))
+                .build();
 
         when(proxyClient.client().updateDataSource(any(UpdateDataSourceRequest.class)))
             .thenReturn(UpdateDataSourceResponse.builder().build());
@@ -661,18 +662,13 @@ public class UpdateHandlerTest extends AbstractTestBase {
             .type(TEST_DATA_SOURCE_TYPE)
             .status(DataSourceStatus.ACTIVE)
             .build());
-        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
-            .thenReturn(ListTagsForResourceResponse
-            .builder()
-            .tags(Arrays.asList(software.amazon.awssdk.services.kendra.model.Tag
-                .builder().key(key).value(value).build()))
-            .build());
 
         when(proxyClient.client().untagResource(any(UntagResourceRequest.class)))
                 .thenThrow(ValidationException.builder().build());
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
                 .desiredResourceState(model)
+                .previousResourceState(prevModel)
                 .build();
 
         assertThrows(CfnInvalidRequestException.class, () -> {
