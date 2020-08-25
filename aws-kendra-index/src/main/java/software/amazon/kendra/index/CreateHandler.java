@@ -153,7 +153,7 @@ public class CreateHandler extends BaseHandlerStd {
             throw new CfnGeneralServiceException(CREATE_INDEX, e);
         }
 
-        logger.log(String.format("%s successfully created.", ResourceModel.TYPE_NAME));
+        logger.log(String.format("%s successfully called CreateIndex and received index ID %s. Still need to stabilize.", ResourceModel.TYPE_NAME, createIndexResponse.id()));
         return createIndexResponse;
     }
 
@@ -185,7 +185,7 @@ public class CreateHandler extends BaseHandlerStd {
             throw new CfnGeneralServiceException(UPDATE_INDEX, e);
         }
 
-        logger.log(String.format("%s successfully updated.", ResourceModel.TYPE_NAME));
+        logger.log(String.format("%s successfully called UpdateIndex with index ID %s. Still need to stabilize.", ResourceModel.TYPE_NAME, updateIndexRequest.id()));
         return updateIndexResponse;
     }
 
@@ -213,6 +213,8 @@ public class CreateHandler extends BaseHandlerStd {
         if (indexStatus.equals(IndexStatus.FAILED)) {
             throw new CfnNotStabilizedException(ResourceModel.TYPE_NAME, model.getId());
         }
-        return indexStatus.equals(IndexStatus.ACTIVE);
+        boolean stabilized = indexStatus.equals(IndexStatus.ACTIVE);
+        logger.log(String.format("%s [%s] create has stabilized: %s", ResourceModel.TYPE_NAME, model.getPrimaryIdentifier(), stabilized));
+        return stabilized;
     }
 }
