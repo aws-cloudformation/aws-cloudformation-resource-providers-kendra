@@ -121,7 +121,7 @@ public class DeleteHandler extends BaseHandlerStd {
             throw new CfnGeneralServiceException(DELETE_INDEX, e);
         }
 
-        logger.log(String.format("%s successfully deleted.", ResourceModel.TYPE_NAME));
+        logger.log(String.format("%s successfully called DeleteIndex with index ID %s. Still need to stabilize.", ResourceModel.TYPE_NAME, deleteIndexRequest.id()));
         return deleteIndexResponse;
     }
 

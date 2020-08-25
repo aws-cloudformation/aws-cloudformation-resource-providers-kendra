@@ -129,7 +129,9 @@ public class UpdateHandler extends BaseHandlerStd {
         DescribeIndexResponse describeIndexResponse = proxyClient.injectCredentialsAndInvokeV2(describeIndexRequest,
                 proxyClient.client()::describeIndex);
         IndexStatus indexStatus = describeIndexResponse.status();
-        return indexStatus.equals(IndexStatus.ACTIVE);
+        boolean stabilized = indexStatus.equals(IndexStatus.ACTIVE);
+        logger.log(String.format("%s [%s] update has stabilized: %s", ResourceModel.TYPE_NAME, model.getPrimaryIdentifier(), stabilized));
+        return stabilized;
     }
 
     /**
