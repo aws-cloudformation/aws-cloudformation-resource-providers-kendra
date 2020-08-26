@@ -196,30 +196,14 @@
         "StorageCapacityUnits",
         "QueryCapacityUnits"
       ]
-    }
-  },
-  "properties": {
-    "Id": {
-      "description": "Unique ID of index",
+    },
+    "Edition": {
+      "description": "Edition of index",
       "type": "string",
-      "minLength": 36,
-      "maxLength": 36,
-      "pattern": "[a-zA-Z0-9][a-zA-Z0-9-]*"
-    },
-    "Arn": {
-      "type": "string"
-    },
-    "Description": {
-      "description": "A description for the index",
-      "$ref": "#/definitions/Description"
-    },
-    "ServerSideEncryptionConfiguration": {
-      "description": "Server side encryption configuration",
-      "$ref": "#/definitions/ServerSideEncryptionConfiguration"
-    },
-    "Tags": {
-      "description": "Tags for labeling the index",
-      "$ref": "#/definitions/TagList"
+      "enum": [
+        "DEVELOPER_EDITION",
+        "ENTERPRISE_EDITION"
+      ]
     },
     "Name": {
       "description": "Name of index",
@@ -235,13 +219,44 @@
       "maxLength": 1284,
       "pattern": "arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}"
     },
-    "Edition": {
-      "description": "Edition of index",
+    "Id": {
+      "description": "Unique ID of index",
       "type": "string",
-      "enum": [
-        "DEVELOPER_EDITION",
-        "ENTERPRISE_EDITION"
-      ]
+      "minLength": 36,
+      "maxLength": 36,
+      "pattern": "[a-zA-Z0-9][a-zA-Z0-9-]*"
+    },
+    "Arn": {
+      "type": "string"
+    }
+  },
+  "properties": {
+    "Id": {
+      "$ref": "#/definitions/Id"
+    },
+    "Arn": {
+      "$ref": "#/definitions/Arn"
+    },
+    "Description": {
+      "description": "A description for the index",
+      "$ref": "#/definitions/Description"
+    },
+    "ServerSideEncryptionConfiguration": {
+      "description": "Server side encryption configuration",
+      "$ref": "#/definitions/ServerSideEncryptionConfiguration"
+    },
+    "Tags": {
+      "description": "Tags for labeling the index",
+      "$ref": "#/definitions/TagList"
+    },
+    "Name": {
+      "$ref": "#/definitions/Name"
+    },
+    "RoleArn": {
+      "$ref": "#/definitions/RoleArn"
+    },
+    "Edition": {
+      "$ref": "#/definitions/Edition"
     },
     "DocumentMetadataConfigurations": {
       "description": "Document metadata configurations",

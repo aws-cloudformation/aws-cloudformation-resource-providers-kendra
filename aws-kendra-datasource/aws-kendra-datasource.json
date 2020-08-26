@@ -758,40 +758,6 @@
       "required": [
         "DocumentDataFieldName"
       ]
-    }
-  },
-  "properties": {
-    "Id": {
-      "description": "ID of data source",
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 100,
-      "pattern": "[a-zA-Z0-9][a-zA-Z0-9_-]*"
-    },
-    "Arn": {
-      "type": "string"
-    },
-    "Name": {
-      "description": "Name of data source",
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 1000,
-      "pattern": "[a-zA-Z0-9][a-zA-Z0-9_-]*"
-    },
-    "IndexId": {
-      "$ref": "#/definitions/IndexId"
-    },
-    "Type": {
-      "description": "Data source type",
-      "type": "string",
-      "enum": [
-        "S3",
-        "SHAREPOINT",
-        "SALESFORCE",
-        "ONEDRIVE",
-        "SERVICENOW",
-        "DATABASE"
-      ]
     },
     "DataSourceConfiguration": {
       "type": "object",
@@ -816,6 +782,25 @@
         }
       }
     },
+    "Name": {
+      "description": "Name of data source",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000,
+      "pattern": "[a-zA-Z0-9][a-zA-Z0-9_-]*"
+    },
+    "Type": {
+      "description": "Data source type",
+      "type": "string",
+      "enum": [
+        "S3",
+        "SHAREPOINT",
+        "SALESFORCE",
+        "ONEDRIVE",
+        "SERVICENOW",
+        "DATABASE"
+      ]
+    },
     "Description": {
       "description": "Description of data source",
       "type": "string",
@@ -823,16 +808,55 @@
       "maxLength": 1000,
       "pattern": "^\\P{C}*$"
     },
-    "Schedule": {
-      "description": "Schedule",
-      "type": "string"
-    },
     "RoleArn": {
       "description": "Role ARN",
       "type": "string",
       "minLength": 1,
       "maxLength": 1284,
       "pattern": "arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}"
+    },
+    "Schedule": {
+      "description": "Schedule",
+      "type": "string"
+    },
+    "Id": {
+      "description": "ID of data source",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "[a-zA-Z0-9][a-zA-Z0-9_-]*"
+    },
+    "Arn": {
+      "type": "string"
+    }
+  },
+  "properties": {
+    "Id": {
+      "$ref": "#/definitions/Id"
+    },
+    "Arn": {
+      "$ref": "#/definitions/Arn"
+    },
+    "Name": {
+      "$ref": "#/definitions/Name"
+    },
+    "IndexId": {
+      "$ref": "#/definitions/IndexId"
+    },
+    "Type": {
+      "$ref": "#/definitions/Type"
+    },
+    "DataSourceConfiguration": {
+      "$ref": "#/definitions/DataSourceConfiguration"
+    },
+    "Description": {
+      "$ref": "#/definitions/Description"
+    },
+    "Schedule": {
+      "$ref": "#/definitions/Schedule"
+    },
+    "RoleArn": {
+      "$ref": "#/definitions/RoleArn"
     },
     "Tags": {
       "description": "Tags for labeling the data source",
