@@ -404,7 +404,7 @@
       },
       "required": [
         "Name",
-        "DocumentDataField"
+        "DocumentDataFieldName"
       ]
     },
     "SalesforceCustomKnowledgeArticleTypeName": {
