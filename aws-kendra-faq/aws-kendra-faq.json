@@ -38,15 +38,13 @@
       "description": "Unique ID of Index",
       "type": "string",
       "minLength": 36,
-      "maxLength": 36,
-      "pattern": "[a-zA-Z0-9][a-zA-Z0-9-]*"
+      "maxLength": 36
     },
     "Description": {
       "description": "Description of the FAQ",
       "type": "string",
       "minLength": 1,
-      "maxLength": 1000,
-      "pattern": "^\\P{C}*$"
+      "maxLength": 1000
     },
     "S3Path": {
       "type": "object",
@@ -77,8 +75,7 @@
     "FaqName": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 100,
-      "pattern": "[a-zA-Z0-9][a-zA-Z0-9-]*"
+      "maxLength": 100
     },
     "RoleArn": {
       "type": "string",
@@ -90,8 +87,7 @@
       "description": "Unique ID of the FAQ",
       "type": "string",
       "minLength": 1,
-      "maxLength": 100,
-      "pattern": "[a-zA-Z0-9][a-zA-Z0-9_-]*"
+      "maxLength": 100
     }
   },
   "properties": {

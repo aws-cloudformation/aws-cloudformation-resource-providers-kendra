@@ -13,8 +13,7 @@
     },
     "Description": {
       "type": "string",
-      "maxLength": 1000,
-      "pattern": "^\\P{C}*$"
+      "maxLength": 1000
     },
     "KmsKeyId": {
       "type": "string",
@@ -209,8 +208,7 @@
       "description": "Name of index",
       "type": "string",
       "minLength": 1,
-      "maxLength": 1000,
-      "pattern": "[a-zA-Z0-9][a-zA-Z0-9_-]*"
+      "maxLength": 1000
     },
     "RoleArn": {
       "description": "Role Arn",
@@ -223,8 +221,7 @@
       "description": "Unique ID of index",
       "type": "string",
       "minLength": 36,
-      "maxLength": 36,
-      "pattern": "[a-zA-Z0-9][a-zA-Z0-9-]*"
+      "maxLength": 36
     },
     "Arn": {
       "type": "string"
