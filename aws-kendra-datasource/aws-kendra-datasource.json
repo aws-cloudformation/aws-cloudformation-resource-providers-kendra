@@ -7,8 +7,7 @@
       "description": "ID of Index",
       "type": "string",
       "minLength": 36,
-      "maxLength": 36,
-      "pattern": "[a-zA-Z0-9][a-zA-Z0-9-]*"
+      "maxLength": 36
     },
     "Tag": {
       "description": "A label for tagging Kendra resources",
@@ -160,8 +159,7 @@
     "DataSourceFieldName": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 100,
-      "pattern": "^[a-zA-Z][a-zA-Z0-9_.]*$"
+      "maxLength": 100
     },
     "DataSourceToIndexFieldMapping": {
       "type": "object",
@@ -177,8 +175,7 @@
         "IndexFieldName": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 30,
-          "pattern": "^\\P{C}*$"
+          "maxLength": 30
         }
       },
       "required": [
@@ -410,8 +407,7 @@
     "SalesforceCustomKnowledgeArticleTypeName": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 100,
-      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+      "maxLength": 100
     },
     "SalesforceChatterFeedConfiguration": {
       "type": "object",
@@ -536,14 +532,12 @@
     "DatabaseName": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 100,
-      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+      "maxLength": 100
     },
     "TableName": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 100,
-      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+      "maxLength": 100
     },
     "ColumnConfiguration": {
       "type": "object",
@@ -581,8 +575,7 @@
     "ColumnName": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 100,
-      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+      "maxLength": 100
     },
     "SqlConfiguration": {
       "type": "object",
@@ -786,8 +779,7 @@
       "description": "Name of data source",
       "type": "string",
       "minLength": 1,
-      "maxLength": 1000,
-      "pattern": "[a-zA-Z0-9][a-zA-Z0-9_-]*"
+      "maxLength": 1000
     },
     "Type": {
       "description": "Data source type",
@@ -805,8 +797,7 @@
       "description": "Description of data source",
       "type": "string",
       "minLength": 1,
-      "maxLength": 1000,
-      "pattern": "^\\P{C}*$"
+      "maxLength": 1000
     },
     "RoleArn": {
       "description": "Role ARN",
@@ -823,8 +814,7 @@
       "description": "ID of data source",
       "type": "string",
       "minLength": 1,
-      "maxLength": 100,
-      "pattern": "[a-zA-Z0-9][a-zA-Z0-9_-]*"
+      "maxLength": 100
     },
     "Arn": {
       "type": "string"
