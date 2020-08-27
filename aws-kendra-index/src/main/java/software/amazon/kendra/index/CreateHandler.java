@@ -102,7 +102,7 @@ public class CreateHandler extends BaseHandlerStd {
                         // STEP 3.0 [initialize a proxy context]
                         proxy.initiate("AWS-Kendra-Index::PostCreateUpdate", proxyClient, request.getDesiredResourceState(), callbackContext)
                                 // STEP 3.1 [TODO: construct a body of a request]
-                                .translateToServiceRequest(Translator::translateToPostCreateUpdateRequest)
+                                .translateToServiceRequest(this::translateToPostCreateUpdateIndexRequest)
                                 // STEP 3.2 [TODO: make an api call]
                                 .makeServiceCall(this::postCreate)
                                 .progress()
@@ -111,6 +111,14 @@ public class CreateHandler extends BaseHandlerStd {
                 .then(progress -> stabilize(proxy, proxyClient, progress, "AWS-Kendra-Index::PostCreateUpdateStabilize"))
                 // STEP 4 [TODO: describe call/chain to return the resource model]
                 .then(progress -> new ReadHandler(indexArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
+    }
+
+    private UpdateIndexRequest translateToPostCreateUpdateIndexRequest(final ResourceModel resourceModel) {
+        try {
+            return Translator.translateToPostCreateUpdateRequest(resourceModel);
+        } catch (TranslatorValidationException e) {
+            throw new CfnInvalidRequestException(e.getMessage(), e);
+        }
     }
 
     private ProgressEvent<ResourceModel, CallbackContext> setId(CreateIndexRequest createIndexRequest,

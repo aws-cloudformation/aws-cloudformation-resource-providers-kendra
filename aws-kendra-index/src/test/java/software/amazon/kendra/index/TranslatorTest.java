@@ -28,13 +28,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class TranslatorTest {
 
     @Test
-    void translateToSdkDocumentMetadataConfigurationListNullDocumentMetadataConfiguration() {
+    void translateToSdkDocumentMetadataConfigurationListNullDocumentMetadataConfiguration() throws TranslatorValidationException {
         assertThat(Translator.translateToSdkDocumentMetadataConfigurationList(null))
                 .isEmpty();
     }
 
     @Test
-    void translateToSdkDocumentMetadataConfigurationListDocumentMetadataConfigurationName() {
+    void translateToSdkDocumentMetadataConfigurationListDocumentMetadataConfigurationName() throws TranslatorValidationException {
         DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder =
                 DocumentMetadataConfiguration.builder();
         String name = "name";
@@ -49,7 +49,7 @@ class TranslatorTest {
     }
 
     @Test
-    void translateToSdkDocumentMetadataConfigurationListDocumentMetadataConfigurationType() {
+    void translateToSdkDocumentMetadataConfigurationListDocumentMetadataConfigurationType() throws TranslatorValidationException {
         DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder =
                 DocumentMetadataConfiguration.builder();
         String type = "type";
@@ -65,7 +65,7 @@ class TranslatorTest {
     }
 
     @Test
-    void translateToSdkDocumentMetadataConfigurationListDocumentMetadataConfigurationRelevance() {
+    void translateToSdkDocumentMetadataConfigurationListDocumentMetadataConfigurationRelevance() throws TranslatorValidationException {
         ResourceModel.ResourceModelBuilder resourceModelBuilder = ResourceModel.builder();
         DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder =
                 DocumentMetadataConfiguration.builder();
@@ -111,7 +111,7 @@ class TranslatorTest {
     }
 
     @Test
-    void translateToSdkDocumentMetadataConfigurationListDocumentMetadataConfigurationSearch() {
+    void translateToSdkDocumentMetadataConfigurationListDocumentMetadataConfigurationSearch() throws TranslatorValidationException {
         ResourceModel.ResourceModelBuilder resourceModelBuilder = ResourceModel.builder();
         DocumentMetadataConfiguration.DocumentMetadataConfigurationBuilder documentMetadataConfigurationBuilder =
                 DocumentMetadataConfiguration.builder();
@@ -326,7 +326,7 @@ class TranslatorTest {
     }
 
     @Test
-    void testTranslateToPostCreateUpdateRequestDeveloperEdition() {
+    void testTranslateToPostCreateUpdateRequestDeveloperEdition() throws TranslatorValidationException {
         String id = "id";
         String name = "name";
         String type = DocumentAttributeValueType.STRING_VALUE.toString();
@@ -356,7 +356,7 @@ class TranslatorTest {
     }
 
     @Test
-    void testTranslateToPostCreateUpdateRequest() {
+    void testTranslateToPostCreateUpdateRequest() throws TranslatorValidationException {
         String id = "id";
         String name = "name";
         String type = DocumentAttributeValueType.STRING_VALUE.toString();
@@ -486,7 +486,7 @@ class TranslatorTest {
     }
 
     @Test
-    void testTranslateToPostCreateUpdateRequestUnsetInCloudFormation() {
+    void testTranslateToPostCreateUpdateRequestUnsetInCloudFormation() throws TranslatorValidationException {
         String id = "id";
         ResourceModel resourceModel = ResourceModel
                 .builder()
@@ -764,6 +764,36 @@ class TranslatorTest {
                                 documentMetadataConfigurationBuilder2.build()), new ArrayList<>());
 
         assertThat(sdkList.size()).isEqualTo(2);
+    }
+
+    @Test
+    void testTranslateToPostCreateUpdateRequestDuplicateValueImportanceItems() {
+        String id = "id";
+        ResourceModel resourceModel = ResourceModel
+                .builder()
+                .edition(IndexEdition.ENTERPRISE_EDITION.toString())
+                .documentMetadataConfigurations(Arrays.asList(
+                        DocumentMetadataConfiguration
+                                .builder()
+                                .relevance(Relevance
+                                        .builder()
+                                        .valueImportanceItems(Arrays.asList(
+                                                ValueImportanceItem
+                                                        .builder()
+                                                        .key("a")
+                                                        .build(),
+                                                ValueImportanceItem
+                                                        .builder()
+                                                        .key("a")
+                                                        .build())
+                                        )
+                                        .build())
+                                .build()
+                ))
+                .id(id)
+                .build();
+
+        assertThrows(TranslatorValidationException.class, () -> Translator.translateToPostCreateUpdateRequest(resourceModel));
     }
 
 }

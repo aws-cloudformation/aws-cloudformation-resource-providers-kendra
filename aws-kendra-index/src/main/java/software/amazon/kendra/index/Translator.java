@@ -190,7 +190,7 @@ public class Translator {
   }
 
 
-  static UpdateIndexRequest translateToPostCreateUpdateRequest(final ResourceModel model) {
+  static UpdateIndexRequest translateToPostCreateUpdateRequest(final ResourceModel model) throws TranslatorValidationException {
     // We only need to update attributes we couldn't set during create.
     return UpdateIndexRequest
             .builder()
@@ -252,7 +252,7 @@ public class Translator {
   }
 
   static List<DocumentMetadataConfiguration> translateToSdkDocumentMetadataConfigurationList(
-          List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList) {
+          List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList) throws TranslatorValidationException {
 
     List<DocumentMetadataConfiguration> sdkDocumentMetadataConfigurationList = new ArrayList<>();
     if (modelDocumentMetadataConfigurationList != null && !modelDocumentMetadataConfigurationList.isEmpty()) {
@@ -275,7 +275,7 @@ public class Translator {
     return sdkDocumentMetadataConfigurationList;
   }
 
-  private static Relevance translateToSdkRelevance(software.amazon.kendra.index.Relevance modelRelevance) {
+  private static Relevance translateToSdkRelevance(software.amazon.kendra.index.Relevance modelRelevance) throws TranslatorValidationException {
     if (modelRelevance != null) {
       Relevance.Builder sdkRelevanceBuilder = Relevance.builder();
       sdkRelevanceBuilder.freshness(modelRelevance.getFreshness());
@@ -283,6 +283,11 @@ public class Translator {
       sdkRelevanceBuilder.duration(modelRelevance.getDuration());
       sdkRelevanceBuilder.rankOrder(modelRelevance.getRankOrder());
       if (modelRelevance.getValueImportanceItems() != null) {
+        List<String> keys = modelRelevance.getValueImportanceItems().stream().map(x -> x.getKey()).collect(Collectors.toList());
+        Set<String> keysDeduplicated = keys.stream().collect(Collectors.toSet());
+        if (keys.size() != keysDeduplicated.size()) {
+          throw new TranslatorValidationException("ValueImportanceItems can not contain duplicate keys.");
+        }
         sdkRelevanceBuilder.valueImportanceMap(modelRelevance.getValueImportanceItems().stream()
                 .collect(Collectors.toMap(ValueImportanceItem::getKey, ValueImportanceItem::getValue)));
       }
