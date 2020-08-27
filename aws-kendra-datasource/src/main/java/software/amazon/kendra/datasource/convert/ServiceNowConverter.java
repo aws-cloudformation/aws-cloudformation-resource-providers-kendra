@@ -7,7 +7,7 @@ import software.amazon.kendra.datasource.ServiceNowServiceCatalogConfiguration;
 
 public class ServiceNowConverter {
 
-    public static software.amazon.awssdk.services.kendra.model.ServiceNowConfiguration toSdk(ServiceNowConfiguration model) {
+    public static software.amazon.awssdk.services.kendra.model.ServiceNowConfiguration toSdkDataSourceConfiguration(ServiceNowConfiguration model) {
         if (model == null) {
             return null;
         }

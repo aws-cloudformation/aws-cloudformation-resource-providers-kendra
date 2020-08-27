@@ -1,7 +1,6 @@
 package software.amazon.kendra.datasource.convert;
 
 import org.junit.jupiter.api.Test;
-import software.amazon.awssdk.services.kendra.model.DataSourceConfiguration;
 import software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping;
 import software.amazon.awssdk.services.kendra.model.SalesforceChatterFeedConfiguration;
 import software.amazon.awssdk.services.kendra.model.SalesforceChatterFeedIncludeFilterType;
@@ -25,7 +24,7 @@ public class SalesforceConverterTest {
         SalesforceConfiguration expected = SalesforceConfiguration.builder().build();
         software.amazon.kendra.datasource.SalesforceConfiguration input = software.amazon.kendra.datasource.SalesforceConfiguration
                 .builder().build();
-        assertThat(SalesforceConverter.toSdk(input)).isEqualTo(expected);
+        assertThat(SalesforceConverter.toSdkDataSourceConfiguration(input)).isEqualTo(expected);
     }
 
     @Test
@@ -47,7 +46,7 @@ public class SalesforceConverterTest {
                         .crawlAttachments(true)
                         .build();
 
-        assertThat(SalesforceConverter.toSdk(input)).isEqualTo(expected);
+        assertThat(SalesforceConverter.toSdkDataSourceConfiguration(input)).isEqualTo(expected);
     }
 
     @Test
@@ -103,7 +102,7 @@ public class SalesforceConverterTest {
                         .standardObjectConfigurations(Arrays.asList(modelSalesforceStandardObjectConfiguration))
                         .build();
 
-        assertThat(SalesforceConverter.toSdk(input)).isEqualTo(expected);
+        assertThat(SalesforceConverter.toSdkDataSourceConfiguration(input)).isEqualTo(expected);
     }
 
     @Test
@@ -119,7 +118,7 @@ public class SalesforceConverterTest {
                         .standardObjectConfigurations(Arrays.asList(modelSalesforceStandardObjectConfiguration))
                         .build();
 
-        SalesforceConfiguration actual = SalesforceConverter.toSdk(input);
+        SalesforceConfiguration actual = SalesforceConverter.toSdkDataSourceConfiguration(input);
         assertThat(actual.standardObjectConfigurations().size()).isEqualTo(1);
         assertThat(actual.standardObjectConfigurations().get(0).fieldMappings()).isEmpty();
     }
@@ -205,7 +204,7 @@ public class SalesforceConverterTest {
                         .knowledgeArticleConfiguration(modelSalesforceKnowledgeArticleConfiguration)
                         .build();
 
-        assertThat(SalesforceConverter.toSdk(input)).isEqualTo(expected);
+        assertThat(SalesforceConverter.toSdkDataSourceConfiguration(input)).isEqualTo(expected);
     }
 
     @Test
@@ -257,7 +256,7 @@ public class SalesforceConverterTest {
                         .chatterFeedConfiguration(modelSalesforceChatterFeedConfiguration)
                         .build();
 
-        assertThat(SalesforceConverter.toSdk(input)).isEqualTo(expected);
+        assertThat(SalesforceConverter.toSdkDataSourceConfiguration(input)).isEqualTo(expected);
     }
 
     @Test
@@ -277,7 +276,7 @@ public class SalesforceConverterTest {
                         .excludeAttachmentFilePatterns(exclude)
                         .build();
 
-        assertThat(SalesforceConverter.toSdk(input)).isEqualTo(expected);
+        assertThat(SalesforceConverter.toSdkDataSourceConfiguration(input)).isEqualTo(expected);
     }
 
     @Test

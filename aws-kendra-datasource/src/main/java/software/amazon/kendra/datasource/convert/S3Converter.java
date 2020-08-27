@@ -7,7 +7,7 @@ import software.amazon.kendra.datasource.S3DataSourceConfiguration;
 
 public class S3Converter {
 
-  public static software.amazon.awssdk.services.kendra.model.S3DataSourceConfiguration toSdk(S3DataSourceConfiguration model) {
+  public static software.amazon.awssdk.services.kendra.model.S3DataSourceConfiguration toSdkDataSourceConfiguration(S3DataSourceConfiguration model) {
     if (model == null) {
       return null;
     }

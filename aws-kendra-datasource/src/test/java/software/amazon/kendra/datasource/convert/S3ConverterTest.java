@@ -41,7 +41,7 @@ public class S3ConverterTest {
                             .build())
                     .build();
 
-    assertThat(S3Converter.toSdk(dataSourceConfiguration.getS3Configuration()))
+    assertThat(S3Converter.toSdkDataSourceConfiguration(dataSourceConfiguration.getS3Configuration()))
             .isEqualTo(expectedDataSourceConfiguration);
   }
 
@@ -62,7 +62,7 @@ public class S3ConverterTest {
                     .exclusionPatterns(Arrays.asList("testExclusionPatterns"))
                     .build();
 
-    assertThat(S3Converter.toSdk(dataSourceConfiguration.getS3Configuration()))
+    assertThat(S3Converter.toSdkDataSourceConfiguration(dataSourceConfiguration.getS3Configuration()))
             .isEqualTo(expectedDataSourceConfiguration);
   }
 

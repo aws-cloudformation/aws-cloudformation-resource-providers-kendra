@@ -11,7 +11,7 @@ import software.amazon.awssdk.services.kendra.model.SalesforceStandardObjectConf
 
 public class SalesforceConverter {
 
-    public static SalesforceConfiguration toSdk(software.amazon.kendra.datasource.SalesforceConfiguration model) {
+    public static SalesforceConfiguration toSdkDataSourceConfiguration(software.amazon.kendra.datasource.SalesforceConfiguration model) {
         if (model == null) {
             return null;
         }

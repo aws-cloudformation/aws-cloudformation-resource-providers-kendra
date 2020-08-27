@@ -6,7 +6,7 @@ import software.amazon.kendra.datasource.SharePointConfiguration;
 
 public class SharePointConverter {
 
-  public static software.amazon.awssdk.services.kendra.model.SharePointConfiguration toSdk(SharePointConfiguration model) {
+  public static software.amazon.awssdk.services.kendra.model.SharePointConfiguration toSdkDataSourceConfiguration(SharePointConfiguration model) {
     if (model == null) {
       return null;
     }

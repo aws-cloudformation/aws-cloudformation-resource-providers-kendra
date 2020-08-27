@@ -58,7 +58,7 @@ public class SharePointCoverterTest {
                 .documentTitleFieldName("testDocumentTitleFieldName")
                 .build();
 
-    assertThat(SharePointConverter.toSdk(dataSourceConfiguration.getSharePointConfiguration()))
+    assertThat(SharePointConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getSharePointConfiguration()))
             .isEqualTo(expectedDataSourceConfiguration);
   }
 
@@ -89,7 +89,7 @@ public class SharePointCoverterTest {
                     .documentTitleFieldName("testDocumentTitleFieldName")
                     .build();
 
-    assertThat(SharePointConverter.toSdk(dataSourceConfiguration.getSharePointConfiguration()))
+    assertThat(SharePointConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getSharePointConfiguration()))
             .isEqualTo(expectedDataSourceConfiguration);
   }
 

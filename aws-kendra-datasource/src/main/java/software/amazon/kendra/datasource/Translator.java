@@ -210,11 +210,11 @@ public class Translator {
     }
     software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.Builder modelDataSourceConfiguration =
             software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder();
-    modelDataSourceConfiguration.s3Configuration(S3Converter.toSdk(dataSourceConfiguration.getS3Configuration()));
-    modelDataSourceConfiguration.sharePointConfiguration(SharePointConverter.toSdk(dataSourceConfiguration.getSharePointConfiguration()));
-    modelDataSourceConfiguration.salesforceConfiguration(SalesforceConverter.toSdk(dataSourceConfiguration.getSalesforceConfiguration()));
+    modelDataSourceConfiguration.s3Configuration(S3Converter.toSdkDataSourceConfiguration(dataSourceConfiguration.getS3Configuration()));
+    modelDataSourceConfiguration.sharePointConfiguration(SharePointConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getSharePointConfiguration()));
+    modelDataSourceConfiguration.salesforceConfiguration(SalesforceConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getSalesforceConfiguration()));
     modelDataSourceConfiguration.databaseConfiguration(DatabaseConverter.toSdk(dataSourceConfiguration.getDatabaseConfiguration()));
-    modelDataSourceConfiguration.serviceNowConfiguration(ServiceNowConverter.toSdk(dataSourceConfiguration.getServiceNowConfiguration()));
+    modelDataSourceConfiguration.serviceNowConfiguration(ServiceNowConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getServiceNowConfiguration()));
     modelDataSourceConfiguration.oneDriveConfiguration(OneDriveConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getOneDriveConfiguration()));
     return modelDataSourceConfiguration.build();
   }
