@@ -1,6 +1,5 @@
 package software.amazon.kendra.datasource.convert;
 
-import software.amazon.awssdk.services.kendra.model.DataSourceConfiguration;
 import software.amazon.kendra.datasource.OneDriveConfiguration;
 import software.amazon.kendra.datasource.OneDriveUsers;
 import software.amazon.kendra.datasource.S3Path;
