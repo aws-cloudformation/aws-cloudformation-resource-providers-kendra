@@ -210,6 +210,8 @@ public class Translator {
     }
     software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.Builder modelDataSourceConfiguration =
             software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder();
+    // Perform a straight pass through from the model to the SDK request. The Kendra service will
+    // do validation.
     modelDataSourceConfiguration.s3Configuration(S3Converter.toSdkDataSourceConfiguration(dataSourceConfiguration.getS3Configuration()));
     modelDataSourceConfiguration.sharePointConfiguration(SharePointConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getSharePointConfiguration()));
     modelDataSourceConfiguration.salesforceConfiguration(SalesforceConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getSalesforceConfiguration()));
