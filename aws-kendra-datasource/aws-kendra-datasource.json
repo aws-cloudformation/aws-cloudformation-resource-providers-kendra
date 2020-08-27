@@ -646,7 +646,19 @@
         "OneDriveUserS3Path": {
           "$ref": "#/definitions/S3Path"
         }
-      }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "OneDriveUserList"
+          ]
+        },
+        {
+          "required": [
+            "OneDriveUserS3Path"
+          ]
+        }
+      ]
     },
     "OneDriveUserList": {
       "type": "array",
