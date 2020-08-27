@@ -28,23 +28,21 @@ public class S3ConverterTest {
       .build())
     .build() ;
 
-    software.amazon.awssdk.services.kendra.model.DataSourceConfiguration expectedDataSourceConfiguration =
-      software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
-        .s3Configuration(software.amazon.awssdk.services.kendra.model.S3DataSourceConfiguration.builder()
-          .bucketName("testBucket")
-          .inclusionPrefixes(Arrays.asList("testInclusionPrefix"))
-          .exclusionPatterns(Arrays.asList("testExclusionPatterns"))
-          .accessControlListConfiguration(software.amazon.awssdk.services.kendra.model.AccessControlListConfiguration.builder()
-            .keyPath("testKeyPath")
-            .build())
-          .documentsMetadataConfiguration(software.amazon.awssdk.services.kendra.model.DocumentsMetadataConfiguration.builder()
-            .s3Prefix("testS3Prefix")
-            .build())
-          .build())
-        .build();
+    software.amazon.awssdk.services.kendra.model.S3DataSourceConfiguration expectedDataSourceConfiguration =
+            software.amazon.awssdk.services.kendra.model.S3DataSourceConfiguration.builder()
+                    .bucketName("testBucket")
+                    .inclusionPrefixes(Arrays.asList("testInclusionPrefix"))
+                    .exclusionPatterns(Arrays.asList("testExclusionPatterns"))
+                    .accessControlListConfiguration(software.amazon.awssdk.services.kendra.model.AccessControlListConfiguration.builder()
+                            .keyPath("testKeyPath")
+                            .build())
+                    .documentsMetadataConfiguration(software.amazon.awssdk.services.kendra.model.DocumentsMetadataConfiguration.builder()
+                            .s3Prefix("testS3Prefix")
+                            .build())
+                    .build();
 
-    assertThat(S3Converter.toSdkDataSourceConfiguration(dataSourceConfiguration.getS3Configuration()))
-      .isEqualTo(expectedDataSourceConfiguration);
+    assertThat(S3Converter.toSdk(dataSourceConfiguration.getS3Configuration()))
+            .isEqualTo(expectedDataSourceConfiguration);
   }
 
   @Test
@@ -57,17 +55,15 @@ public class S3ConverterTest {
       .build())
     .build() ;
 
-    software.amazon.awssdk.services.kendra.model.DataSourceConfiguration expectedDataSourceConfiguration =
-    software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
-    .s3Configuration(software.amazon.awssdk.services.kendra.model.S3DataSourceConfiguration.builder()
-      .bucketName("testBucket")
-      .inclusionPrefixes(Arrays.asList("testInclusionPrefix"))
-      .exclusionPatterns(Arrays.asList("testExclusionPatterns"))
-      .build())
-    .build();
+    software.amazon.awssdk.services.kendra.model.S3DataSourceConfiguration expectedDataSourceConfiguration =
+            software.amazon.awssdk.services.kendra.model.S3DataSourceConfiguration.builder()
+                    .bucketName("testBucket")
+                    .inclusionPrefixes(Arrays.asList("testInclusionPrefix"))
+                    .exclusionPatterns(Arrays.asList("testExclusionPatterns"))
+                    .build();
 
-     assertThat(S3Converter.toSdkDataSourceConfiguration(dataSourceConfiguration.getS3Configuration()))
-      .isEqualTo(expectedDataSourceConfiguration);
+    assertThat(S3Converter.toSdk(dataSourceConfiguration.getS3Configuration()))
+            .isEqualTo(expectedDataSourceConfiguration);
   }
 
   @Test

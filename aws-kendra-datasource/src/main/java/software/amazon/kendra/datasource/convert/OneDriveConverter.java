@@ -6,15 +6,7 @@ import software.amazon.kendra.datasource.OneDriveUsers;
 import software.amazon.kendra.datasource.S3Path;
 
 public class OneDriveConverter {
-    public static software.amazon.awssdk.services.kendra.model.DataSourceConfiguration toSdkDataSourceConfiguration(
-            OneDriveConfiguration model) {
-        return DataSourceConfiguration
-                .builder()
-                .oneDriveConfiguration(toSdk(model))
-                .build();
-    }
-
-    public static software.amazon.awssdk.services.kendra.model.OneDriveConfiguration toSdk(OneDriveConfiguration model) {
+    public static software.amazon.awssdk.services.kendra.model.OneDriveConfiguration toSdkDataSourceConfiguration(OneDriveConfiguration model) {
         if (model == null) {
             return null;
         }

@@ -773,7 +773,39 @@
         "DatabaseConfiguration": {
           "$ref": "#/definitions/DatabaseConfiguration"
         }
-      }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "S3DataSourceConfiguration"
+          ]
+        },
+        {
+          "required": [
+            "SharePointDataSourceConfiguration"
+          ]
+        },
+        {
+          "required": [
+            "SalesforceDataSourceConfiguration"
+          ]
+        },
+        {
+          "required": [
+            "OneDriveDataSourceConfiguration"
+          ]
+        },
+        {
+          "required": [
+            "ServiceNowDataSourceConfiguration"
+          ]
+        },
+        {
+          "required": [
+            "DatabaseDataSourceConfiguration"
+          ]
+        }
+      ]
     },
     "Name": {
       "description": "Name of data source",

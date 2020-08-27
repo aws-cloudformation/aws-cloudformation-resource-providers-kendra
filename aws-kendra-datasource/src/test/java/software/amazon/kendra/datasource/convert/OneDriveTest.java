@@ -34,7 +34,7 @@ public class OneDriveTest {
                 .exclusionPatterns(excludes)
                 .build();
 
-        assertThat(OneDriveConverter.toSdk(model)).isEqualTo(sdk);
+        assertThat(OneDriveConverter.toSdkDataSourceConfiguration(model)).isEqualTo(sdk);
     }
 
     @Test
@@ -70,7 +70,7 @@ public class OneDriveTest {
                                 .build())
                         .build();
 
-        assertThat(OneDriveConverter.toSdk(model)).isEqualTo(sdk);
+        assertThat(OneDriveConverter.toSdkDataSourceConfiguration(model)).isEqualTo(sdk);
     }
 
     @Test

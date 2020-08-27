@@ -49,7 +49,7 @@ public class Translator {
       .name(model.getName())
       .indexId(model.getIndexId())
       .type(model.getType())
-      .configuration(toSdkDataSourceConfiguration(model.getDataSourceConfiguration(), model.getType()))
+      .configuration(toSdkDataSourceConfiguration(model.getDataSourceConfiguration()))
       .description(model.getDescription())
       .schedule(model.getSchedule())
       .roleArn(model.getRoleArn());
@@ -126,7 +126,7 @@ public class Translator {
     String schedule = model.getSchedule() == null ? "" : model.getSchedule();
     software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration = model.getDataSourceConfiguration() == null ?
       software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder().build()
-      : toSdkDataSourceConfiguration(model.getDataSourceConfiguration(), model.getType());
+      : toSdkDataSourceConfiguration(model.getDataSourceConfiguration());
     final UpdateDataSourceRequest updateDataSourceRequest = UpdateDataSourceRequest.builder()
       .id(model.getId())
       .indexId(model.getIndexId())
@@ -204,22 +204,19 @@ public class Translator {
   }
 
   static software.amazon.awssdk.services.kendra.model.DataSourceConfiguration toSdkDataSourceConfiguration(
-    final DataSourceConfiguration dataSourceConfiguration, final String dataSourceType) {
-    if (DataSourceType.S3.toString().equals(dataSourceType)) {
-      return S3Converter.toSdkDataSourceConfiguration(dataSourceConfiguration.getS3Configuration());
-    } else if (DataSourceType.SHAREPOINT.toString().equals(dataSourceType)) {
-      return SharePointConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getSharePointConfiguration());
-    } else if (DataSourceType.SALESFORCE.toString().equals(dataSourceType)){
-      return SalesforceConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getSalesforceConfiguration());
-    } else if (DataSourceType.DATABASE.toString().equals(dataSourceType)) {
-      return DatabaseConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getDatabaseConfiguration());
-    } else if (DataSourceType.SERVICENOW.toString().equals(dataSourceType)) {
-      return ServiceNowConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getServiceNowConfiguration());
-    } else if (DataSourceType.ONEDRIVE.toString().equals(dataSourceType)) {
-      return OneDriveConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getOneDriveConfiguration());
-    } else {
+          final DataSourceConfiguration dataSourceConfiguration) {
+    if (dataSourceConfiguration == null) {
       return null;
     }
+    software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.Builder modelDataSourceConfiguration =
+            software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder();
+    modelDataSourceConfiguration.s3Configuration(S3Converter.toSdk(dataSourceConfiguration.getS3Configuration()));
+    modelDataSourceConfiguration.sharePointConfiguration(SharePointConverter.toSdk(dataSourceConfiguration.getSharePointConfiguration()));
+    modelDataSourceConfiguration.salesforceConfiguration(SalesforceConverter.toSdk(dataSourceConfiguration.getSalesforceConfiguration()));
+    modelDataSourceConfiguration.databaseConfiguration(DatabaseConverter.toSdk(dataSourceConfiguration.getDatabaseConfiguration()));
+    modelDataSourceConfiguration.serviceNowConfiguration(ServiceNowConverter.toSdk(dataSourceConfiguration.getServiceNowConfiguration()));
+    modelDataSourceConfiguration.oneDriveConfiguration(OneDriveConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getOneDriveConfiguration()));
+    return modelDataSourceConfiguration.build();
   }
 
   static DataSourceConfiguration toModelDataSourceConfiguration(

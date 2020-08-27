@@ -22,16 +22,10 @@ public class SalesforceConverterTest {
     // Tests to SDK from model
     @Test
     void sdkDataSourceConfiguration() {
-        DataSourceConfiguration expected =
-                DataSourceConfiguration
-                        .builder()
-                        .salesforceConfiguration(SalesforceConfiguration.builder().build())
-                        .build();
-
+        SalesforceConfiguration expected = SalesforceConfiguration.builder().build();
         software.amazon.kendra.datasource.SalesforceConfiguration input = software.amazon.kendra.datasource.SalesforceConfiguration
                 .builder().build();
-
-        assertThat(SalesforceConverter.toSdkDataSourceConfiguration(input)).isEqualTo(expected);
+        assertThat(SalesforceConverter.toSdk(input)).isEqualTo(expected);
     }
 
     @Test

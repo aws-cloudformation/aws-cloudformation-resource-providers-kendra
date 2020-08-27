@@ -87,7 +87,7 @@ public class TranslatorTest {
                 .build();
         CreateDataSourceRequest createDataSourceRequest = Translator.translateToCreateRequest(resourceModel);
         assertThat(createDataSourceRequest.indexId()).isEqualTo(indexId);
-        assertThat(createDataSourceRequest.configuration()).isEqualTo(null);
+        assertThat(createDataSourceRequest.configuration()).isNull();
     }
 
     @Test
@@ -231,7 +231,7 @@ public class TranslatorTest {
                         .builder().build())
                 .build();
 
-        assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration, "DATABASE"));
+        assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration));
     }
 
 
@@ -294,7 +294,7 @@ public class TranslatorTest {
                         .build())
                 .build();
 
-        assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration, "SERVICENOW"))
+        assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration))
                 .isEqualTo(expected);
     }
 
@@ -337,7 +337,7 @@ public class TranslatorTest {
                         .build())
                 .build();
 
-        assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration, "ONEDRIVE"))
+        assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration))
                 .isEqualTo(expected);
     }
 }

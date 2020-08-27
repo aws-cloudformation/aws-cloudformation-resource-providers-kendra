@@ -6,13 +6,6 @@ import software.amazon.kendra.datasource.ServiceNowKnowledgeArticleConfiguration
 import software.amazon.kendra.datasource.ServiceNowServiceCatalogConfiguration;
 
 public class ServiceNowConverter {
-    public static software.amazon.awssdk.services.kendra.model.DataSourceConfiguration toSdkDataSourceConfiguration(
-            ServiceNowConfiguration model) {
-        return software.amazon.awssdk.services.kendra.model.DataSourceConfiguration
-                .builder()
-                .serviceNowConfiguration(toSdk(model))
-                .build();
-    }
 
     public static software.amazon.awssdk.services.kendra.model.ServiceNowConfiguration toSdk(ServiceNowConfiguration model) {
         if (model == null) {
