@@ -777,32 +777,32 @@
       "oneOf": [
         {
           "required": [
-            "S3DataSourceConfiguration"
+            "S3Configuration"
           ]
         },
         {
           "required": [
-            "SharePointDataSourceConfiguration"
+            "SharePointConfiguration"
           ]
         },
         {
           "required": [
-            "SalesforceDataSourceConfiguration"
+            "SalesforceConfiguration"
           ]
         },
         {
           "required": [
-            "OneDriveDataSourceConfiguration"
+            "OneDriveConfiguration"
           ]
         },
         {
           "required": [
-            "ServiceNowDataSourceConfiguration"
+            "ServiceNowConfiguration"
           ]
         },
         {
           "required": [
-            "DatabaseDataSourceConfiguration"
+            "DatabaseConfiguration"
           ]
         }
       ]
