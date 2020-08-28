@@ -120,7 +120,7 @@ public class Translator {
    * @return awsRequest the aws service request to modify a resource
    */
   static UpdateDataSourceRequest translateToUpdateRequest(final ResourceModel model) {
-    String description = model.getDescription() == null ? "" : model.getDescription();
+    // Removing this line until the SDK has a min of 0 String description = model.getDescription() == null ? "" : model.getDescription();
     String name = model.getName() == null ? "" : model.getName();
     String roleArn = model.getRoleArn() == null ? "" : model.getRoleArn();
     String schedule = model.getSchedule() == null ? "" : model.getSchedule();
@@ -132,7 +132,7 @@ public class Translator {
       .indexId(model.getIndexId())
       .roleArn(roleArn)
       .name(name)
-      .description(description)
+      .description(model.getDescription())
       .configuration(dataSourceConfiguration)
       .schedule(schedule)
       .build();
