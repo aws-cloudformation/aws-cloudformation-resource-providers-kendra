@@ -646,7 +646,19 @@
         "OneDriveUserS3Path": {
           "$ref": "#/definitions/S3Path"
         }
-      }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "OneDriveUserList"
+          ]
+        },
+        {
+          "required": [
+            "OneDriveUserS3Path"
+          ]
+        }
+      ]
     },
     "OneDriveUserList": {
       "type": "array",
@@ -773,7 +785,39 @@
         "DatabaseConfiguration": {
           "$ref": "#/definitions/DatabaseConfiguration"
         }
-      }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "S3Configuration"
+          ]
+        },
+        {
+          "required": [
+            "SharePointConfiguration"
+          ]
+        },
+        {
+          "required": [
+            "SalesforceConfiguration"
+          ]
+        },
+        {
+          "required": [
+            "OneDriveConfiguration"
+          ]
+        },
+        {
+          "required": [
+            "ServiceNowConfiguration"
+          ]
+        },
+        {
+          "required": [
+            "DatabaseConfiguration"
+          ]
+        }
+      ]
     },
     "Name": {
       "description": "Name of data source",

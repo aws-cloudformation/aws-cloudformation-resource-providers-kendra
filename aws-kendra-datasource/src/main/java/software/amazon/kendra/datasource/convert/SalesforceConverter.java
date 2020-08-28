@@ -1,6 +1,5 @@
 package software.amazon.kendra.datasource.convert;
 
-import software.amazon.awssdk.services.kendra.model.DataSourceConfiguration;
 import software.amazon.awssdk.services.kendra.model.SalesforceChatterFeedConfiguration;
 import software.amazon.awssdk.services.kendra.model.SalesforceChatterFeedIncludeFilterType;
 import software.amazon.awssdk.services.kendra.model.SalesforceConfiguration;
@@ -12,15 +11,7 @@ import software.amazon.awssdk.services.kendra.model.SalesforceStandardObjectConf
 
 public class SalesforceConverter {
 
-    public static DataSourceConfiguration toSdkDataSourceConfiguration(
-            software.amazon.kendra.datasource.SalesforceConfiguration model) {
-        return DataSourceConfiguration
-                .builder()
-                .salesforceConfiguration(toSdk(model))
-                .build();
-    }
-
-    static SalesforceConfiguration toSdk(software.amazon.kendra.datasource.SalesforceConfiguration model) {
+    public static SalesforceConfiguration toSdkDataSourceConfiguration(software.amazon.kendra.datasource.SalesforceConfiguration model) {
         if (model == null) {
             return null;
         }

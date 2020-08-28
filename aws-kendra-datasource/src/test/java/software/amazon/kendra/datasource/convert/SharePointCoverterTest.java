@@ -37,31 +37,29 @@ public class SharePointCoverterTest {
         .build())
       .build();
 
-    software.amazon.awssdk.services.kendra.model.DataSourceConfiguration expectedDataSourceConfiguration =
-      software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
-        .sharePointConfiguration(software.amazon.awssdk.services.kendra.model.SharePointConfiguration.builder()
+    software.amazon.awssdk.services.kendra.model.SharePointConfiguration expectedDataSourceConfiguration =
+        software.amazon.awssdk.services.kendra.model.SharePointConfiguration.builder()
           .sharePointVersion(SharePointVersion.SHAREPOINT_ONLINE.toString())
           .urls(Arrays.asList("www.sharepoint.com"))
           .secretArn("secretArn")
-          .crawlAttachments(true)
-          .useChangeLog(true)
-          .inclusionPatterns(Arrays.asList("testInclusionPatterns"))
-          .exclusionPatterns(Arrays.asList("testExclusionPatterns"))
-          .vpcConfiguration( software.amazon.awssdk.services.kendra.model.DataSourceVpcConfiguration.builder()
-            .securityGroupIds(Arrays.asList("testSecurityGroupId"))
-            .subnetIds(Arrays.asList("testSubnetId"))
-            .build())
-          .fieldMappings(Arrays.asList(software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping.builder()
-            .dataSourceFieldName("testDataSourceFieldName")
-            .dateFieldFormat("testDateFieldFormat")
-            .indexFieldName("testIndexFieldName")
-            .build()))
-          .documentTitleFieldName("testDocumentTitleFieldName")
-          .build())
-        .build();
+                .crawlAttachments(true)
+                .useChangeLog(true)
+                .inclusionPatterns(Arrays.asList("testInclusionPatterns"))
+                .exclusionPatterns(Arrays.asList("testExclusionPatterns"))
+                .vpcConfiguration( software.amazon.awssdk.services.kendra.model.DataSourceVpcConfiguration.builder()
+                        .securityGroupIds(Arrays.asList("testSecurityGroupId"))
+                        .subnetIds(Arrays.asList("testSubnetId"))
+                        .build())
+                .fieldMappings(Arrays.asList(software.amazon.awssdk.services.kendra.model.DataSourceToIndexFieldMapping.builder()
+                        .dataSourceFieldName("testDataSourceFieldName")
+                        .dateFieldFormat("testDateFieldFormat")
+                        .indexFieldName("testIndexFieldName")
+                        .build()))
+                .documentTitleFieldName("testDocumentTitleFieldName")
+                .build();
 
-     assertThat(SharePointConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getSharePointConfiguration()))
-    .isEqualTo(expectedDataSourceConfiguration);
+    assertThat(SharePointConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getSharePointConfiguration()))
+            .isEqualTo(expectedDataSourceConfiguration);
   }
 
   @Test
@@ -79,22 +77,20 @@ public class SharePointCoverterTest {
         .build())
       .build();
 
-    software.amazon.awssdk.services.kendra.model.DataSourceConfiguration expectedDataSourceConfiguration =
-      software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
-        .sharePointConfiguration(software.amazon.awssdk.services.kendra.model.SharePointConfiguration.builder()
-          .sharePointVersion(SharePointVersion.SHAREPOINT_ONLINE.toString())
-          .urls(Arrays.asList("www.sharepoint.com"))
-          .secretArn("secretArn")
-          .crawlAttachments(true)
-          .useChangeLog(true)
-          .inclusionPatterns(Arrays.asList("testInclusionPatterns"))
-          .exclusionPatterns(Arrays.asList("testExclusionPatterns"))
-          .documentTitleFieldName("testDocumentTitleFieldName")
-          .build())
-        .build();
+    software.amazon.awssdk.services.kendra.model.SharePointConfiguration expectedDataSourceConfiguration =
+            software.amazon.awssdk.services.kendra.model.SharePointConfiguration.builder()
+                    .sharePointVersion(SharePointVersion.SHAREPOINT_ONLINE.toString())
+                    .urls(Arrays.asList("www.sharepoint.com"))
+                    .secretArn("secretArn")
+                    .crawlAttachments(true)
+                    .useChangeLog(true)
+                    .inclusionPatterns(Arrays.asList("testInclusionPatterns"))
+                    .exclusionPatterns(Arrays.asList("testExclusionPatterns"))
+                    .documentTitleFieldName("testDocumentTitleFieldName")
+                    .build();
 
-     assertThat(SharePointConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getSharePointConfiguration()))
-    .isEqualTo(expectedDataSourceConfiguration);
+    assertThat(SharePointConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getSharePointConfiguration()))
+            .isEqualTo(expectedDataSourceConfiguration);
   }
 
   @Test

@@ -33,7 +33,7 @@ public class ServiceNowConverterTest {
                         .serviceNowBuildVersion(version)
                         .build();
 
-        assertThat(ServiceNowConverter.toSdk(model)).isEqualTo(sdk);
+        assertThat(ServiceNowConverter.toSdkDataSourceConfiguration(model)).isEqualTo(sdk);
     }
 
     @Test
@@ -85,7 +85,7 @@ public class ServiceNowConverterTest {
                                 .build())
                         .build();
 
-        assertThat(ServiceNowConverter.toSdk(model)).isEqualTo(sdk);
+        assertThat(ServiceNowConverter.toSdkDataSourceConfiguration(model)).isEqualTo(sdk);
     }
 
     @Test
