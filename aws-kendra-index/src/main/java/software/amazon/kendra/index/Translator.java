@@ -145,7 +145,7 @@ public class Translator {
   static UpdateIndexRequest translateToUpdateRequest(final ResourceModel currModel,
                                                      final ResourceModel prevModel) throws TranslatorValidationException {
     // Null equivalents for partial updates.
-    String description = currModel.getDescription() == null ? "" : currModel.getDescription();
+    // Removing this line until the SDK has min of 0 String description = currModel.getDescription() == null ? "" : currModel.getDescription();
     String name = currModel.getName() == null ? "" : currModel.getName();
     String roleArn = currModel.getRoleArn() == null ? "" : currModel.getRoleArn();
     // Handle null previous resource model
@@ -156,7 +156,7 @@ public class Translator {
             .id(currModel.getId())
             .roleArn(roleArn)
             .name(name)
-            .description(description)
+            .description(currModel.getDescription())
             .documentMetadataConfigurationUpdates(
                     translateToSdkDocumentMetadataConfigurationList(
                             currModel.getDocumentMetadataConfigurations(),
