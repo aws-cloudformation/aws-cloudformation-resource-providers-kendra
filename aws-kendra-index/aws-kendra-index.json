@@ -224,7 +224,8 @@
       "maxLength": 36
     },
     "Arn": {
-      "type": "string"
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "properties": {

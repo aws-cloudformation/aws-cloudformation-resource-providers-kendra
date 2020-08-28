@@ -852,7 +852,8 @@
     },
     "Schedule": {
       "description": "Schedule",
-      "type": "string"
+      "type": "string",
+      "maxLength": 1000
     },
     "Id": {
       "description": "ID of data source",
@@ -861,7 +862,8 @@
       "maxLength": 100
     },
     "Arn": {
-      "type": "string"
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "properties": {
