@@ -927,7 +927,7 @@
         "kendra:DescribeDataSource",
         "kendra:DeleteDataSource"
       ],
-      "timeoutInMinutes": 720
+      "timeoutInMinutes": 2160
     },
     "list": {
       "permissions": [
