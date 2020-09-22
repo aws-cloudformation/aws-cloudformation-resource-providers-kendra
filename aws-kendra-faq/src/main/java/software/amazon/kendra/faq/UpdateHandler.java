@@ -136,6 +136,9 @@ public class UpdateHandler extends BaseHandlerStd {
             if (!Optional.ofNullable(currModel.getDescription()).equals(Optional.ofNullable(prevModel.getDescription()))) {
                 throw new CfnNotUpdatableException(ResourceModel.TYPE_NAME, "Description");
             }
+            if (!Optional.ofNullable(currModel.getFileFormat()).equals(Optional.ofNullable(prevModel.getFileFormat()))) {
+                throw new CfnNotUpdatableException(ResourceModel.TYPE_NAME, "FileFormat");
+            }
         }
     }
 

@@ -73,6 +73,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         String name = "name";
         String s3Key = "s3Key";
         String s3Bucket = "s3Bucket";
+        String fileFormat = "CSV";
         S3Path s3Path = S3Path
                 .builder()
                 .key(s3Key)
@@ -84,6 +85,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .indexId(indexId)
                 .description(description)
                 .name(name)
+                .fileFormat(fileFormat)
                 .s3Path(s3Path)
                 .roleArn(roleArn)
                 .build();
@@ -103,6 +105,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                         .name(name)
                         .roleArn(roleArn)
                         .description(description)
+                        .fileFormat(fileFormat)
                         .s3Path(software.amazon.awssdk.services.kendra.model.S3Path
                                 .builder()
                                 .key(s3Key)
@@ -125,8 +128,80 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .name(name)
                 .description(description)
                 .roleArn(roleArn)
+                .fileFormat(fileFormat)
                 .s3Path(s3Path)
                 .build();
+        assertThat(response.getResourceModel()).isEqualTo(expectedResourceModel);
+        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getMessage()).isNull();
+        assertThat(response.getErrorCode()).isNull();
+
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(proxyClient.client(), times(2)).describeFaq(any(DescribeFaqRequest.class));
+        verify(kendraClient, atLeastOnce()).serviceName();
+    }
+
+    @Test
+    public void handleRequest_RequiredOnlySuccess() {
+        final UpdateHandler handler = new UpdateHandler(faqArnBuilder);
+
+        String faqId = "faqId";
+        String indexId = "indexId";
+        String roleArn = "roleArn";
+        String name = "name";
+        String s3Key = "s3Key";
+        String s3Bucket = "s3Bucket";
+        S3Path s3Path = S3Path
+            .builder()
+            .key(s3Key)
+            .bucket(s3Bucket)
+            .build();
+        ResourceModel resourceModel = ResourceModel
+            .builder()
+            .id(faqId)
+            .indexId(indexId)
+            .name(name)
+            .s3Path(s3Path)
+            .roleArn(roleArn)
+            .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+            .desiredResourceState(resourceModel)
+            .build();
+
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
+            .thenReturn(ListTagsForResourceResponse.builder().build());
+
+        when(proxyClient.client().describeFaq(any(DescribeFaqRequest.class)))
+            .thenReturn(DescribeFaqResponse
+                .builder()
+                .id(faqId)
+                .indexId(indexId)
+                .name(name)
+                .roleArn(roleArn)
+                .s3Path(software.amazon.awssdk.services.kendra.model.S3Path
+                    .builder()
+                    .key(s3Key)
+                    .bucket(s3Bucket)
+                    .build())
+                .status(FaqStatus.ACTIVE)
+                .build());
+
+        final ProgressEvent<ResourceModel, CallbackContext> response =
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        ResourceModel expectedResourceModel = ResourceModel
+            .builder()
+            .id(faqId)
+            .indexId(indexId)
+            .arn(faqArnBuilder.build(request))
+            .name(name)
+            .roleArn(roleArn)
+            .s3Path(s3Path)
+            .build();
         assertThat(response.getResourceModel()).isEqualTo(expectedResourceModel);
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
@@ -150,6 +225,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         String roleArn = "roleArn";
         String s3Key = "s3Key";
         String s3Bucket = "s3Bucket";
+        String fileFormat = "CSV";
         S3Path s3Path = S3Path
                 .builder()
                 .key(s3Key)
@@ -163,6 +239,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .name(name)
                 .description(description)
                 .roleArn(roleArn)
+                .fileFormat(fileFormat)
                 .s3Path(s3Path)
                 .build();
 
@@ -191,6 +268,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                         .name(name)
                         .roleArn(roleArn)
                         .description(description)
+                        .fileFormat(fileFormat)
                         .s3Path(software.amazon.awssdk.services.kendra.model.S3Path
                                 .builder()
                                 .bucket(s3Bucket)
@@ -214,6 +292,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .name(name)
                 .description(description)
                 .roleArn(roleArn)
+                .fileFormat(fileFormat)
                 .s3Path(s3Path)
                 .build();
         assertThat(response.getResourceModel()).isEqualTo(expectedResourceModel);
@@ -239,6 +318,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         String roleArn = "roleArn";
         String s3Key = "s3Key";
         String s3Bucket = "s3Bucket";
+        String fileFormat = "CSV";
         S3Path s3Path = S3Path
                 .builder()
                 .key(s3Key)
@@ -251,6 +331,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .name(name)
                 .description(description)
                 .roleArn(roleArn)
+                .fileFormat(fileFormat)
                 .s3Path(s3Path)
                 .build();
 
@@ -263,6 +344,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .name(name)
                 .description(description)
                 .roleArn(roleArn)
+                .fileFormat(fileFormat)
                 .s3Path(s3Path)
                 .tags(Arrays.asList(Tag.builder().key(key).value(value).build()))
                 .build();
@@ -283,6 +365,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                         .name(name)
                         .roleArn(roleArn)
                         .description(description)
+                        .fileFormat(fileFormat)
                         .s3Path(software.amazon.awssdk.services.kendra.model.S3Path
                                 .builder()
                                 .bucket(s3Bucket)
@@ -305,6 +388,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .name(name)
                 .description(description)
                 .roleArn(roleArn)
+                .fileFormat(fileFormat)
                 .s3Path(s3Path)
                 .build();
         assertThat(response.getResourceModel()).isEqualTo(expectedResourceModel);
@@ -330,6 +414,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
         String roleArn = "roleArn";
         String s3Key = "s3Key";
         String s3Bucket = "s3Bucket";
+        String fileFormat = "CSV";
         S3Path s3Path = S3Path
                 .builder()
                 .key(s3Key)
@@ -344,6 +429,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .name(name)
                 .description(description)
                 .roleArn(roleArn)
+                .fileFormat(fileFormat)
                 .s3Path(s3Path)
                 .tags(Arrays.asList(Tag.builder().key(tagKeyToAdd).value(tagValueToAdd).build()))
                 .build();
@@ -356,6 +442,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .name(name)
                 .description(description)
                 .roleArn(roleArn)
+                .fileFormat(fileFormat)
                 .s3Path(s3Path)
                 .tags(Arrays.asList(Tag.builder().key(tagKeyToRemove).value(tagValueToRemove).build()))
                 .build();
@@ -383,6 +470,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                         .name(name)
                         .roleArn(roleArn)
                         .description(description)
+                        .fileFormat(fileFormat)
                         .s3Path(software.amazon.awssdk.services.kendra.model.S3Path
                                 .builder()
                                 .bucket(s3Bucket)
@@ -406,6 +494,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .name(name)
                 .description(description)
                 .roleArn(roleArn)
+                .fileFormat(fileFormat)
                 .s3Path(s3Path)
                 .build();
         assertThat(response.getResourceModel()).isEqualTo(expectedResourceModel);
@@ -568,6 +657,35 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .desiredResourceState(model)
                 .previousResourceState(prevModel)
                 .build();
+
+        assertThrows(CfnNotUpdatableException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
+    }
+
+    @Test
+    public void handleRequest_FailWith_CfnNotUpdatableException_forFileFormat() {
+        final UpdateHandler handler = new UpdateHandler(faqArnBuilder);
+        String indexId = "indexId";
+        String fileFormat = "JSON";
+        String oldFileFormat = "CSV";
+
+        final ResourceModel model = ResourceModel
+            .builder()
+            .indexId(indexId)
+            .fileFormat(fileFormat)
+            .build();
+
+        final ResourceModel prevModel = ResourceModel
+            .builder()
+            .indexId(indexId)
+            .fileFormat(oldFileFormat)
+            .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+            .desiredResourceState(model)
+            .previousResourceState(prevModel)
+            .build();
 
         assertThrows(CfnNotUpdatableException.class, () -> {
             handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);

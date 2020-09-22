@@ -74,6 +74,7 @@ public class CreateHandlerTest extends AbstractTestBase {
         String name = "name";
         String s3Key = "s3Key";
         String s3Bucket = "s3Bucket";
+        String fileFormat = "CSV";
         S3Path s3Path = S3Path
                 .builder()
                 .key(s3Key)
@@ -86,6 +87,7 @@ public class CreateHandlerTest extends AbstractTestBase {
                 .name(name)
                 .s3Path(s3Path)
                 .roleArn(roleArn)
+                .fileFormat(fileFormat)
                 .build();
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
@@ -104,6 +106,7 @@ public class CreateHandlerTest extends AbstractTestBase {
                         .name(name)
                         .roleArn(roleArn)
                         .description(description)
+                        .fileFormat(fileFormat)
                         .s3Path(software.amazon.awssdk.services.kendra.model.S3Path
                                 .builder()
                                 .key(s3Key)
@@ -127,11 +130,85 @@ public class CreateHandlerTest extends AbstractTestBase {
                 .description(description)
                 .roleArn(roleArn)
                 .name(name)
+                .fileFormat(fileFormat)
                 .s3Path(software.amazon.kendra.faq.S3Path.builder()
                         .key(s3Key)
                         .bucket(s3Bucket)
                         .build())
                 .build();
+        assertThat(response.getResourceModel()).isEqualTo(expectedResourceModel);
+        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getMessage()).isNull();
+        assertThat(response.getErrorCode()).isNull();
+
+        verify(proxyClient.client(), times(1)).createFaq(any(CreateFaqRequest.class));
+        verify(proxyClient.client(), times(2)).describeFaq(any(DescribeFaqRequest.class));
+    }
+
+    @Test
+    public void handleRequest_RequiredOnlySuccess() {
+        final CreateHandler handler = new CreateHandler(faqArnBuilder);
+
+        String indexId = "indexId";
+        String roleArn = "roleArn";
+        String name = "name";
+        String s3Key = "s3Key";
+        String s3Bucket = "s3Bucket";
+        S3Path s3Path = S3Path
+            .builder()
+            .key(s3Key)
+            .bucket(s3Bucket)
+            .build();
+        ResourceModel resourceModel = ResourceModel
+            .builder()
+            .indexId(indexId)
+            .name(name)
+            .s3Path(s3Path)
+            .roleArn(roleArn)
+            .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+            .desiredResourceState(resourceModel)
+            .build();
+
+        String id = "id";
+        when(proxyClient.client().createFaq(any(CreateFaqRequest.class)))
+            .thenReturn(CreateFaqResponse.builder().id(id).build());
+
+        when(proxyClient.client().describeFaq(any(DescribeFaqRequest.class)))
+            .thenReturn(DescribeFaqResponse
+                .builder()
+                .id(id)
+                .indexId(indexId)
+                .name(name)
+                .roleArn(roleArn)
+                .s3Path(software.amazon.awssdk.services.kendra.model.S3Path
+                    .builder()
+                    .key(s3Key)
+                    .bucket(s3Bucket)
+                    .build())
+                .status(FaqStatus.ACTIVE)
+                .build());
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
+            .thenReturn(ListTagsForResourceResponse.builder().build());
+
+        final ProgressEvent<ResourceModel, CallbackContext> response = handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        ResourceModel expectedResourceModel = ResourceModel
+            .builder()
+            .id(id)
+            .indexId(indexId)
+            .arn(faqArnBuilder.build(request))
+            .roleArn(roleArn)
+            .name(name)
+            .s3Path(software.amazon.kendra.faq.S3Path.builder()
+                .key(s3Key)
+                .bucket(s3Bucket)
+                .build())
+            .build();
         assertThat(response.getResourceModel()).isEqualTo(expectedResourceModel);
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
@@ -151,6 +228,7 @@ public class CreateHandlerTest extends AbstractTestBase {
         String name = "name";
         String s3Key = "s3Key";
         String s3Bucket = "s3Bucket";
+        String fileFormat = "CSV";
         S3Path s3Path = S3Path
                 .builder()
                 .key(s3Key)
@@ -163,6 +241,7 @@ public class CreateHandlerTest extends AbstractTestBase {
                 .name(name)
                 .s3Path(s3Path)
                 .roleArn(roleArn)
+                .fileFormat(fileFormat)
                 .build();
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
@@ -181,6 +260,7 @@ public class CreateHandlerTest extends AbstractTestBase {
                         .name(name)
                         .roleArn(roleArn)
                         .description(description)
+                        .fileFormat(fileFormat)
                         .s3Path(software.amazon.awssdk.services.kendra.model.S3Path
                                 .builder()
                                 .key(s3Key)
@@ -195,6 +275,7 @@ public class CreateHandlerTest extends AbstractTestBase {
                         .name(name)
                         .roleArn(roleArn)
                         .description(description)
+                        .fileFormat(fileFormat)
                         .s3Path(software.amazon.awssdk.services.kendra.model.S3Path
                                 .builder()
                                 .key(s3Key)
@@ -219,6 +300,7 @@ public class CreateHandlerTest extends AbstractTestBase {
                 .description(description)
                 .roleArn(roleArn)
                 .name(name)
+                .fileFormat(fileFormat)
                 .s3Path(software.amazon.kendra.faq.S3Path.builder()
                         .key(s3Key)
                         .bucket(s3Bucket)
@@ -243,6 +325,7 @@ public class CreateHandlerTest extends AbstractTestBase {
         String name = "name";
         String s3Key = "s3Key";
         String s3Bucket = "s3Bucket";
+        String fileFormat = "CSV";
         S3Path s3Path = S3Path
                 .builder()
                 .key(s3Key)
@@ -253,6 +336,7 @@ public class CreateHandlerTest extends AbstractTestBase {
                 .indexId(indexId)
                 .description(description)
                 .name(name)
+                .fileFormat(fileFormat)
                 .s3Path(s3Path)
                 .roleArn(roleArn)
                 .build();
@@ -273,6 +357,7 @@ public class CreateHandlerTest extends AbstractTestBase {
                         .name(name)
                         .roleArn(roleArn)
                         .description(description)
+                        .fileFormat(fileFormat)
                         .s3Path(software.amazon.awssdk.services.kendra.model.S3Path
                                 .builder()
                                 .key(s3Key)
@@ -296,6 +381,7 @@ public class CreateHandlerTest extends AbstractTestBase {
         String name = "name";
         String s3Key = "s3Key";
         String s3Bucket = "s3Bucket";
+        String fileFormat = "CSV";
         S3Path s3Path = S3Path
                 .builder()
                 .key(s3Key)
@@ -306,6 +392,7 @@ public class CreateHandlerTest extends AbstractTestBase {
                 .indexId(indexId)
                 .description(description)
                 .name(name)
+                .fileFormat(fileFormat)
                 .s3Path(s3Path)
                 .roleArn(roleArn)
                 .build();
@@ -332,6 +419,7 @@ public class CreateHandlerTest extends AbstractTestBase {
         String name = "name";
         String s3Key = "s3Key";
         String s3Bucket = "s3Bucket";
+        String fileFormat = "CSV";
         S3Path s3Path = S3Path
                 .builder()
                 .key(s3Key)
@@ -342,6 +430,7 @@ public class CreateHandlerTest extends AbstractTestBase {
                 .indexId(indexId)
                 .description(description)
                 .name(name)
+                .fileFormat(fileFormat)
                 .s3Path(s3Path)
                 .roleArn(roleArn)
                 .build();
