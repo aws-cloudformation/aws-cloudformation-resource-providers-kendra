@@ -34,7 +34,8 @@ public class Translator {
             .indexId(model.getIndexId())
             .description(model.getDescription())
             .name(model.getName())
-            .roleArn(model.getRoleArn());
+            .roleArn(model.getRoleArn())
+            .fileFormat(model.getFileFormat());
     if (model.getS3Path() != null) {
       builder.s3Path(
               S3Path.builder()
@@ -63,7 +64,8 @@ public class Translator {
             .arn(arn)
             .description(describeFaqResponse.description())
             .name(describeFaqResponse.name())
-            .roleArn(describeFaqResponse.roleArn());
+            .roleArn(describeFaqResponse.roleArn())
+            .fileFormat(describeFaqResponse.fileFormatAsString());
     if (describeFaqResponse.s3Path() != null) {
       builder.s3Path(software.amazon.kendra.faq.S3Path.builder()
               .key(describeFaqResponse.s3Path().key())

@@ -46,6 +46,15 @@
       "minLength": 1,
       "maxLength": 1000
     },
+    "FileFormat": {
+      "description": "Format of the input file",
+      "enum": [
+        "CSV",
+        "CSV_WITH_HEADER",
+        "JSON"
+      ],
+      "type": "string"
+    },
     "S3Path": {
       "type": "object",
       "properties": {
@@ -105,6 +114,10 @@
     "Description": {
       "description": "FAQ description",
       "$ref": "#/definitions/Description"
+    },
+    "FileFormat": {
+      "description": "FAQ file format",
+      "$ref": "#/definitions/FileFormat"
     },
     "S3Path": {
       "description": "FAQ S3 path",
@@ -174,7 +187,8 @@
     "/properties/Name",
     "/properties/S3Path",
     "/properties/RoleArn",
-    "/properties/Description"
+    "/properties/Description",
+    "/properties/FileFormat"
   ],
   "primaryIdentifier": [
     "/properties/Id",

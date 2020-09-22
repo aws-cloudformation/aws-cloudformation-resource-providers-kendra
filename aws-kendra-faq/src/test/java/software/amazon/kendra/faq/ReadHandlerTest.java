@@ -84,10 +84,12 @@ public class ReadHandlerTest extends AbstractTestBase {
         String roleArn = "roleArn";
         String description = "description";
         String name = "name";
+        String fileFormat = "CSV";
         when(proxyClient.client().describeFaq(any(DescribeFaqRequest.class)))
                 .thenReturn(DescribeFaqResponse.builder()
                         .id(id)
                         .indexId(indexId)
+                        .fileFormat(fileFormat)
                         .s3Path(s3Path)
                         .description(description)
                         .name(name)
@@ -116,6 +118,7 @@ public class ReadHandlerTest extends AbstractTestBase {
                 .description(description)
                 .roleArn(roleArn)
                 .name(name)
+                .fileFormat(fileFormat)
                 .s3Path(software.amazon.kendra.faq.S3Path.builder()
                         .key(tagKey)
                         .bucket(bucket)

@@ -25,6 +25,7 @@ class TranslatorTest {
         String name = "name";
         String s3Key = "s3Key";
         String s3Bucket = "s3Bucket";
+        String fileFormat = "CSV";
         S3Path s3Path = S3Path
                 .builder()
                 .key(s3Key)
@@ -37,6 +38,7 @@ class TranslatorTest {
                 .indexId(indexId)
                 .description(description)
                 .name(name)
+                .fileFormat(fileFormat)
                 .s3Path(s3Path)
                 .roleArn(roleArn)
                 .tags(Arrays.asList(Tag.builder().key(tagKey).value(tagValue).build()))
@@ -47,6 +49,7 @@ class TranslatorTest {
                 .indexId(indexId)
                 .description(description)
                 .name(name)
+                .fileFormat(fileFormat)
                 .s3Path(software.amazon.awssdk.services.kendra.model.S3Path
                         .builder()
                         .key(s3Key)
@@ -103,6 +106,7 @@ class TranslatorTest {
         String name = "name";
         String s3Key = "s3Key";
         String s3Bucket = "s3Bucket";
+        String fileFormat = "CSV";
         S3Path s3Path = S3Path
                 .builder()
                 .key(s3Key)
@@ -118,6 +122,7 @@ class TranslatorTest {
                 .arn(arn)
                 .description(description)
                 .name(name)
+                .fileFormat(fileFormat)
                 .s3Path(s3Path)
                 .roleArn(roleArn)
                 .tags(Arrays.asList(Tag.builder().key(key).value(value).build()))
@@ -130,6 +135,7 @@ class TranslatorTest {
                 .name(name)
                 .roleArn(roleArn)
                 .description(description)
+                .fileFormat(fileFormat)
                 .s3Path(software.amazon.awssdk.services.kendra.model.S3Path
                         .builder()
                         .key(s3Key)
