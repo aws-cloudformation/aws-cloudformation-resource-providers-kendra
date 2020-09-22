@@ -142,6 +142,77 @@ public class UpdateHandlerTest extends AbstractTestBase {
     }
 
     @Test
+    public void handleRequest_RequiredOnlySuccess() {
+        final UpdateHandler handler = new UpdateHandler(faqArnBuilder);
+
+        String faqId = "faqId";
+        String indexId = "indexId";
+        String roleArn = "roleArn";
+        String name = "name";
+        String s3Key = "s3Key";
+        String s3Bucket = "s3Bucket";
+        S3Path s3Path = S3Path
+            .builder()
+            .key(s3Key)
+            .bucket(s3Bucket)
+            .build();
+        ResourceModel resourceModel = ResourceModel
+            .builder()
+            .id(faqId)
+            .indexId(indexId)
+            .name(name)
+            .s3Path(s3Path)
+            .roleArn(roleArn)
+            .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+            .desiredResourceState(resourceModel)
+            .build();
+
+        when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
+            .thenReturn(ListTagsForResourceResponse.builder().build());
+
+        when(proxyClient.client().describeFaq(any(DescribeFaqRequest.class)))
+            .thenReturn(DescribeFaqResponse
+                .builder()
+                .id(faqId)
+                .indexId(indexId)
+                .name(name)
+                .roleArn(roleArn)
+                .s3Path(software.amazon.awssdk.services.kendra.model.S3Path
+                    .builder()
+                    .key(s3Key)
+                    .bucket(s3Bucket)
+                    .build())
+                .status(FaqStatus.ACTIVE)
+                .build());
+
+        final ProgressEvent<ResourceModel, CallbackContext> response =
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
+        ResourceModel expectedResourceModel = ResourceModel
+            .builder()
+            .id(faqId)
+            .indexId(indexId)
+            .arn(faqArnBuilder.build(request))
+            .name(name)
+            .roleArn(roleArn)
+            .s3Path(s3Path)
+            .build();
+        assertThat(response.getResourceModel()).isEqualTo(expectedResourceModel);
+        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getMessage()).isNull();
+        assertThat(response.getErrorCode()).isNull();
+
+        verify(proxyClient.client(), times(1)).listTagsForResource(any(ListTagsForResourceRequest.class));
+        verify(proxyClient.client(), times(2)).describeFaq(any(DescribeFaqRequest.class));
+        verify(kendraClient, atLeastOnce()).serviceName();
+    }
+
+    @Test
     public void handleRequest_AddTags() {
         final UpdateHandler handler = new UpdateHandler(faqArnBuilder);
 
