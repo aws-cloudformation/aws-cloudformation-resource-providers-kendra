@@ -477,7 +477,7 @@ class TranslatorTest {
                 .id(id)
                 .build();
         UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel, ResourceModel.builder().build());
-        assertThat(updateIndexRequest.description()).isNull();
+        assertThat(updateIndexRequest.description()).isEqualTo("");
         assertThat(updateIndexRequest.name()).isEqualTo("");
         assertThat(updateIndexRequest.roleArn()).isEqualTo("");
         assertThat(updateIndexRequest.documentMetadataConfigurationUpdates()).isEmpty();
