@@ -834,7 +834,8 @@
         "SALESFORCE",
         "ONEDRIVE",
         "SERVICENOW",
-        "DATABASE"
+        "DATABASE",
+        "CUSTOM"
       ]
     },
     "Description": {
@@ -902,9 +903,7 @@
   "required": [
     "Name",
     "IndexId",
-    "Type",
-    "DataSourceConfiguration",
-    "RoleArn"
+    "Type"
   ],
   "handlers": {
     "create": {

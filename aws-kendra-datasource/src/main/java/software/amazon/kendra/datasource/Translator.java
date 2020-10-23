@@ -120,23 +120,21 @@ public class Translator {
    * @return awsRequest the aws service request to modify a resource
    */
   static UpdateDataSourceRequest translateToUpdateRequest(final ResourceModel model) {
-    String description = model.getDescription() == null ? "" : model.getDescription();
-    String name = model.getName() == null ? "" : model.getName();
-    String roleArn = model.getRoleArn() == null ? "" : model.getRoleArn();
-    String schedule = model.getSchedule() == null ? "" : model.getSchedule();
-    software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration = model.getDataSourceConfiguration() == null ?
-      software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder().build()
-      : toSdkDataSourceConfiguration(model.getDataSourceConfiguration());
-    final UpdateDataSourceRequest updateDataSourceRequest = UpdateDataSourceRequest.builder()
-      .id(model.getId())
-      .indexId(model.getIndexId())
-      .roleArn(roleArn)
-      .name(name)
-      .description(description)
-      .configuration(dataSourceConfiguration)
-      .schedule(schedule)
-      .build();
-    return updateDataSourceRequest;
+      String description = model.getDescription();
+      String name =  model.getName();
+      String roleArn =  model.getRoleArn();
+      String schedule =  model.getSchedule();
+      software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration = toSdkDataSourceConfiguration(model.getDataSourceConfiguration());
+      final UpdateDataSourceRequest updateDataSourceRequest = UpdateDataSourceRequest.builder()
+          .id(model.getId())
+          .indexId(model.getIndexId())
+          .roleArn(roleArn)
+          .name(name)
+          .description(description)
+          .configuration(dataSourceConfiguration)
+          .schedule(schedule)
+          .build();
+      return updateDataSourceRequest;
   }
 
   /**
