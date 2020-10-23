@@ -91,6 +91,20 @@ public class TranslatorTest {
     }
 
     @Test
+    void testTranslateToCreateRequest_WithCustomDataSource() {
+        String indexId = "indexId";
+        ResourceModel resourceModel = ResourceModel
+            .builder()
+            .indexId(indexId)
+            .type("CUSTOM")
+            .description("description")
+            .build();
+        CreateDataSourceRequest createDataSourceRequest = Translator.translateToCreateRequest(resourceModel);
+        assertThat(createDataSourceRequest.indexId()).isEqualTo(indexId);
+        assertThat(createDataSourceRequest.configuration()).isNull();
+    }
+
+    @Test
     void testTranslateToCreateRequest_WithTags() {
         String indexId = "indexId";
         ResourceModel resourceModel = ResourceModel
@@ -119,11 +133,11 @@ public class TranslatorTest {
         assertThat(updateDataSourceRequest.id()).isEqualTo(id);
         assertThat(updateDataSourceRequest.indexId()).isEqualTo(indexId);
         assertThat(updateDataSourceRequest.description()).isEqualTo("description");
-        assertThat(updateDataSourceRequest.name()).isEqualTo("");
-        assertThat(updateDataSourceRequest.roleArn()).isEqualTo("");
-        assertThat(updateDataSourceRequest.schedule()).isEqualTo("");
+        assertThat(updateDataSourceRequest.name()).isEqualTo(null);
+        assertThat(updateDataSourceRequest.roleArn()).isEqualTo(null);
+        assertThat(updateDataSourceRequest.schedule()).isEqualTo(null);
         assertThat(updateDataSourceRequest.configuration())
-                .isEqualTo(software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder().build());
+                .isEqualTo(null);
     }
 
     @Test
