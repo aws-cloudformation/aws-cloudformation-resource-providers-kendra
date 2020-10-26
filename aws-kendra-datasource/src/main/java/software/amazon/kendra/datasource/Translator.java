@@ -120,7 +120,7 @@ public class Translator {
    * @return awsRequest the aws service request to modify a resource
    */
   static UpdateDataSourceRequest translateToUpdateRequest(final ResourceModel model) {
-      String description = model.getDescription();
+      String description = model.getDescription() == null ? "" : model.getDescription();
       String name =  model.getName();
       String roleArn =  model.getRoleArn();
       String schedule =  model.getSchedule();
