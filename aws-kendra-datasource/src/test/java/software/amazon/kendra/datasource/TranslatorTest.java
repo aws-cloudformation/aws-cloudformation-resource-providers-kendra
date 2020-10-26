@@ -141,6 +141,26 @@ public class TranslatorTest {
     }
 
     @Test
+    void testTranslateToUpdateRequest_DescriptionNotProvided() {
+        String id = "id";
+        String indexId = "indexId";
+        ResourceModel resourceModel = ResourceModel
+            .builder()
+            .id(id)
+            .indexId(indexId)
+            .build();
+        UpdateDataSourceRequest updateDataSourceRequest = Translator.translateToUpdateRequest(resourceModel);
+        assertThat(updateDataSourceRequest.id()).isEqualTo(id);
+        assertThat(updateDataSourceRequest.indexId()).isEqualTo(indexId);
+        assertThat(updateDataSourceRequest.description()).isEqualTo("");
+        assertThat(updateDataSourceRequest.name()).isEqualTo(null);
+        assertThat(updateDataSourceRequest.roleArn()).isEqualTo(null);
+        assertThat(updateDataSourceRequest.schedule()).isEqualTo(null);
+        assertThat(updateDataSourceRequest.configuration())
+            .isEqualTo(null);
+    }
+
+    @Test
     void testTranslateToListRequest()  {
         String nextToken = "nextToken";
         String indexId = "indexId";
