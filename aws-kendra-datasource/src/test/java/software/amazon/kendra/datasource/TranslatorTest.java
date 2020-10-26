@@ -374,4 +374,24 @@ public class TranslatorTest {
         assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration))
                 .isEqualTo(expected);
     }
+
+    @Test
+    void translateToSdkConfiguration_WHEN_Configuration_Null(){
+        assertThat(Translator.toSdkDataSourceConfiguration(null))
+            .isEqualTo(null);
+    }
+
+    @Test
+    void testTranslateS3_WHEN_Configuration_NULL() {
+        ResourceModel resourceModel = ResourceModel
+            .builder()
+            .type("S3")
+            .dataSourceConfiguration(null)
+            .build();
+        CreateDataSourceRequest expected = CreateDataSourceRequest
+            .builder()
+            .type(DataSourceType.S3)
+            .build();
+        assertThat(Translator.translateToCreateRequest(resourceModel)).isEqualTo(expected);
+    }
 }
