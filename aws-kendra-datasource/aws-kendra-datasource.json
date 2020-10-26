@@ -101,6 +101,9 @@
         "InclusionPrefixes": {
           "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
         },
+        "InclusionPatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
         "ExclusionPatterns": {
           "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
         },
