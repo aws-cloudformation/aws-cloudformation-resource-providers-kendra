@@ -28,10 +28,10 @@ public class DeleteHandler extends BaseHandlerStd {
             // Set the timeout to something silly/way too high, because
             // we already set the timeout in the schema https://github.com/aws-cloudformation/aws-cloudformation-resource-schema
             .timeout(Duration.ofDays(365L))
-            // Set the delay to five minutes so the stabilization code only calls
-            // DescribeIndex every five minutes - delete can take hours
-            // so there's no need to check the index has been deleted more than every five minutes.
-            .delay(Duration.ofMinutes(5))
+            // Set the delay to one minute so the stabilization code only calls
+            // DescribeIndex every minute - delete can take a few minutes
+            // so there's no need to check the index has been deleted more than once a minute.
+            .delay(Duration.ofMinutes(1))
             .build();
 
     private Logger logger;
