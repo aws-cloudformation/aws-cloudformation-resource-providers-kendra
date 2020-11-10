@@ -284,7 +284,9 @@ public class ReadHandlerTest extends AbstractTestBase {
                 .name(name)
                 .roleArn(roleArn)
                 .edition(indexEdition)
-                .documentMetadataConfigurations(documentMetadataConfigurationList)
+                .documentMetadataConfigurations(DocumentMetadataConfigurationList.builder()
+                        .documentMetadataConfigurationList(documentMetadataConfigurationList)
+                        .build())
                 .build();
         assertThat(response.getResourceModel()).isEqualTo(expected);
         assertThat(response.getResourceModels()).isNull();

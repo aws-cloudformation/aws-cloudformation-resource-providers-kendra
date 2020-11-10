@@ -167,6 +167,14 @@
       ]
     },
     "DocumentMetadataConfigurationList": {
+      "type": "object",
+      "properties": {
+        "DocumentMetadataConfigurationList": {
+          "$ref": "#/definitions/DocumentMetadataConfigurationListItems"
+        }
+      }
+    },
+    "DocumentMetadataConfigurationListItems": {
       "type": "array",
       "maxItems": 500,
       "items": {

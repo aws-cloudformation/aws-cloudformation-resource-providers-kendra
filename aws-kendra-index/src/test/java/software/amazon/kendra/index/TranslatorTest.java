@@ -41,7 +41,9 @@ class TranslatorTest {
         documentMetadataConfigurationBuilder.name(name);
 
         software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration sdkDocumentMetadataConfiguration =
-                Translator.translateToSdkDocumentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build())).get(0);
+                Translator.translateToSdkDocumentMetadataConfigurationList(DocumentMetadataConfigurationList.builder()
+                        .documentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                        .build()).get(0);
         assertThat(sdkDocumentMetadataConfiguration.name()).isEqualTo(name);
         assertThat(sdkDocumentMetadataConfiguration.type()).isNull();
         assertThat(sdkDocumentMetadataConfiguration.relevance()).isNull();
@@ -56,7 +58,9 @@ class TranslatorTest {
         documentMetadataConfigurationBuilder.type(type);
 
         software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration sdkDocumentMetadataConfiguration =
-                Translator.translateToSdkDocumentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build())).get(0);
+                Translator.translateToSdkDocumentMetadataConfigurationList(DocumentMetadataConfigurationList.builder()
+                        .documentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                        .build()).get(0);
         assertThat(sdkDocumentMetadataConfiguration.typeAsString())
                 .isEqualTo(type);
         assertThat(sdkDocumentMetadataConfiguration.name()).isNull();
@@ -90,10 +94,14 @@ class TranslatorTest {
         );
         documentMetadataConfigurationBuilder.relevance(relevanceBuilder.build());
         resourceModelBuilder.documentMetadataConfigurations(
-                Arrays.asList(documentMetadataConfigurationBuilder.build()));
+                DocumentMetadataConfigurationList.builder()
+                        .documentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                        .build());
 
         software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration sdkDocumentMetadataConfiguration =
-                Translator.translateToSdkDocumentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build())).get(0);
+                Translator.translateToSdkDocumentMetadataConfigurationList(DocumentMetadataConfigurationList.builder()
+                        .documentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                        .build()).get(0);
         assertThat(sdkDocumentMetadataConfiguration.relevance().importance())
                 .isEqualTo(importance);
         assertThat(sdkDocumentMetadataConfiguration.relevance().duration())
@@ -123,10 +131,14 @@ class TranslatorTest {
 
         documentMetadataConfigurationBuilder.search(searchBuilder.build());
         resourceModelBuilder.documentMetadataConfigurations(
-                Arrays.asList(documentMetadataConfigurationBuilder.build()));
+                DocumentMetadataConfigurationList.builder()
+                        .documentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                        .build());
 
         software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration sdkDocumentMetadataConfiguration =
-                Translator.translateToSdkDocumentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build())).get(0);
+                Translator.translateToSdkDocumentMetadataConfigurationList(DocumentMetadataConfigurationList.builder()
+                        .documentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                        .build()).get(0);
         assertThat(sdkDocumentMetadataConfiguration.search().displayable())
                 .isTrue();
         assertThat(sdkDocumentMetadataConfiguration.search().facetable())
@@ -341,7 +353,9 @@ class TranslatorTest {
                 .name("name")
                 .description("description")
                 .edition(IndexEdition.DEVELOPER_EDITION.toString())
-                .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                .documentMetadataConfigurations(DocumentMetadataConfigurationList.builder()
+                        .documentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                        .build())
                 .build();
 
         UpdateIndexRequest updateIndexRequest = Translator.translateToPostCreateUpdateRequest(resourceModel);
@@ -373,7 +387,9 @@ class TranslatorTest {
                 .name("name")
                 .description("description")
                 .edition(IndexEdition.ENTERPRISE_EDITION.toString())
-                .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                .documentMetadataConfigurations(DocumentMetadataConfigurationList.builder()
+                        .documentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                        .build())
                 .capacityUnits(CapacityUnitsConfiguration.builder()
                         .queryCapacityUnits(queryCapacityUnits)
                         .storageCapacityUnits(storageCapacityUnits)
@@ -412,7 +428,9 @@ class TranslatorTest {
                 .id(id)
                 .description(description)
                 .roleArn(roleArn)
-                .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                .documentMetadataConfigurations(DocumentMetadataConfigurationList.builder()
+                        .documentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                        .build())
                 .edition(IndexEdition.ENTERPRISE_EDITION.toString())
                 .capacityUnits(CapacityUnitsConfiguration
                         .builder()
@@ -422,7 +440,9 @@ class TranslatorTest {
                 .build();
         ResourceModel prevModel = ResourceModel
                 .builder()
-                .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                .documentMetadataConfigurations(DocumentMetadataConfigurationList.builder()
+                        .documentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                        .build())
                 .build();
         UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel, prevModel);
         assertThat(updateIndexRequest.id()).isEqualTo(id);
@@ -452,12 +472,16 @@ class TranslatorTest {
                 .id(id)
                 .description(description)
                 .roleArn(roleArn)
-                .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                .documentMetadataConfigurations(DocumentMetadataConfigurationList.builder()
+                        .documentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                        .build())
                 .edition(IndexEdition.DEVELOPER_EDITION.toString())
                 .build();
         ResourceModel prevModel = ResourceModel
                 .builder()
-                .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                .documentMetadataConfigurations(DocumentMetadataConfigurationList.builder()
+                        .documentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                        .build())
                 .build();
         UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel, prevModel);
         assertThat(updateIndexRequest.id()).isEqualTo(id);
@@ -606,9 +630,9 @@ class TranslatorTest {
         assertThat(actual.getName()).isEqualTo(name);
         assertThat(actual.getRoleArn()).isEqualTo(roleArn);
         assertThat(actual.getEdition()).isEqualTo(edition);
-        assertThat(actual.getDocumentMetadataConfigurations().size()).isEqualTo(1);
-        assertThat(actual.getDocumentMetadataConfigurations().get(0).getName()).isEqualTo(metadataName);
-        assertThat(actual.getDocumentMetadataConfigurations().get(0).getType()).isEqualTo(metadataType);
+        assertThat(actual.getDocumentMetadataConfigurations().getDocumentMetadataConfigurationList().size()).isEqualTo(1);
+        assertThat(actual.getDocumentMetadataConfigurations().getDocumentMetadataConfigurationList().get(0).getName()).isEqualTo(metadataName);
+        assertThat(actual.getDocumentMetadataConfigurations().getDocumentMetadataConfigurationList().get(0).getType()).isEqualTo(metadataType);
         assertThat(actual.getCapacityUnits().getQueryCapacityUnits()).isEqualTo(queryCapacityUnits);
         assertThat(actual.getCapacityUnits().getStorageCapacityUnits()).isEqualTo(storageCapacityUnits);
         assertThat(actual.getTags().size()).isEqualTo(1);
@@ -706,8 +730,12 @@ class TranslatorTest {
 
         assertThrows(TranslatorValidationException.class, () -> {
             Translator.translateToSdkDocumentMetadataConfigurationList(
-                    Arrays.asList(documentMetadataConfigurationBuilder.build()),
-                    Arrays.asList(documentMetadataConfigurationBuilder2.build()));
+                    DocumentMetadataConfigurationList.builder()
+                        .documentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                        .build(),
+                    DocumentMetadataConfigurationList.builder()
+                            .documentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder2.build()))
+                            .build());
         });
     }
 
@@ -730,8 +758,12 @@ class TranslatorTest {
 
         List<software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration> sdkList =
                 Translator.translateToSdkDocumentMetadataConfigurationList(
-                        Arrays.asList(documentMetadataConfigurationBuilder.build(), documentMetadataConfigurationBuilder2.build()),
-                        new ArrayList<>());
+                        DocumentMetadataConfigurationList.builder()
+                                .documentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build(), documentMetadataConfigurationBuilder2.build()))
+                                .build(),
+                        DocumentMetadataConfigurationList.builder()
+                                .documentMetadataConfigurationList(new ArrayList<>())
+                                .build());
 
         assertThat(sdkList.size()).isEqualTo(2);
         assertThat(sdkList.get(1).name()).isEqualTo(customAttributeName);
@@ -759,9 +791,12 @@ class TranslatorTest {
 
         List<software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration> sdkList =
                 Translator.translateToSdkDocumentMetadataConfigurationList(
-                        Arrays.asList(
-                                documentMetadataConfigurationBuilder.build(),
-                                documentMetadataConfigurationBuilder2.build()), new ArrayList<>());
+                        DocumentMetadataConfigurationList.builder()
+                                .documentMetadataConfigurationList(Arrays.asList(documentMetadataConfigurationBuilder.build(), documentMetadataConfigurationBuilder2.build()))
+                                .build(),
+                        DocumentMetadataConfigurationList.builder()
+                                .documentMetadataConfigurationList(new ArrayList<>())
+                                .build());
 
         assertThat(sdkList.size()).isEqualTo(2);
     }
@@ -772,24 +807,26 @@ class TranslatorTest {
         ResourceModel resourceModel = ResourceModel
                 .builder()
                 .edition(IndexEdition.ENTERPRISE_EDITION.toString())
-                .documentMetadataConfigurations(Arrays.asList(
-                        DocumentMetadataConfiguration
-                                .builder()
-                                .relevance(Relevance
+                .documentMetadataConfigurations(DocumentMetadataConfigurationList.builder()
+                        .documentMetadataConfigurationList(Arrays.asList(
+                                DocumentMetadataConfiguration
                                         .builder()
-                                        .valueImportanceItems(Arrays.asList(
-                                                ValueImportanceItem
-                                                        .builder()
-                                                        .key("a")
-                                                        .build(),
-                                                ValueImportanceItem
-                                                        .builder()
-                                                        .key("a")
-                                                        .build())
-                                        )
-                                        .build())
-                                .build()
-                ))
+                                        .relevance(Relevance
+                                                .builder()
+                                                .valueImportanceItems(Arrays.asList(
+                                                        ValueImportanceItem
+                                                                .builder()
+                                                                .key("a")
+                                                                .build(),
+                                                        ValueImportanceItem
+                                                                .builder()
+                                                                .key("a")
+                                                                .build())
+                                                )
+                                                .build())
+                                        .build()
+                        ))
+                        .build())
                 .id(id)
                 .build();
 

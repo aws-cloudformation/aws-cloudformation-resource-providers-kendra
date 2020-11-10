@@ -129,7 +129,11 @@ public class Translator {
     builder.tags(tags);
     List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList =
             translateFromSdkDocumentMetadataConfigurationList(describeIndexResponse.documentMetadataConfigurations());
-    builder.documentMetadataConfigurations(modelDocumentMetadataConfigurationList);
+    if (modelDocumentMetadataConfigurationList != null) {
+      builder.documentMetadataConfigurations(DocumentMetadataConfigurationList.builder()
+              .documentMetadataConfigurationList(modelDocumentMetadataConfigurationList)
+              .build());
+    }
 
     return builder.build();
   }
@@ -149,8 +153,8 @@ public class Translator {
     String name = currModel.getName() == null ? "" : currModel.getName();
     String roleArn = currModel.getRoleArn() == null ? "" : currModel.getRoleArn();
     // Handle null previous resource model
-    List<software.amazon.kendra.index.DocumentMetadataConfiguration> prevDocumentMetadataConfiguration =
-            prevModel == null ? new ArrayList<>() : prevModel.getDocumentMetadataConfigurations();
+    software.amazon.kendra.index.DocumentMetadataConfigurationList prevDocumentMetadataConfiguration =
+            prevModel == null ? null : prevModel.getDocumentMetadataConfigurations();
     return UpdateIndexRequest
             .builder()
             .id(currModel.getId())
@@ -202,16 +206,16 @@ public class Translator {
   }
 
   static List<DocumentMetadataConfiguration> translateToSdkDocumentMetadataConfigurationList(
-          List<software.amazon.kendra.index.DocumentMetadataConfiguration> curr,
-          List<software.amazon.kendra.index.DocumentMetadataConfiguration> prev) throws TranslatorValidationException {
+          software.amazon.kendra.index.DocumentMetadataConfigurationList curr,
+          software.amazon.kendra.index.DocumentMetadataConfigurationList prev) throws TranslatorValidationException {
 
     Map<String, String> previousMetadataNames = new HashMap<>();
-    if (prev != null && !prev.isEmpty()) {
-      previousMetadataNames = prev.stream().collect(Collectors.toMap(x -> x.getName(), x -> x.getType()));
+    if (prev != null && prev.getDocumentMetadataConfigurationList() != null && !prev.getDocumentMetadataConfigurationList().isEmpty()) {
+      previousMetadataNames = prev.getDocumentMetadataConfigurationList().stream().collect(Collectors.toMap(x -> x.getName(), x -> x.getType()));
     }
     Set<String> currMetadataNames = new HashSet<>();
-    if (curr != null && !curr.isEmpty()) {
-      currMetadataNames = curr.stream().map(x -> x.getName()).collect(Collectors.toSet());
+    if (curr != null && curr.getDocumentMetadataConfigurationList() != null && !curr.getDocumentMetadataConfigurationList().isEmpty()) {
+      currMetadataNames = curr.getDocumentMetadataConfigurationList().stream().map(x -> x.getName()).collect(Collectors.toSet());
     }
     List<DocumentMetadataConfiguration> sdkDefaultAttributes = new ArrayList<>();
     for (Map.Entry<String, String> entry : previousMetadataNames.entrySet()) {
@@ -252,12 +256,13 @@ public class Translator {
   }
 
   static List<DocumentMetadataConfiguration> translateToSdkDocumentMetadataConfigurationList(
-          List<software.amazon.kendra.index.DocumentMetadataConfiguration> modelDocumentMetadataConfigurationList) throws TranslatorValidationException {
+          software.amazon.kendra.index.DocumentMetadataConfigurationList modelDocumentMetadataConfigurationList) throws TranslatorValidationException {
 
     List<DocumentMetadataConfiguration> sdkDocumentMetadataConfigurationList = new ArrayList<>();
-    if (modelDocumentMetadataConfigurationList != null && !modelDocumentMetadataConfigurationList.isEmpty()) {
+    if (modelDocumentMetadataConfigurationList != null && modelDocumentMetadataConfigurationList.getDocumentMetadataConfigurationList() != null &&
+      !modelDocumentMetadataConfigurationList.getDocumentMetadataConfigurationList().isEmpty()) {
       sdkDocumentMetadataConfigurationList = new ArrayList<>();
-      for (software.amazon.kendra.index.DocumentMetadataConfiguration modelDocumentMetadataConfiguration : modelDocumentMetadataConfigurationList) {
+      for (software.amazon.kendra.index.DocumentMetadataConfiguration modelDocumentMetadataConfiguration : modelDocumentMetadataConfigurationList.getDocumentMetadataConfigurationList()) {
         DocumentMetadataConfiguration.Builder sdkDocumentMetadataConfigurationBuilder = DocumentMetadataConfiguration.builder();
 
         sdkDocumentMetadataConfigurationBuilder.name(modelDocumentMetadataConfiguration.getName());
