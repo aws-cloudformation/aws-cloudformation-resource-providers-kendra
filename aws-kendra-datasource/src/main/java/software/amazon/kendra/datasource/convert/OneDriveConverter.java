@@ -17,6 +17,7 @@ public class OneDriveConverter {
                 .exclusionPatterns(StringListConverter.toSdk(model.getExclusionPatterns()))
                 .fieldMappings(ListConverter.toSdk(model.getFieldMappings(), FieldMappingConverter::toSdk))
                 .oneDriveUsers(toSdk(model.getOneDriveUsers()))
+                .disableLocalGroups(model.getDisableLocalGroups())
                 .build();
     }
 
@@ -60,6 +61,7 @@ public class OneDriveConverter {
                 .inclusionPatterns(StringListConverter.toModel(sdk.inclusionPatterns()))
                 .exclusionPatterns(StringListConverter.toModel(sdk.exclusionPatterns()))
                 .oneDriveUsers(toModel(sdk.oneDriveUsers()))
+                .disableLocalGroups(sdk.disableLocalGroups())
                 .build();
     }
 

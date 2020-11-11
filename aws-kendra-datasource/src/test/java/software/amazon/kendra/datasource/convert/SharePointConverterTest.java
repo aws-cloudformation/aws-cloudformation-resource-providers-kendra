@@ -11,7 +11,7 @@ import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SharePointCoverterTest {
+public class SharePointConverterTest {
 
   @Test
   public void testSdkDataSourceConfiguration() {
@@ -28,6 +28,7 @@ public class SharePointCoverterTest {
           .securityGroupIds(Arrays.asList("testSecurityGroupId"))
           .subnetIds(Arrays.asList("testSubnetId"))
           .build())
+        .disableLocalGroups(true)
         .fieldMappings(Arrays.asList(DataSourceToIndexFieldMapping.builder()
           .dataSourceFieldName("testDataSourceFieldName")
           .dateFieldFormat("testDateFieldFormat")
@@ -56,6 +57,7 @@ public class SharePointCoverterTest {
                         .indexFieldName("testIndexFieldName")
                         .build()))
                 .documentTitleFieldName("testDocumentTitleFieldName")
+                .disableLocalGroups(true)
                 .build();
 
     assertThat(SharePointConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getSharePointConfiguration()))
@@ -71,6 +73,7 @@ public class SharePointCoverterTest {
         .secretArn("secretArn")
         .crawlAttachments(true)
         .useChangeLog(true)
+        .disableLocalGroups(false)
         .inclusionPatterns(Arrays.asList("testInclusionPatterns"))
         .exclusionPatterns(Arrays.asList("testExclusionPatterns"))
         .documentTitleFieldName("testDocumentTitleFieldName")
@@ -84,6 +87,7 @@ public class SharePointCoverterTest {
                     .secretArn("secretArn")
                     .crawlAttachments(true)
                     .useChangeLog(true)
+                    .disableLocalGroups(false)
                     .inclusionPatterns(Arrays.asList("testInclusionPatterns"))
                     .exclusionPatterns(Arrays.asList("testExclusionPatterns"))
                     .documentTitleFieldName("testDocumentTitleFieldName")
@@ -103,6 +107,7 @@ public class SharePointCoverterTest {
           .secretArn("secretArn")
           .crawlAttachments(true)
           .useChangeLog(true)
+          .disableLocalGroups(true)
           .inclusionPatterns(Arrays.asList("testInclusionPatterns"))
           .exclusionPatterns(Arrays.asList("testExclusionPatterns"))
           .vpcConfiguration( software.amazon.awssdk.services.kendra.model.DataSourceVpcConfiguration.builder()
@@ -125,6 +130,7 @@ public class SharePointCoverterTest {
         .secretArn("secretArn")
         .crawlAttachments(true)
         .useChangeLog(true)
+        .disableLocalGroups(true)
         .inclusionPatterns(Arrays.asList("testInclusionPatterns"))
         .exclusionPatterns(Arrays.asList("testExclusionPatterns"))
         .vpcConfiguration( DataSourceVpcConfiguration.builder()

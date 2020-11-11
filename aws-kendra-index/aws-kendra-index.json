@@ -226,6 +226,108 @@
     "Arn": {
       "type": "string",
       "maxLength": 1000
+    },
+    "UserContextPolicy": {
+      "type": "string",
+      "enum": [
+        "ATTRIBUTE_FILTER",
+        "USER_TOKEN"
+      ]
+    },
+    "UserNameAttributeField": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "GroupAttributeField": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "KeyLocation": {
+      "type": "string",
+      "enum": [
+        "URL",
+        "SECRET_MANAGER"
+      ]
+    },
+    "Issuer": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 65
+    },
+    "ClaimRegex": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "Url": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
+      "pattern": "^(https?|ftp|file):\\/\\/([^\\s]*)"
+    },
+    "JsonTokenTypeConfiguration": {
+      "type": "object",
+      "properties": {
+        "UserNameAttributeField": {
+          "$ref": "#/definitions/UserNameAttributeField"
+        },
+        "GroupAttributeField": {
+          "$ref": "#/definitions/GroupAttributeField"
+        }
+      },
+      "required": [
+        "UserNameAttributeField",
+        "GroupAttributeField"
+      ]
+    },
+    "JwtTokenTypeConfiguration": {
+      "type": "object",
+      "properties": {
+        "KeyLocation": {
+          "$ref": "#/definitions/KeyLocation"
+        },
+        "URL": {
+          "$ref": "#/definitions/Url"
+        },
+        "SecretManagerArn": {
+          "$ref": "#/definitions/RoleArn"
+        },
+        "UserNameAttributeField": {
+          "$ref": "#/definitions/UserNameAttributeField"
+        },
+        "GroupAttributeField": {
+          "$ref": "#/definitions/GroupAttributeField"
+        },
+        "Issuer": {
+          "$ref": "#/definitions/Issuer"
+        },
+        "ClaimRegex": {
+          "$ref": "#/definitions/ClaimRegex"
+        }
+      },
+      "required": [
+        "KeyLocation"
+      ]
+    },
+    "UserTokenConfiguration": {
+      "type": "object",
+      "properties": {
+        "JwtTokenTypeConfiguration": {
+          "$ref": "#/definitions/JwtTokenTypeConfiguration"
+        },
+        "JsonTokenTypeConfiguration": {
+          "$ref": "#/definitions/JsonTokenTypeConfiguration"
+        }
+      }
+    },
+    "UserTokenConfigurationList": {
+      "type": "array",
+      "maxItems": 1,
+      "items": {
+        "$ref": "#/definitions/UserTokenConfiguration"
+      }
     }
   },
   "properties": {
@@ -263,6 +365,12 @@
     "CapacityUnits": {
       "description": "Capacity units",
       "$ref": "#/definitions/CapacityUnitsConfiguration"
+    },
+    "UserContextPolicy": {
+      "$ref": "#/definitions/UserContextPolicy"
+    },
+    "UserTokenConfigurations": {
+      "$ref": "#/definitions/UserTokenConfigurationList"
     }
   },
   "required": [

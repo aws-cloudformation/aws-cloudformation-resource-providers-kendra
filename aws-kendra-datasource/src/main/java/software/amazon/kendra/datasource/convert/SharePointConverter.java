@@ -21,6 +21,7 @@ public class SharePointConverter {
             .vpcConfiguration(sdkVpcConfiguration(model.getVpcConfiguration()))
             .fieldMappings(ListConverter.toSdk(model.getFieldMappings(), FieldMappingConverter::toSdk))
             .documentTitleFieldName(model.getDocumentTitleFieldName())
+            .disableLocalGroups(model.getDisableLocalGroups())
             .build();
   }
 
@@ -46,6 +47,7 @@ public class SharePointConverter {
             .vpcConfiguration(modelVpcConfiguration(sdk.vpcConfiguration()))
             .fieldMappings(ListConverter.toModel(sdk.fieldMappings(), FieldMappingConverter::toModel))
             .documentTitleFieldName(sdk.documentTitleFieldName())
+            .disableLocalGroups(sdk.disableLocalGroups())
             .build();
   }
 
