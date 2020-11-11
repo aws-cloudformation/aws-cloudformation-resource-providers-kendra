@@ -18,6 +18,7 @@ import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.kendra.model.ServiceQuotaExceededException;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexResponse;
+import software.amazon.awssdk.services.kendra.model.UserContextPolicy;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
@@ -383,6 +384,7 @@ public class CreateHandlerTest extends AbstractTestBase {
         String roleArn = "testRoleArn";
         String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
         String kmsKeyId = "kmsKeyId";
+        String userContextPolicy = UserContextPolicy.ATTRIBUTE_FILTER.toString();
         ServerSideEncryptionConfiguration serverSideEncryptionConfiguration =
                 ServerSideEncryptionConfiguration.builder().kmsKeyId(kmsKeyId).build();
         final ResourceModel model = ResourceModel
@@ -390,6 +392,7 @@ public class CreateHandlerTest extends AbstractTestBase {
                 .name(name)
                 .roleArn(roleArn)
                 .edition(indexEdition)
+                .userContextPolicy(userContextPolicy)
                 .serverSideEncryptionConfiguration(serverSideEncryptionConfiguration)
                 .build();
 
@@ -406,6 +409,7 @@ public class CreateHandlerTest extends AbstractTestBase {
                         .name(name)
                         .roleArn(roleArn)
                         .edition(indexEdition)
+                        .userContextPolicy(userContextPolicy)
                         .status(IndexStatus.ACTIVE.toString())
                         .serverSideEncryptionConfiguration(
                                 software.amazon.awssdk.services.kendra.model.ServerSideEncryptionConfiguration
@@ -430,6 +434,7 @@ public class CreateHandlerTest extends AbstractTestBase {
                 .name(name)
                 .roleArn(roleArn)
                 .edition(indexEdition)
+                .userContextPolicy(userContextPolicy)
                 .serverSideEncryptionConfiguration(serverSideEncryptionConfiguration)
                 .build();
         assertThat(response.getResourceModel()).isEqualTo(expectedResourceModel);

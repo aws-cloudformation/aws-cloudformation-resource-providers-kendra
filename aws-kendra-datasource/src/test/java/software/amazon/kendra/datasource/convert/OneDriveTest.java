@@ -24,6 +24,7 @@ public class OneDriveTest {
                 .secretArn(secretArn)
                 .inclusionPatterns(includes)
                 .exclusionPatterns(excludes)
+                .disableLocalGroups(true)
                 .build();
 
         software.amazon.awssdk.services.kendra.model.OneDriveConfiguration sdk =
@@ -32,6 +33,7 @@ public class OneDriveTest {
                 .tenantDomain(tenantDomain)
                 .inclusionPatterns(includes)
                 .exclusionPatterns(excludes)
+                .disableLocalGroups(true)
                 .build();
 
         assertThat(OneDriveConverter.toSdkDataSourceConfiguration(model)).isEqualTo(sdk);
@@ -85,6 +87,7 @@ public class OneDriveTest {
                 .secretArn(secretArn)
                 .inclusionPatterns(includes)
                 .exclusionPatterns(excludes)
+                .disableLocalGroups(false)
                 .build();
 
         software.amazon.awssdk.services.kendra.model.OneDriveConfiguration sdk =
@@ -93,6 +96,7 @@ public class OneDriveTest {
                         .tenantDomain(tenantDomain)
                         .inclusionPatterns(includes)
                         .exclusionPatterns(excludes)
+                        .disableLocalGroups(false)
                         .build();
 
         assertThat(OneDriveConverter.toModel(sdk)).isEqualTo(model);

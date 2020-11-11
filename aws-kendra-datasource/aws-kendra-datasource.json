@@ -193,6 +193,9 @@
         "$ref": "#/definitions/DataSourceToIndexFieldMapping"
       }
     },
+    "DisableLocalGroups": {
+      "type": "boolean"
+    },
     "SharePointConfiguration": {
       "description": "SharePoint configuration",
       "type": "object",
@@ -233,6 +236,9 @@
         },
         "DocumentTitleFieldName": {
           "$ref": "#/definitions/DataSourceFieldName"
+        },
+        "DisableLocalGroups": {
+          "$ref": "#/definitions/DisableLocalGroups"
         }
       },
       "required": [
@@ -626,6 +632,9 @@
         },
         "FieldMappings": {
           "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        },
+        "DisableLocalGroups": {
+          "$ref": "#/definitions/DisableLocalGroups"
         }
       },
       "required": [

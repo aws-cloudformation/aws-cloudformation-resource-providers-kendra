@@ -16,6 +16,7 @@ import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.kendra.model.ResourceInUseException;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.kendra.model.Tag;
+import software.amazon.awssdk.services.kendra.model.UserContextPolicy;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
@@ -72,6 +73,7 @@ public class ReadHandlerTest extends AbstractTestBase {
         String name = "testName";
         String roleArn = "testRoleArn";
         String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
+        String userContextPolicy = UserContextPolicy.ATTRIBUTE_FILTER.toString();
 
         when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
                 .thenReturn(DescribeIndexResponse.builder()
@@ -80,6 +82,7 @@ public class ReadHandlerTest extends AbstractTestBase {
                         .roleArn(roleArn)
                         .edition(indexEdition)
                         .status(IndexStatus.ACTIVE.toString())
+                        .userContextPolicy(userContextPolicy)
                         .build());
 
         when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
@@ -105,6 +108,7 @@ public class ReadHandlerTest extends AbstractTestBase {
                 .name(name)
                 .roleArn(roleArn)
                 .edition(indexEdition)
+                .userContextPolicy(userContextPolicy)
                 .build();
         assertThat(response.getResourceModel()).isEqualTo(expected);
         assertThat(response.getResourceModels()).isNull();
@@ -123,6 +127,7 @@ public class ReadHandlerTest extends AbstractTestBase {
         String name = "testName";
         String roleArn = "testRoleArn";
         String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
+        String userContextPolicy = UserContextPolicy.ATTRIBUTE_FILTER.toString();
 
         when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
                 .thenReturn(DescribeIndexResponse.builder()
@@ -131,6 +136,7 @@ public class ReadHandlerTest extends AbstractTestBase {
                         .roleArn(roleArn)
                         .edition(indexEdition)
                         .status(IndexStatus.ACTIVE.toString())
+                        .userContextPolicy(userContextPolicy)
                         .build());
 
         String key = "key";
@@ -162,6 +168,7 @@ public class ReadHandlerTest extends AbstractTestBase {
                 .roleArn(roleArn)
                 .edition(indexEdition)
                 .tags(Arrays.asList(software.amazon.kendra.index.Tag.builder().key(key).value(value).build()))
+                .userContextPolicy(userContextPolicy)
                 .build();
         assertThat(response.getResourceModel()).isEqualTo(expected);
         assertThat(response.getResourceModels()).isNull();
@@ -201,6 +208,7 @@ public class ReadHandlerTest extends AbstractTestBase {
         String name = "testName";
         String roleArn = "testRoleArn";
         String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
+        String userContextPolicy = UserContextPolicy.ATTRIBUTE_FILTER.toString();
 
         when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
                 .thenReturn(DescribeIndexResponse.builder()
@@ -209,6 +217,7 @@ public class ReadHandlerTest extends AbstractTestBase {
                         .roleArn(roleArn)
                         .edition(indexEdition)
                         .status(IndexStatus.ACTIVE.toString())
+                        .userContextPolicy(userContextPolicy)
                         .build());
 
         when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
@@ -239,6 +248,7 @@ public class ReadHandlerTest extends AbstractTestBase {
         String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
         String documentMetadataConfigurationName = "documentMetadataConfigurationName";
         String documentMetadataConfigurationType = "documentMetadataConfigurationType";
+        String userContextPolicy = UserContextPolicy.ATTRIBUTE_FILTER.toString();
 
         List<software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration> sdkDocumentMetadataConfigurationList =
                 Arrays.asList(software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration
@@ -251,6 +261,7 @@ public class ReadHandlerTest extends AbstractTestBase {
                         .edition(indexEdition)
                         .status(IndexStatus.ACTIVE.toString())
                         .documentMetadataConfigurations(sdkDocumentMetadataConfigurationList)
+                        .userContextPolicy(userContextPolicy)
                         .build());
 
         when(proxyClient.client().listTagsForResource(any(ListTagsForResourceRequest.class)))
@@ -285,6 +296,7 @@ public class ReadHandlerTest extends AbstractTestBase {
                 .roleArn(roleArn)
                 .edition(indexEdition)
                 .documentMetadataConfigurations(documentMetadataConfigurationList)
+                .userContextPolicy(userContextPolicy)
                 .build();
         assertThat(response.getResourceModel()).isEqualTo(expected);
         assertThat(response.getResourceModels()).isNull();
