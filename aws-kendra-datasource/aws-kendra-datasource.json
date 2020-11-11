@@ -32,22 +32,10 @@
       ],
       "additionalProperties": false
     },
-    "TagList": {
-      "description": "List of tags",
-      "type": "array",
-      "maxItems": 200,
-      "items": {
-        "$ref": "#/definitions/Tag"
-      }
-    },
-    "DataSourceInclusionsExclusionsStrings": {
-      "type": "array",
-      "maxItems": 100,
-      "items": {
-        "type": "string",
-        "minLength": 1,
-        "maxLength": 50
-      }
+    "DataSourceInclusionsExclusionsString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50
     },
     "S3Path": {
       "type": "object",
@@ -99,13 +87,25 @@
           "$ref": "#/definitions/S3BucketName"
         },
         "InclusionPrefixes": {
-          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceInclusionsExclusionsString"
+          }
         },
         "InclusionPatterns": {
-          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceInclusionsExclusionsString"
+          }
         },
         "ExclusionPatterns": {
-          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceInclusionsExclusionsString"
+          }
         },
         "DocumentsMetadataConfiguration": {
           "$ref": "#/definitions/DocumentsMetadataConfiguration"
@@ -186,13 +186,6 @@
         "IndexFieldName"
       ]
     },
-    "DataSourceToIndexFieldMappingList": {
-      "type": "array",
-      "maxItems": 100,
-      "items": {
-        "$ref": "#/definitions/DataSourceToIndexFieldMapping"
-      }
-    },
     "SharePointConfiguration": {
       "description": "SharePoint configuration",
       "type": "object",
@@ -220,16 +213,28 @@
           "type": "boolean"
         },
         "InclusionPatterns": {
-          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceInclusionsExclusionsString"
+          }
         },
         "ExclusionPatterns": {
-          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceInclusionsExclusionsString"
+          }
         },
         "VpcConfiguration": {
           "$ref": "#/definitions/DataSourceVpcConfiguration"
         },
         "FieldMappings": {
-          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceToIndexFieldMapping"
+          }
         },
         "DocumentTitleFieldName": {
           "$ref": "#/definitions/DataSourceFieldName"
@@ -266,10 +271,18 @@
           "$ref": "#/definitions/SalesforceStandardObjectAttachmentConfiguration"
         },
         "IncludeAttachmentFilePatterns": {
-          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceInclusionsExclusionsString"
+          }
         },
         "ExcludeAttachmentFilePatterns": {
-          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceInclusionsExclusionsString"
+          }
         }
       },
       "required": [
@@ -298,7 +311,11 @@
           "$ref": "#/definitions/DataSourceFieldName"
         },
         "FieldMappings": {
-          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceToIndexFieldMapping"
+          }
         }
       },
       "required": [
@@ -332,26 +349,28 @@
       "type": "object",
       "properties": {
         "IncludedStates": {
-          "$ref": "#/definitions/SalesforceKnowledgeArticleStateList"
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/definitions/SalesforceKnowledgeArticleState"
+          }
         },
         "StandardKnowledgeArticleTypeConfiguration": {
           "$ref": "#/definitions/SalesforceStandardKnowledgeArticleTypeConfiguration"
         },
         "CustomKnowledgeArticleTypeConfigurations": {
-          "$ref": "#/definitions/SalesforceCustomKnowledgeArticleTypeConfigurationList"
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "items": {
+            "$ref": "#/definitions/SalesforceCustomKnowledgeArticleTypeConfiguration"
+          }
         }
       },
       "required": [
         "IncludedStates"
       ]
-    },
-    "SalesforceKnowledgeArticleStateList": {
-      "type": "array",
-      "minItems": 1,
-      "maxItems": 3,
-      "items": {
-        "$ref": "#/definitions/SalesforceKnowledgeArticleState"
-      }
     },
     "SalesforceKnowledgeArticleState": {
       "type": "string",
@@ -371,20 +390,16 @@
           "$ref": "#/definitions/DataSourceFieldName"
         },
         "FieldMappings": {
-          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceToIndexFieldMapping"
+          }
         }
       },
       "required": [
         "DocumentDataFieldName"
       ]
-    },
-    "SalesforceCustomKnowledgeArticleTypeConfigurationList": {
-      "type": "array",
-      "minItems": 1,
-      "maxItems": 10,
-      "items": {
-        "$ref": "#/definitions/SalesforceCustomKnowledgeArticleTypeConfiguration"
-      }
     },
     "SalesforceCustomKnowledgeArticleTypeConfiguration": {
       "type": "object",
@@ -399,7 +414,11 @@
           "$ref": "#/definitions/DataSourceFieldName"
         },
         "FieldMappings": {
-          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceToIndexFieldMapping"
+          }
         }
       },
       "required": [
@@ -422,23 +441,24 @@
           "$ref": "#/definitions/DataSourceFieldName"
         },
         "FieldMappings": {
-          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceToIndexFieldMapping"
+          }
         },
         "IncludeFilterTypes": {
-          "$ref": "#/definitions/SalesforceChatterFeedIncludeFilterTypes"
+          "type": "array",
+          "minLength": 1,
+          "maxLength": 2,
+          "items": {
+            "$ref": "#/definitions/SalesforceChatterFeedIncludeFilterType"
+          }
         }
       },
       "required": [
         "DocumentDataFieldName"
       ]
-    },
-    "SalesforceChatterFeedIncludeFilterTypes": {
-      "type": "array",
-      "minLength": 1,
-      "maxLength": 2,
-      "items": {
-        "$ref": "#/definitions/SalesforceChatterFeedIncludeFilterType"
-      }
     },
     "SalesforceChatterFeedIncludeFilterType": {
       "type": "string",
@@ -454,7 +474,11 @@
           "$ref": "#/definitions/DataSourceFieldName"
         },
         "FieldMappings": {
-          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceToIndexFieldMapping"
+          }
         }
       }
     },
@@ -555,7 +579,11 @@
           "$ref": "#/definitions/ColumnName"
         },
         "FieldMappings": {
-          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceToIndexFieldMapping"
+          }
         },
         "ChangeDetectingColumns": {
           "$ref": "#/definitions/ChangeDetectingColumns"
@@ -619,13 +647,25 @@
           "$ref": "#/definitions/OneDriveUsers"
         },
         "InclusionPatterns": {
-          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceInclusionsExclusionsString"
+          }
         },
         "ExclusionPatterns": {
-          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceInclusionsExclusionsString"
+          }
         },
         "FieldMappings": {
-          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceToIndexFieldMapping"
+          }
         }
       },
       "required": [
@@ -644,7 +684,12 @@
       "type": "object",
       "properties": {
         "OneDriveUserList": {
-          "$ref": "#/definitions/OneDriveUserList"
+          "type": "array",
+          "minLength": 1,
+          "maxLength": 100,
+          "items": {
+            "$ref": "#/definitions/OneDriveUser"
+          }
         },
         "OneDriveUserS3Path": {
           "$ref": "#/definitions/S3Path"
@@ -662,14 +707,6 @@
           ]
         }
       ]
-    },
-    "OneDriveUserList": {
-      "type": "array",
-      "minLength": 1,
-      "maxLength": 100,
-      "items": {
-        "$ref": "#/definitions/OneDriveUser"
-      }
     },
     "OneDriveUser": {
       "type": "string",
@@ -716,10 +753,18 @@
           "type": "boolean"
         },
         "IncludeAttachmentFilePatterns": {
-          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceInclusionsExclusionsString"
+          }
         },
         "ExcludeAttachmentFilePatterns": {
-          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceInclusionsExclusionsString"
+          }
         },
         "DocumentDataFieldName": {
           "$ref": "#/definitions/DataSourceFieldName"
@@ -728,7 +773,11 @@
           "$ref": "#/definitions/DataSourceFieldName"
         },
         "FieldMappings": {
-          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceToIndexFieldMapping"
+          }
         }
       },
       "required": [
@@ -748,10 +797,18 @@
           "type": "boolean"
         },
         "IncludeAttachmentFilePatterns": {
-          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceInclusionsExclusionsString"
+          }
         },
         "ExcludeAttachmentFilePatterns": {
-          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceInclusionsExclusionsString"
+          }
         },
         "DocumentDataFieldName": {
           "$ref": "#/definitions/DataSourceFieldName"
@@ -760,7 +817,11 @@
           "$ref": "#/definitions/DataSourceFieldName"
         },
         "FieldMappings": {
-          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "$ref": "#/definitions/DataSourceToIndexFieldMapping"
+          }
         }
       },
       "required": [
@@ -900,7 +961,11 @@
     },
     "Tags": {
       "description": "Tags for labeling the data source",
-      "$ref": "#/definitions/TagList"
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "$ref": "#/definitions/Tag"
+      }
     }
   },
   "required": [

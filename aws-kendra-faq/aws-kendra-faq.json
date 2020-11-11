@@ -26,14 +26,6 @@
       ],
       "additionalProperties": false
     },
-    "TagList": {
-      "description": "List of tags",
-      "type": "array",
-      "maxItems": 200,
-      "items": {
-        "$ref": "#/definitions/Tag"
-      }
-    },
     "IndexId": {
       "description": "Unique ID of Index",
       "type": "string",
@@ -129,7 +121,11 @@
     },
     "Tags": {
       "description": "Tags for labeling the FAQ",
-      "$ref": "#/definitions/TagList"
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "$ref": "#/definitions/Tag"
+      }
     },
     "Arn": {
       "type": "string",

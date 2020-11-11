@@ -43,14 +43,6 @@
       ],
       "additionalProperties": false
     },
-    "TagList": {
-      "description": "List of tags",
-      "type": "array",
-      "maxItems": 200,
-      "items": {
-        "$ref": "#/definitions/Tag"
-      }
-    },
     "Importance": {
       "type": "integer",
       "minimum": 1,
@@ -88,14 +80,11 @@
           "$ref": "#/definitions/Order"
         },
         "ValueImportanceItems": {
-          "$ref": "#/definitions/ValueImportanceItems"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ValueImportanceItem"
+          }
         }
-      }
-    },
-    "ValueImportanceItems": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/ValueImportanceItem"
       }
     },
     "ValueImportanceItem": {
@@ -165,13 +154,6 @@
         "Name",
         "Type"
       ]
-    },
-    "DocumentMetadataConfigurationList": {
-      "type": "array",
-      "maxItems": 500,
-      "items": {
-        "$ref": "#/definitions/DocumentMetadataConfiguration"
-      }
     },
     "StorageCapacityUnits": {
       "type": "integer",
@@ -245,7 +227,11 @@
     },
     "Tags": {
       "description": "Tags for labeling the index",
-      "$ref": "#/definitions/TagList"
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "$ref": "#/definitions/Tag"
+      }
     },
     "Name": {
       "$ref": "#/definitions/Name"
@@ -258,7 +244,11 @@
     },
     "DocumentMetadataConfigurations": {
       "description": "Document metadata configurations",
-      "$ref": "#/definitions/DocumentMetadataConfigurationList"
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "$ref": "#/definitions/DocumentMetadataConfiguration"
+      }
     },
     "CapacityUnits": {
       "description": "Capacity units",
