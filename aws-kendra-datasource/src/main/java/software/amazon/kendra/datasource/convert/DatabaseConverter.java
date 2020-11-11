@@ -28,7 +28,7 @@ public class DatabaseConverter {
                 .builder()
                 .databaseEngineType(model.getDatabaseEngineType())
                 .connectionConfiguration(toSdk(model.getConnectionConfiguration()))
-                .vpcConfiguration(toSdk(model.getVpcConfiguration()))
+                .vpcConfiguration(DataSourceVpcConfigurationConverter.toSdk(model.getVpcConfiguration()))
                 .columnConfiguration(toSdk(model.getColumnConfiguration()))
                 .aclConfiguration(toSdk(model.getAclConfiguration()))
                 .sqlConfiguration(toSdk(model.getSqlConfiguration()))
@@ -46,17 +46,6 @@ public class DatabaseConverter {
                 .databaseName(model.getDatabaseName())
                 .secretArn(model.getSecretArn())
                 .tableName(model.getTableName())
-                .build();
-    }
-
-    private static software.amazon.awssdk.services.kendra.model.DataSourceVpcConfiguration toSdk(DataSourceVpcConfiguration model) {
-        if (model == null) {
-            return null;
-        }
-        return software.amazon.awssdk.services.kendra.model.DataSourceVpcConfiguration
-                .builder()
-                .subnetIds(toSdkStringList(model.getSubnetIds()))
-                .securityGroupIds(toSdkStringList(model.getSecurityGroupIds()))
                 .build();
     }
 
@@ -117,7 +106,7 @@ public class DatabaseConverter {
                 .builder()
                 .databaseEngineType(sdk.databaseEngineTypeAsString())
                 .connectionConfiguration(toModel(sdk.connectionConfiguration()))
-                .vpcConfiguration(toModel(sdk.vpcConfiguration()))
+                .vpcConfiguration(DataSourceVpcConfigurationConverter.toModel(sdk.vpcConfiguration()))
                 .columnConfiguration(toModel(sdk.columnConfiguration()))
                 .aclConfiguration(toModel(sdk.aclConfiguration()))
                 .sqlConfiguration(toModel(sdk.sqlConfiguration()))
@@ -135,17 +124,6 @@ public class DatabaseConverter {
                 .databaseName(sdk.databaseName())
                 .secretArn(sdk.secretArn())
                 .tableName(sdk.tableName())
-                .build();
-    }
-
-    private static DataSourceVpcConfiguration toModel(software.amazon.awssdk.services.kendra.model.DataSourceVpcConfiguration sdk) {
-        if (sdk == null) {
-            return null;
-        }
-        return DataSourceVpcConfiguration
-                .builder()
-                .securityGroupIds(StringListConverter.toModel(sdk.securityGroupIds()))
-                .subnetIds(StringListConverter.toModel(sdk.subnetIds()))
                 .build();
     }
 

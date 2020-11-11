@@ -78,6 +78,22 @@ public class TranslatorTest {
     }
 
     @Test
+    void testTranslateToCreateRequest_WithConfluenceDataSource() {
+        String indexId = "indexId";
+        ResourceModel resourceModel = ResourceModel
+            .builder()
+            .indexId(indexId)
+            .type(DataSourceType.CONFLUENCE.toString())
+            .dataSourceConfiguration(DataSourceConfiguration.builder()
+                .confluenceConfiguration(ConfluenceConfiguration.builder().build())
+                .build())
+            .build();
+        CreateDataSourceRequest createDataSourceRequest = Translator.translateToCreateRequest(resourceModel);
+        assertThat(createDataSourceRequest.indexId()).isEqualTo(indexId);
+        assertThat(createDataSourceRequest.configuration().confluenceConfiguration()).isNotNull();
+    }
+
+    @Test
     void testTranslateToCreateRequest_WithInvalidDataSource() {
         String indexId = "indexId";
         ResourceModel resourceModel = ResourceModel
@@ -373,6 +389,33 @@ public class TranslatorTest {
 
         assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration))
                 .isEqualTo(expected);
+    }
+
+    @Test
+    void testTranslateToModelConfluence() {
+
+        software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration =
+            software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
+            .confluenceConfiguration(software.amazon.awssdk.services.kendra.model.ConfluenceConfiguration.builder().build())
+            .build();
+
+        assertThat(Translator.toModelDataSourceConfiguration(dataSourceConfiguration, DataSourceType.CONFLUENCE.toString()))
+            .isEqualTo(DataSourceConfiguration.builder()
+                .confluenceConfiguration(ConfluenceConfiguration.builder().build())
+                .build());
+    }
+
+    @Test
+    void testTranslateToSdkConfluence() {
+        DataSourceConfiguration dataSourceConfiguration = DataSourceConfiguration
+            .builder()
+            .confluenceConfiguration(ConfluenceConfiguration.builder().build())
+            .build();
+
+        assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration))
+            .isEqualTo(software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
+                .confluenceConfiguration(software.amazon.awssdk.services.kendra.model.ConfluenceConfiguration.builder().build())
+                .build());
     }
 
     @Test
