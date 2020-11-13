@@ -20,7 +20,7 @@ import software.amazon.kendra.datasource.convert.S3Converter;
 import software.amazon.kendra.datasource.convert.ServiceNowConverter;
 import software.amazon.kendra.datasource.convert.SharePointConverter;
 import software.amazon.kendra.datasource.convert.SalesforceConverter;
-
+import software.amazon.kendra.datasource.convert.confluence.ConfluenceConverter;
 
 import java.util.Collection;
 import java.util.List;
@@ -216,6 +216,7 @@ public class Translator {
     modelDataSourceConfiguration.databaseConfiguration(DatabaseConverter.toSdk(dataSourceConfiguration.getDatabaseConfiguration()));
     modelDataSourceConfiguration.serviceNowConfiguration(ServiceNowConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getServiceNowConfiguration()));
     modelDataSourceConfiguration.oneDriveConfiguration(OneDriveConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getOneDriveConfiguration()));
+    modelDataSourceConfiguration.confluenceConfiguration(ConfluenceConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getConfluenceConfiguration()));
     return modelDataSourceConfiguration.build();
   }
 
@@ -233,6 +234,8 @@ public class Translator {
       return ServiceNowConverter.toModelDataSourceConfiguration(dataSourceConfiguration.serviceNowConfiguration());
     } else if (DataSourceType.ONEDRIVE.toString().equals(dataSourceType)) {
       return OneDriveConverter.toModelDataSourceConfiguration(dataSourceConfiguration.oneDriveConfiguration());
+    } else if (DataSourceType.CONFLUENCE.toString().equals(dataSourceType)) {
+      return ConfluenceConverter.toModelDataSourceConfiguration(dataSourceConfiguration.confluenceConfiguration());
     } else {
       return null;
     }
