@@ -18,6 +18,9 @@ import software.amazon.awssdk.services.kendra.model.Tag;
 import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
+import software.amazon.awssdk.services.kendra.model.UserTokenConfiguration;
+import software.amazon.awssdk.services.kendra.model.JsonTokenTypeConfiguration;
+import software.amazon.awssdk.services.kendra.model.JwtTokenTypeConfiguration;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,7 +48,9 @@ public class Translator {
             .name(model.getName())
             .roleArn(model.getRoleArn())
             .description(model.getDescription())
-            .edition(model.getEdition());
+            .edition(model.getEdition())
+            .userTokenConfigurations(translateToSdkUserTokenConfigurations(model.getUserTokenConfigurations()))
+            .userContextPolicy(model.getUserContextPolicy());
     builder.tags(ListConverter.toSdk(model.getTags(), x -> Tag.builder().key(x.getKey()).value(x.getValue()).build()));
     if (model.getServerSideEncryptionConfiguration() != null
             && (model.getServerSideEncryptionConfiguration().getKmsKeyId() != null)) {
@@ -102,7 +107,9 @@ public class Translator {
             .name(describeIndexResponse.name())
             .roleArn(describeIndexResponse.roleArn())
             .description(describeIndexResponse.description())
-            .edition(describeIndexResponse.edition().toString());
+            .edition(describeIndexResponse.edition().toString())
+            .userContextPolicy(describeIndexResponse.userContextPolicy() == null ? null : describeIndexResponse.userContextPolicy().toString())
+            .userTokenConfigurations(translateFromSdkUserTokenConfigurations(describeIndexResponse.userTokenConfigurations()));
     if (describeIndexResponse.serverSideEncryptionConfiguration() != null
             && (describeIndexResponse.serverSideEncryptionConfiguration().kmsKeyId() != null)) {
       builder.serverSideEncryptionConfiguration(
@@ -151,7 +158,8 @@ public class Translator {
     // Handle null previous resource model
     List<software.amazon.kendra.index.DocumentMetadataConfiguration> prevDocumentMetadataConfiguration =
             prevModel == null ? new ArrayList<>() : prevModel.getDocumentMetadataConfigurations();
-    return UpdateIndexRequest
+
+    final UpdateIndexRequest.Builder builder = UpdateIndexRequest
             .builder()
             .id(currModel.getId())
             .roleArn(roleArn)
@@ -162,7 +170,11 @@ public class Translator {
                             currModel.getDocumentMetadataConfigurations(),
                             prevDocumentMetadataConfiguration))
             .capacityUnits(translateToCapacityUnitsConfiguration(currModel.getCapacityUnits(), currModel.getEdition()))
-            .build();
+            .userTokenConfigurations(translateToSdkUserTokenConfigurations(currModel.getUserTokenConfigurations()));
+    if (currModel.getUserContextPolicy() != null) {
+      builder.userContextPolicy(currModel.getUserContextPolicy());
+    }
+    return builder.build();
   }
 
   static CapacityUnitsConfiguration translateToCapacityUnitsConfiguration(
@@ -388,5 +400,89 @@ public class Translator {
     return Optional.ofNullable(collection)
             .map(Collection::stream)
             .orElseGet(Stream::empty);
+  }
+
+  private static List<UserTokenConfiguration> translateToSdkUserTokenConfigurations(List<software.amazon.kendra.index.UserTokenConfiguration> modelUserTokenConfigurations) {
+    if (modelUserTokenConfigurations != null && !modelUserTokenConfigurations.isEmpty()) {
+      return modelUserTokenConfigurations
+          .stream()
+          .map(x -> UserTokenConfiguration.builder()
+              .jsonTokenTypeConfiguration(translateToSdkJsonTokenTypeConfiguration(x.getJsonTokenTypeConfiguration()))
+              .jwtTokenTypeConfiguration(translateToSdkJwtTokenTypeConfiguration(x.getJwtTokenTypeConfiguration()))
+              .build())
+          .collect(Collectors.toList());
+    } else {
+      return null;
+    }
+  }
+
+  private static JsonTokenTypeConfiguration translateToSdkJsonTokenTypeConfiguration(software.amazon.kendra.index.JsonTokenTypeConfiguration modelJsonTokenTypeConfiguration) {
+    if (modelJsonTokenTypeConfiguration != null) {
+      JsonTokenTypeConfiguration.Builder sdkJsonTokenTypeConfigurationBuilder = JsonTokenTypeConfiguration.builder();
+      sdkJsonTokenTypeConfigurationBuilder.userNameAttributeField(modelJsonTokenTypeConfiguration.getUserNameAttributeField());
+      sdkJsonTokenTypeConfigurationBuilder.groupAttributeField(modelJsonTokenTypeConfiguration.getGroupAttributeField());
+      return sdkJsonTokenTypeConfigurationBuilder.build();
+    } else {
+      return null;
+    }
+  }
+
+  private static JwtTokenTypeConfiguration translateToSdkJwtTokenTypeConfiguration(software.amazon.kendra.index.JwtTokenTypeConfiguration modelJwtTokenTypeConfiguration) {
+    if (modelJwtTokenTypeConfiguration != null) {
+      JwtTokenTypeConfiguration.Builder sdkJwtTokenTypeConfigurationBuilder = JwtTokenTypeConfiguration.builder();
+      sdkJwtTokenTypeConfigurationBuilder.keyLocation(modelJwtTokenTypeConfiguration.getKeyLocation());
+      sdkJwtTokenTypeConfigurationBuilder.url(modelJwtTokenTypeConfiguration.getURL());
+      sdkJwtTokenTypeConfigurationBuilder.secretManagerArn(modelJwtTokenTypeConfiguration.getSecretManagerArn());
+      sdkJwtTokenTypeConfigurationBuilder.issuer(modelJwtTokenTypeConfiguration.getIssuer());
+      sdkJwtTokenTypeConfigurationBuilder.claimRegex(modelJwtTokenTypeConfiguration.getClaimRegex());
+      sdkJwtTokenTypeConfigurationBuilder.userNameAttributeField(modelJwtTokenTypeConfiguration.getUserNameAttributeField());
+      sdkJwtTokenTypeConfigurationBuilder.groupAttributeField(modelJwtTokenTypeConfiguration.getGroupAttributeField());
+      return sdkJwtTokenTypeConfigurationBuilder.build();
+    } else {
+      return null;
+    }
+  }
+
+  private static List<software.amazon.kendra.index.UserTokenConfiguration> translateFromSdkUserTokenConfigurations(List<UserTokenConfiguration> sdkUserTokenConfigurations) {
+    if (sdkUserTokenConfigurations != null && !sdkUserTokenConfigurations.isEmpty()) {
+      return sdkUserTokenConfigurations
+          .stream()
+          .map(x -> software.amazon.kendra.index.UserTokenConfiguration.builder()
+              .jsonTokenTypeConfiguration(translateFromSdkJsonTokenTypeConfiguration(x.jsonTokenTypeConfiguration()))
+              .jwtTokenTypeConfiguration(translateFromSdkJwtTokenTypeConfiguration(x.jwtTokenTypeConfiguration()))
+              .build())
+          .collect(Collectors.toList());
+    } else {
+      return null;
+    }
+  }
+
+  private static software.amazon.kendra.index.JsonTokenTypeConfiguration translateFromSdkJsonTokenTypeConfiguration(JsonTokenTypeConfiguration sdkJsonTokenTypeConfiguration) {
+    if (sdkJsonTokenTypeConfiguration != null) {
+      software.amazon.kendra.index.JsonTokenTypeConfiguration.JsonTokenTypeConfigurationBuilder modelJsonTokenTypeConfigurationBuilder =
+          software.amazon.kendra.index.JsonTokenTypeConfiguration.builder();
+      modelJsonTokenTypeConfigurationBuilder.userNameAttributeField(sdkJsonTokenTypeConfiguration.userNameAttributeField());
+      modelJsonTokenTypeConfigurationBuilder.groupAttributeField(sdkJsonTokenTypeConfiguration.groupAttributeField());
+      return modelJsonTokenTypeConfigurationBuilder.build();
+    } else {
+      return null;
+    }
+  }
+
+  private static software.amazon.kendra.index.JwtTokenTypeConfiguration translateFromSdkJwtTokenTypeConfiguration(JwtTokenTypeConfiguration sdkJwtTokenTypeConfiguration) {
+    if (sdkJwtTokenTypeConfiguration != null) {
+      software.amazon.kendra.index.JwtTokenTypeConfiguration.JwtTokenTypeConfigurationBuilder modelJwtTokenTypeConfigurationBuilder =
+          software.amazon.kendra.index.JwtTokenTypeConfiguration.builder();
+      modelJwtTokenTypeConfigurationBuilder.keyLocation(sdkJwtTokenTypeConfiguration.keyLocation().toString());
+      modelJwtTokenTypeConfigurationBuilder.uRL(sdkJwtTokenTypeConfiguration.url());
+      modelJwtTokenTypeConfigurationBuilder.secretManagerArn(sdkJwtTokenTypeConfiguration.secretManagerArn());
+      modelJwtTokenTypeConfigurationBuilder.issuer(sdkJwtTokenTypeConfiguration.issuer());
+      modelJwtTokenTypeConfigurationBuilder.claimRegex(sdkJwtTokenTypeConfiguration.claimRegex());
+      modelJwtTokenTypeConfigurationBuilder.userNameAttributeField(sdkJwtTokenTypeConfiguration.userNameAttributeField());
+      modelJwtTokenTypeConfigurationBuilder.groupAttributeField(sdkJwtTokenTypeConfiguration.groupAttributeField());
+      return modelJwtTokenTypeConfigurationBuilder.build();
+    } else {
+      return null;
+    }
   }
 }

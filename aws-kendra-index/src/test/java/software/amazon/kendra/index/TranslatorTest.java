@@ -8,6 +8,7 @@ import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
 import software.amazon.awssdk.services.kendra.model.DocumentAttributeValueType;
 import software.amazon.awssdk.services.kendra.model.IndexConfigurationSummary;
 import software.amazon.awssdk.services.kendra.model.IndexEdition;
+import software.amazon.awssdk.services.kendra.model.KeyLocation;
 import software.amazon.awssdk.services.kendra.model.ListIndicesRequest;
 import software.amazon.awssdk.services.kendra.model.ListIndicesResponse;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
@@ -15,6 +16,7 @@ import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
+import software.amazon.awssdk.services.kendra.model.UserContextPolicy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -246,18 +248,86 @@ class TranslatorTest {
         String description = "description";
         String roleArn = "roleArn";
         String edition = IndexEdition.ENTERPRISE_EDITION.toString();
+        String userContextPolicy = UserContextPolicy.USER_TOKEN.toString();
+        UserTokenConfiguration userTokenConfiguration = UserTokenConfiguration.builder()
+            .jsonTokenTypeConfiguration(JsonTokenTypeConfiguration.builder()
+                .userNameAttributeField("user")
+                .groupAttributeField("group")
+                .build())
+            .build();
         ResourceModel resourceModel = ResourceModel
                 .builder()
                 .name(name)
                 .description(description)
                 .roleArn(roleArn)
                 .edition(edition)
+                .userContextPolicy(userContextPolicy)
+                .userTokenConfigurations(Arrays.asList(userTokenConfiguration))
                 .build();
         CreateIndexRequest actualCreateIndexRequest = Translator.translateToCreateRequest(resourceModel);
         assertThat(actualCreateIndexRequest.description()).isEqualTo(description);
         assertThat(actualCreateIndexRequest.name()).isEqualTo(name);
         assertThat(actualCreateIndexRequest.editionAsString()).isEqualTo(edition);
         assertThat(actualCreateIndexRequest.roleArn()).isEqualTo(roleArn);
+        assertThat(actualCreateIndexRequest.userContextPolicy().toString()).isEqualTo(userContextPolicy);
+        assertThat(actualCreateIndexRequest.userTokenConfigurations().get(0).jsonTokenTypeConfiguration().groupAttributeField()).isEqualTo("group");
+        assertThat(actualCreateIndexRequest.userTokenConfigurations().get(0).jsonTokenTypeConfiguration().userNameAttributeField()).isEqualTo("user");
+    }
+
+    @Test
+    void testTranslateToCreateRequestWithJwtTokenTypeConfiguration() {
+        String name = "name";
+        String description = "description";
+        String roleArn = "roleArn";
+        String edition = IndexEdition.ENTERPRISE_EDITION.toString();
+        String userContextPolicy = UserContextPolicy.USER_TOKEN.toString();
+        UserTokenConfiguration userTokenConfiguration = UserTokenConfiguration.builder()
+            .jwtTokenTypeConfiguration(JwtTokenTypeConfiguration.builder()
+                .keyLocation(KeyLocation.URL.toString())
+                .uRL("test_url")
+                .build())
+            .build();
+        ResourceModel resourceModel = ResourceModel
+            .builder()
+            .name(name)
+            .description(description)
+            .roleArn(roleArn)
+            .edition(edition)
+            .userContextPolicy(userContextPolicy)
+            .userTokenConfigurations(Arrays.asList(userTokenConfiguration))
+            .build();
+        CreateIndexRequest actualCreateIndexRequest = Translator.translateToCreateRequest(resourceModel);
+        assertThat(actualCreateIndexRequest.description()).isEqualTo(description);
+        assertThat(actualCreateIndexRequest.name()).isEqualTo(name);
+        assertThat(actualCreateIndexRequest.editionAsString()).isEqualTo(edition);
+        assertThat(actualCreateIndexRequest.roleArn()).isEqualTo(roleArn);
+        assertThat(actualCreateIndexRequest.userContextPolicy().toString()).isEqualTo(userContextPolicy);
+        assertThat(actualCreateIndexRequest.userTokenConfigurations().get(0).jwtTokenTypeConfiguration().keyLocation().toString()).isEqualTo(KeyLocation.URL.toString());
+        assertThat(actualCreateIndexRequest.userTokenConfigurations().get(0).jwtTokenTypeConfiguration().url()).isEqualTo("test_url");
+    }
+
+    @Test
+    void testTranslateToCreateRequestWithUserContextPolicyAsAttributeFilter() {
+        String name = "name";
+        String description = "description";
+        String roleArn = "roleArn";
+        String edition = IndexEdition.ENTERPRISE_EDITION.toString();
+        String userContextPolicy = UserContextPolicy.ATTRIBUTE_FILTER.toString();
+        ResourceModel resourceModel = ResourceModel
+            .builder()
+            .name(name)
+            .description(description)
+            .roleArn(roleArn)
+            .edition(edition)
+            .userContextPolicy(userContextPolicy)
+            .build();
+        CreateIndexRequest actualCreateIndexRequest = Translator.translateToCreateRequest(resourceModel);
+        assertThat(actualCreateIndexRequest.description()).isEqualTo(description);
+        assertThat(actualCreateIndexRequest.name()).isEqualTo(name);
+        assertThat(actualCreateIndexRequest.editionAsString()).isEqualTo(edition);
+        assertThat(actualCreateIndexRequest.roleArn()).isEqualTo(roleArn);
+        assertThat(actualCreateIndexRequest.userContextPolicy().toString()).isEqualTo(userContextPolicy);
+        assertThat(actualCreateIndexRequest.userTokenConfigurations()).isNullOrEmpty();
     }
 
     @Test
@@ -406,12 +476,21 @@ class TranslatorTest {
         String id = "id";
         Integer queryCapacityUnits = 1;
         Integer storageCapacityUnits = 2;
+        String userContextPolicy = UserContextPolicy.USER_TOKEN.toString();
+        UserTokenConfiguration userTokenConfiguration = UserTokenConfiguration.builder()
+            .jsonTokenTypeConfiguration(JsonTokenTypeConfiguration.builder()
+                .groupAttributeField("group")
+                .userNameAttributeField("user")
+                .build())
+            .build();
         ResourceModel resourceModel = ResourceModel
                 .builder()
                 .name(name)
                 .id(id)
                 .description(description)
                 .roleArn(roleArn)
+                .userContextPolicy(userContextPolicy)
+                .userTokenConfigurations(Arrays.asList(userTokenConfiguration))
                 .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
                 .edition(IndexEdition.ENTERPRISE_EDITION.toString())
                 .capacityUnits(CapacityUnitsConfiguration
@@ -423,6 +502,7 @@ class TranslatorTest {
         ResourceModel prevModel = ResourceModel
                 .builder()
                 .documentMetadataConfigurations(Arrays.asList(documentMetadataConfigurationBuilder.build()))
+                .userContextPolicy(UserContextPolicy.ATTRIBUTE_FILTER.toString())
                 .build();
         UpdateIndexRequest updateIndexRequest = Translator.translateToUpdateRequest(resourceModel, prevModel);
         assertThat(updateIndexRequest.id()).isEqualTo(id);
@@ -432,6 +512,8 @@ class TranslatorTest {
         assertThat(updateIndexRequest.documentMetadataConfigurationUpdates().size()).isEqualTo(1);
         assertThat(updateIndexRequest.capacityUnits().queryCapacityUnits()).isEqualTo(queryCapacityUnits);
         assertThat(updateIndexRequest.capacityUnits().storageCapacityUnits()).isEqualTo(storageCapacityUnits);
+        assertThat(updateIndexRequest.userContextPolicy().toString()).isEqualTo(userContextPolicy);
+        assertThat(updateIndexRequest.userTokenConfigurations().size()).isEqualTo(1);
     }
 
     @Test
@@ -483,6 +565,8 @@ class TranslatorTest {
         assertThat(updateIndexRequest.documentMetadataConfigurationUpdates()).isEmpty();
         assertThat(updateIndexRequest.capacityUnits().queryCapacityUnits()).isEqualTo(0);
         assertThat(updateIndexRequest.capacityUnits().storageCapacityUnits()).isEqualTo(0);
+        assertThat(updateIndexRequest.userContextPolicy()).isNull();
+        assertThat(updateIndexRequest.userTokenConfigurations()).isNullOrEmpty();
     }
 
     @Test
@@ -558,6 +642,13 @@ class TranslatorTest {
         String roleArn = "roleArn";
         String edition = IndexEdition.ENTERPRISE_EDITION.toString();
         String kmsKeyId = "kmsKeyId";
+        String userContextPolicy = software.amazon.awssdk.services.kendra.model.UserContextPolicy.USER_TOKEN.toString();
+        software.amazon.awssdk.services.kendra.model.UserTokenConfiguration userTokenConfiguration = software.amazon.awssdk.services.kendra.model.UserTokenConfiguration.builder()
+            .jwtTokenTypeConfiguration(software.amazon.awssdk.services.kendra.model.JwtTokenTypeConfiguration.builder()
+                .keyLocation(KeyLocation.SECRET_MANAGER)
+                .secretManagerArn("test_secrets_manager_arn")
+                .build())
+            .build();
         software.amazon.awssdk.services.kendra.model.ServerSideEncryptionConfiguration serverSideEncryptionConfiguration =
                 software.amazon.awssdk.services.kendra.model.ServerSideEncryptionConfiguration
                         .builder()
@@ -587,6 +678,8 @@ class TranslatorTest {
                         .queryCapacityUnits(queryCapacityUnits)
                         .storageCapacityUnits(storageCapacityUnits)
                         .build())
+                .userContextPolicy(userContextPolicy)
+                .userTokenConfigurations(Arrays.asList(userTokenConfiguration))
                 .build();
         String tagKey = "tagKey";
         String tagValue = "tagValue";
@@ -612,6 +705,9 @@ class TranslatorTest {
         assertThat(actual.getCapacityUnits().getQueryCapacityUnits()).isEqualTo(queryCapacityUnits);
         assertThat(actual.getCapacityUnits().getStorageCapacityUnits()).isEqualTo(storageCapacityUnits);
         assertThat(actual.getTags().size()).isEqualTo(1);
+        assertThat(actual.getUserContextPolicy()).isEqualTo(userContextPolicy);
+        assertThat(actual.getUserTokenConfigurations().get(0).getJwtTokenTypeConfiguration().getKeyLocation()).isEqualTo(KeyLocation.SECRET_MANAGER.toString());
+        assertThat(actual.getUserTokenConfigurations().get(0).getJwtTokenTypeConfiguration().getSecretManagerArn()).isEqualTo("test_secrets_manager_arn");
     }
 
     @Test
@@ -624,6 +720,7 @@ class TranslatorTest {
                         .queryCapacityUnits(0)
                         .storageCapacityUnits(0)
                         .build())
+                .userContextPolicy(UserContextPolicy.ATTRIBUTE_FILTER)
                 .build();
         ResourceModel actual = Translator.translateFromReadResponse(
                 describeIndexResponse,
@@ -795,5 +892,4 @@ class TranslatorTest {
 
         assertThrows(TranslatorValidationException.class, () -> Translator.translateToPostCreateUpdateRequest(resourceModel));
     }
-
 }
