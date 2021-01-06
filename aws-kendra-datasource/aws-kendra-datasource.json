@@ -1032,6 +1032,74 @@
         "IndexFieldName"
       ]
     },
+    "GoogleDriveConfiguration": {
+      "type": "object",
+      "properties": {
+        "SecretArn": {
+          "$ref": "#/definitions/SecretArn"
+        },
+        "InclusionPatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "ExclusionPatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "FieldMappings": {
+          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        },
+        "ExcludeMimeTypes": {
+          "$ref": "#/definitions/ExcludeMimeTypesList"
+        },
+        "ExcludeUserAccounts": {
+          "$ref": "#/definitions/ExcludeUserAccountsList"
+        },
+        "ExcludeSharedDrives": {
+          "$ref": "#/definitions/ExcludeSharedDrivesList"
+        }
+      },
+      "required": [
+        "SecretArn"
+      ]
+    },
+    "ExcludeMimeTypesList": {
+      "type": "array",
+      "minLength": 0,
+      "maxLength": 30,
+      "items": {
+        "$ref": "#/definitions/MimeType"
+      }
+    },
+    "MimeType": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "ExcludeUserAccountsList": {
+      "type": "array",
+      "minLength": 0,
+      "maxLength": 100,
+      "items": {
+        "$ref": "#/definitions/UserAccount"
+      }
+    },
+    "UserAccount": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "ExcludeSharedDrivesList": {
+      "type": "array",
+      "minLength": 0,
+      "maxLength": 100,
+      "items": {
+        "$ref": "#/definitions/SharedDriveId"
+      }
+    },
+    "SharedDriveId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
     "ConfluenceAttachmentFieldName": {
       "type": "string",
       "enum": [
@@ -1071,6 +1139,9 @@
         },
         "ConfluenceConfiguration": {
           "$ref": "#/definitions/ConfluenceConfiguration"
+        },
+        "GoogleDriveConfiguration": {
+          "$ref": "#/definitions/GoogleDriveConfiguration"
         }
       },
       "oneOf": [
@@ -1108,6 +1179,11 @@
           "required": [
             "ConfluenceConfiguration"
           ]
+        },
+        {
+          "required": [
+            "GoogleDriveConfiguration"
+          ]
         }
       ]
     },
@@ -1128,7 +1204,8 @@
         "SERVICENOW",
         "DATABASE",
         "CUSTOM",
-        "CONFLUENCE"
+        "CONFLUENCE",
+        "GOOGLEDRIVE"
       ]
     },
     "Description": {

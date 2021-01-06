@@ -14,6 +14,7 @@ import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateDataSourceRequest;
 import software.amazon.kendra.datasource.convert.DatabaseConverter;
+import software.amazon.kendra.datasource.convert.GoogleDriveConverter;
 import software.amazon.kendra.datasource.convert.ListConverter;
 import software.amazon.kendra.datasource.convert.OneDriveConverter;
 import software.amazon.kendra.datasource.convert.S3Converter;
@@ -217,6 +218,7 @@ public class Translator {
     modelDataSourceConfiguration.serviceNowConfiguration(ServiceNowConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getServiceNowConfiguration()));
     modelDataSourceConfiguration.oneDriveConfiguration(OneDriveConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getOneDriveConfiguration()));
     modelDataSourceConfiguration.confluenceConfiguration(ConfluenceConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getConfluenceConfiguration()));
+    modelDataSourceConfiguration.googleDriveConfiguration(GoogleDriveConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getGoogleDriveConfiguration()));
     return modelDataSourceConfiguration.build();
   }
 
@@ -236,6 +238,8 @@ public class Translator {
       return OneDriveConverter.toModelDataSourceConfiguration(dataSourceConfiguration.oneDriveConfiguration());
     } else if (DataSourceType.CONFLUENCE.toString().equals(dataSourceType)) {
       return ConfluenceConverter.toModelDataSourceConfiguration(dataSourceConfiguration.confluenceConfiguration());
+    } else if (DataSourceType.GOOGLEDRIVE.toString().equals(dataSourceType)) {
+      return GoogleDriveConverter.toModelDataSourceConfiguration(dataSourceConfiguration.googleDriveConfiguration());
     } else {
       return null;
     }
