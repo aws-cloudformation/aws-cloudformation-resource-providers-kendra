@@ -419,6 +419,33 @@ public class TranslatorTest {
     }
 
     @Test
+    void testTranslateToModelGoogleDrive() {
+
+        software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration =
+            software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
+                .googleDriveConfiguration(software.amazon.awssdk.services.kendra.model.GoogleDriveConfiguration.builder().build())
+                .build();
+
+        assertThat(Translator.toModelDataSourceConfiguration(dataSourceConfiguration, DataSourceType.GOOGLEDRIVE.toString()))
+            .isEqualTo(DataSourceConfiguration.builder()
+                .googleDriveConfiguration(GoogleDriveConfiguration.builder().build())
+                .build());
+    }
+
+    @Test
+    void testTranslateToSdkGoogleDrive() {
+        DataSourceConfiguration dataSourceConfiguration = DataSourceConfiguration
+            .builder()
+            .googleDriveConfiguration(GoogleDriveConfiguration.builder().build())
+            .build();
+
+        assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration))
+            .isEqualTo(software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
+                .googleDriveConfiguration(software.amazon.awssdk.services.kendra.model.GoogleDriveConfiguration.builder().build())
+                .build());
+    }
+
+    @Test
     void translateToSdkConfiguration_WHEN_Configuration_Null(){
         assertThat(Translator.toSdkDataSourceConfiguration(null))
             .isEqualTo(null);
