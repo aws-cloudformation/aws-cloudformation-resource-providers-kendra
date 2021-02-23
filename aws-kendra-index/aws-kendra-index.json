@@ -9,7 +9,8 @@
         "KmsKeyId": {
           "$ref": "#/definitions/KmsKeyId"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "Description": {
       "type": "string",
