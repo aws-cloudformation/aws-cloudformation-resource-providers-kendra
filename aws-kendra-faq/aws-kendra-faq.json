@@ -65,6 +65,7 @@
           "$ref": "#/definitions/S3ObjectKey"
         }
       },
+      "additionalProperties": false,
       "required": [
         "Bucket",
         "Key"
