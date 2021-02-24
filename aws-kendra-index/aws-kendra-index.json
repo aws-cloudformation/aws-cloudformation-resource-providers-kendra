@@ -9,7 +9,8 @@
         "KmsKeyId": {
           "$ref": "#/definitions/KmsKeyId"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "Description": {
       "type": "string",
@@ -90,7 +91,8 @@
         "ValueImportanceItems": {
           "$ref": "#/definitions/ValueImportanceItems"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "ValueImportanceItems": {
       "type": "array",
@@ -107,7 +109,8 @@
         "Value": {
           "$ref": "#/definitions/Importance"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "ValueImportanceItemKey": {
       "type": "string",
@@ -129,7 +132,8 @@
         "Sortable": {
           "type": "boolean"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "DocumentMetadataConfigurationName": {
       "type": "string",
@@ -161,6 +165,7 @@
           "$ref": "#/definitions/Search"
         }
       },
+      "additionalProperties": false,
       "required": [
         "Name",
         "Type"
@@ -191,6 +196,7 @@
           "$ref": "#/definitions/QueryCapacityUnits"
         }
       },
+      "additionalProperties": false,
       "required": [
         "StorageCapacityUnits",
         "QueryCapacityUnits"
@@ -277,6 +283,7 @@
           "$ref": "#/definitions/GroupAttributeField"
         }
       },
+      "additionalProperties": false,
       "required": [
         "UserNameAttributeField",
         "GroupAttributeField"
@@ -307,6 +314,7 @@
           "$ref": "#/definitions/ClaimRegex"
         }
       },
+      "additionalProperties": false,
       "required": [
         "KeyLocation"
       ]
@@ -320,7 +328,8 @@
         "JsonTokenTypeConfiguration": {
           "$ref": "#/definitions/JsonTokenTypeConfiguration"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "UserTokenConfigurationList": {
       "type": "array",
