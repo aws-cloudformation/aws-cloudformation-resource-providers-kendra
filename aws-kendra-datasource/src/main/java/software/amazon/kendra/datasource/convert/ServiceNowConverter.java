@@ -16,6 +16,7 @@ public class ServiceNowConverter {
                 .hostUrl(model.getHostUrl())
                 .secretArn(model.getSecretArn())
                 .serviceNowBuildVersion(model.getServiceNowBuildVersion())
+                .authenticationType(model.getAuthenticationType())
                 .knowledgeArticleConfiguration(toSdk(model.getKnowledgeArticleConfiguration()))
                 .serviceCatalogConfiguration(toSdk(model.getServiceCatalogConfiguration()))
                 .build();
@@ -34,6 +35,7 @@ public class ServiceNowConverter {
                 .fieldMappings(ListConverter.toSdk(model.getFieldMappings(), FieldMappingConverter::toSdk))
                 .includeAttachmentFilePatterns(StringListConverter.toSdk(model.getIncludeAttachmentFilePatterns()))
                 .excludeAttachmentFilePatterns(StringListConverter.toSdk(model.getExcludeAttachmentFilePatterns()))
+                .filterQuery(model.getFilterQuery())
                 .build();
     }
 
@@ -69,6 +71,7 @@ public class ServiceNowConverter {
                 .hostUrl(sdk.hostUrl())
                 .secretArn(sdk.secretArn())
                 .serviceNowBuildVersion(sdk.serviceNowBuildVersionAsString())
+                .authenticationType(sdk.authenticationTypeAsString())
                 .knowledgeArticleConfiguration(toModel(sdk.knowledgeArticleConfiguration()))
                 .serviceCatalogConfiguration(toModel(sdk.serviceCatalogConfiguration()))
                 .build();
@@ -83,9 +86,10 @@ public class ServiceNowConverter {
                 .crawlAttachments(sdk.crawlAttachments())
                 .documentDataFieldName(sdk.documentDataFieldName())
                 .documentTitleFieldName(sdk.documentTitleFieldName())
-                .fieldMappings(ListConverter.toSdk(sdk.fieldMappings(), FieldMappingConverter::toModel))
+                .fieldMappings(ListConverter.toModel(sdk.fieldMappings(), FieldMappingConverter::toModel))
                 .includeAttachmentFilePatterns(StringListConverter.toModel(sdk.includeAttachmentFilePatterns()))
                 .excludeAttachmentFilePatterns(StringListConverter.toModel(sdk.excludeAttachmentFilePatterns()))
+                .filterQuery(sdk.filterQuery())
                 .build();
     }
 
