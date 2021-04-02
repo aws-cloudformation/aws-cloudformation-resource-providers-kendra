@@ -459,8 +459,8 @@
     },
     "SalesforceChatterFeedIncludeFilterTypes": {
       "type": "array",
-      "minLength": 1,
-      "maxLength": 2,
+      "minItems": 1,
+      "maxItems": 2,
       "items": {
         "$ref": "#/definitions/SalesforceChatterFeedIncludeFilterType"
       }
@@ -701,8 +701,8 @@
     },
     "OneDriveUserList": {
       "type": "array",
-      "minLength": 1,
-      "maxLength": 100,
+      "minItems": 1,
+      "maxItems": 100,
       "items": {
         "$ref": "#/definitions/OneDriveUser"
       }
@@ -725,6 +725,9 @@
         "ServiceNowBuildVersion": {
           "$ref": "#/definitions/ServiceNowBuildVersionType"
         },
+        "AuthenticationType": {
+          "$ref": "#/definitions/ServiceNowAuthenticationType"
+        },
         "KnowledgeArticleConfiguration": {
           "$ref": "#/definitions/ServiceNowKnowledgeArticleConfiguration"
         },
@@ -744,6 +747,13 @@
       "enum": [
         "LONDON",
         "OTHERS"
+      ]
+    },
+    "ServiceNowAuthenticationType": {
+      "type": "string",
+      "enum": [
+        "HTTP_BASIC",
+        "OAUTH2"
       ]
     },
     "ServiceNowServiceCatalogConfiguration": {
@@ -799,12 +809,20 @@
         },
         "FieldMappings": {
           "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        },
+        "FilterQuery": {
+          "$ref": "#/definitions/ServiceNowKnowledgeArticleFilterQuery"
         }
       },
       "additionalProperties": false,
       "required": [
         "DocumentDataFieldName"
       ]
+    },
+    "ServiceNowKnowledgeArticleFilterQuery": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048
     },
     "ConfluenceConfiguration": {
       "type": "object",
@@ -1090,14 +1108,15 @@
           "$ref": "#/definitions/ExcludeSharedDrivesList"
         }
       },
+      "additionalProperties": false,
       "required": [
         "SecretArn"
       ]
     },
     "ExcludeMimeTypesList": {
       "type": "array",
-      "minLength": 0,
-      "maxLength": 30,
+      "minItems": 0,
+      "maxItems": 30,
       "items": {
         "$ref": "#/definitions/MimeType"
       }
@@ -1109,8 +1128,8 @@
     },
     "ExcludeUserAccountsList": {
       "type": "array",
-      "minLength": 0,
-      "maxLength": 100,
+      "minItems": 0,
+      "maxItems": 100,
       "items": {
         "$ref": "#/definitions/UserAccount"
       }
@@ -1122,8 +1141,8 @@
     },
     "ExcludeSharedDrivesList": {
       "type": "array",
-      "minLength": 0,
-      "maxLength": 100,
+      "minItems": 0,
+      "maxItems": 100,
       "items": {
         "$ref": "#/definitions/SharedDriveId"
       }

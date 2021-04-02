@@ -1,12 +1,15 @@
 package software.amazon.kendra.datasource.convert;
 
 import org.junit.jupiter.api.Test;
+
+import software.amazon.awssdk.services.kendra.model.ServiceNowAuthenticationType;
 import software.amazon.kendra.datasource.DataSourceToIndexFieldMapping;
 import software.amazon.kendra.datasource.ServiceNowConfiguration;
 import software.amazon.kendra.datasource.ServiceNowKnowledgeArticleConfiguration;
 import software.amazon.kendra.datasource.ServiceNowServiceCatalogConfiguration;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -213,5 +216,83 @@ public class ServiceNowConverterTest {
                         .build();
 
         assertThat(ServiceNowConverter.toModel(sdk)).isEqualTo(model);
+    }
+
+    @Test
+    public void testServiceNowEnhancements() {
+
+        List<String> authenticationTypes = Arrays.asList(
+            ServiceNowAuthenticationType.HTTP_BASIC.toString(), ServiceNowAuthenticationType.OAUTH2.toString(), null);
+
+        List<String> filterQueries = Arrays.asList("hello world", "", null);
+
+        for (String authType : authenticationTypes) {
+            for (String filterQuery : filterQueries) {
+
+                software.amazon.awssdk.services.kendra.model.ServiceNowConfiguration sdkConfig =
+                    software.amazon.awssdk.services.kendra.model.ServiceNowConfiguration.builder()
+                        .authenticationType(authType)
+                        .knowledgeArticleConfiguration(software.amazon.awssdk.services.kendra.model.ServiceNowKnowledgeArticleConfiguration.builder()
+                            .filterQuery(filterQuery)
+                            .build())
+                        .build();
+
+                ServiceNowConfiguration modelConfig = ServiceNowConfiguration.builder()
+                        .authenticationType(authType)
+                        .knowledgeArticleConfiguration(ServiceNowKnowledgeArticleConfiguration.builder()
+                            .filterQuery(filterQuery)
+                            .build())
+                        .build();
+
+                assertThat(ServiceNowConverter.toModel(sdkConfig))
+                    .as("Sdk -> Model")
+                    .isEqualTo(modelConfig);
+
+                assertThat(ServiceNowConverter.toSdkDataSourceConfiguration(modelConfig))
+                    .as("Model -> Sdk")
+                    .isEqualTo(sdkConfig);
+
+                assertThat(ServiceNowConverter.toSdkDataSourceConfiguration(ServiceNowConverter.toModel(sdkConfig)))
+                    .as("Sdk -> Model -> Sdk")
+                    .isEqualTo(sdkConfig);
+
+                assertThat(ServiceNowConverter.toModel(ServiceNowConverter.toSdkDataSourceConfiguration(modelConfig)))
+                    .as("Model -> Sdk -> Model")
+                    .isEqualTo(modelConfig);
+            }
+        }
+    }
+
+    @Test
+    public void testEmptySdkListsBecomeNullsInModel() {
+        assertThat(
+            ServiceNowConverter.toModel(
+                software.amazon.awssdk.services.kendra.model.ServiceNowConfiguration.builder()
+                    .knowledgeArticleConfiguration(software.amazon.awssdk.services.kendra.model.ServiceNowKnowledgeArticleConfiguration.builder()
+                        .fieldMappings(Collections.emptyList())
+                        .includeAttachmentFilePatterns(Collections.emptyList())
+                        .excludeAttachmentFilePatterns(Collections.emptyList())
+                        .build())
+                    .serviceCatalogConfiguration(software.amazon.awssdk.services.kendra.model.ServiceNowServiceCatalogConfiguration.builder()
+                        .fieldMappings(Collections.emptyList())
+                        .includeAttachmentFilePatterns(Collections.emptyList())
+                        .excludeAttachmentFilePatterns(Collections.emptyList())
+                        .build())
+                    .build()
+            )
+        ).isEqualTo(
+            ServiceNowConfiguration.builder()
+                .knowledgeArticleConfiguration(ServiceNowKnowledgeArticleConfiguration.builder()
+                    .fieldMappings(null)
+                    .includeAttachmentFilePatterns(null)
+                    .excludeAttachmentFilePatterns(null)
+                    .build())
+                .serviceCatalogConfiguration(ServiceNowServiceCatalogConfiguration.builder()
+                    .fieldMappings(null)
+                    .includeAttachmentFilePatterns(null)
+                    .excludeAttachmentFilePatterns(null)
+                    .build())
+                .build()
+        );
     }
 }
