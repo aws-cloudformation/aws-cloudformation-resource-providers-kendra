@@ -84,6 +84,7 @@ public class DeleteHandlerTest extends AbstractTestBase {
                 .build();
 
         when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
+                .thenReturn(DescribeIndexResponse.builder().status(IndexStatus.ACTIVE).build())
                 .thenThrow(ResourceNotFoundException.builder().build());
 
         when(proxyClient.client().deleteIndex(any(DeleteIndexRequest.class)))
@@ -101,7 +102,7 @@ public class DeleteHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).deleteIndex(any(DeleteIndexRequest.class));
-        verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
     }
 
     @Test
@@ -125,6 +126,7 @@ public class DeleteHandlerTest extends AbstractTestBase {
                 .build();
 
         when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
+                .thenReturn(DescribeIndexResponse.builder().status(IndexStatus.ACTIVE).build())
                 .thenReturn(DescribeIndexResponse
                         .builder()
                         .status(IndexStatus.DELETING)
@@ -146,12 +148,15 @@ public class DeleteHandlerTest extends AbstractTestBase {
         assertThat(response.getErrorCode()).isNull();
 
         verify(proxyClient.client(), times(1)).deleteIndex(any(DeleteIndexRequest.class));
-        verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
     }
 
     @Test
     public void handleRequest_FailWith_ConflictException() {
         final DeleteHandler handler = new DeleteHandler(testDelay);
+
+        when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
+               .thenReturn(DescribeIndexResponse.builder().build());
 
         when(proxyClient.client().deleteIndex(any(DeleteIndexRequest.class)))
                 .thenThrow(ConflictException.builder().build());
@@ -172,5 +177,6 @@ public class DeleteHandlerTest extends AbstractTestBase {
         });
 
         verify(proxyClient.client(), times(1)).deleteIndex(any(DeleteIndexRequest.class));
+        verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
     }
 }

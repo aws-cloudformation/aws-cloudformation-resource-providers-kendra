@@ -68,7 +68,7 @@ public class DeleteHandler extends BaseHandlerStd {
                 // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
                 // if target API does not support 'ResourceNotFoundException' then following check is required
                 //.then(progress -> checkForPreDeleteResourceExistence(proxy, proxyClient, request, progress))
-
+                .then(progress -> preExistenceCheckForDelete(proxy, proxyClient, progress, request))
                 // STEP 2.0 [delete/stabilize progress chain - required for resource deletion]
                 .then(progress ->
                         // If your service API throws 'ResourceNotFoundException' for delete requests then DeleteHandler can return just proxy.initiate construction
@@ -78,11 +78,39 @@ public class DeleteHandler extends BaseHandlerStd {
                                 .translateToServiceRequest(Translator::translateToDeleteRequest)
                                 .backoffDelay(delay)
                                 // STEP 2.2 [TODO: make an api call]
-                                .makeServiceCall(this::deleteIndex)
+                                .makeServiceCall((awsRequest, sdkProxyClient) -> deleteIndex(awsRequest, sdkProxyClient, callbackContext))
                                 // STEP 2.3 [TODO: stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]
                                 // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
                                 .stabilize(this::stabilizedOnDelete)
                                 .done(this::setResourceModelToNullAndReturnSuccess));
+    }
+
+    private ProgressEvent<ResourceModel, CallbackContext> preExistenceCheckForDelete(
+        final AmazonWebServicesClientProxy proxy,
+        final ProxyClient<KendraClient> proxyClient,
+        final ProgressEvent<ResourceModel, CallbackContext> progressEvent,
+        final ResourceHandlerRequest<ResourceModel> request
+    ) {
+        ResourceModel model = progressEvent.getResourceModel();
+        CallbackContext callbackContext = progressEvent.getCallbackContext();
+
+        logger.log(String.format("%s [%s] pre-existence check for deletion", ResourceModel.TYPE_NAME, model.getPrimaryIdentifier()));
+
+        DescribeIndexRequest describeIndexRequest = DescribeIndexRequest.builder()
+                .id(model.getId())
+                .build();
+        try {
+            proxyClient.injectCredentialsAndInvokeV2(describeIndexRequest,
+                    proxyClient.client()::describeIndex);
+            return ProgressEvent.progress(model, callbackContext);
+        } catch (ResourceNotFoundException e) {
+            if (callbackContext.isDeleteWorkflow()) {
+                logger.log(String.format("In a delete workflow. Allow ResourceNotFoundException to propagate."));
+                return ProgressEvent.progress(model, callbackContext);
+            }
+            logger.log(String.format("%s [%s] does not pre-exist", ResourceModel.TYPE_NAME, model.getPrimaryIdentifier()));
+            throw new CfnNotFoundException(ResourceModel.TYPE_NAME, describeIndexRequest.id(), e);
+        }
     }
 
     private ProgressEvent<ResourceModel, CallbackContext> setResourceModelToNullAndReturnSuccess(
@@ -103,10 +131,12 @@ public class DeleteHandler extends BaseHandlerStd {
      */
     private DeleteIndexResponse deleteIndex(
             final DeleteIndexRequest deleteIndexRequest,
-            final ProxyClient<KendraClient> proxyClient) {
+            final ProxyClient<KendraClient> proxyClient,
+            final CallbackContext callbackContext) {
         DeleteIndexResponse deleteIndexResponse;
         try {
             deleteIndexResponse = proxyClient.injectCredentialsAndInvokeV2(deleteIndexRequest, proxyClient.client()::deleteIndex);
+            callbackContext.setDeleteWorkflow(true);
         } catch (ResourceNotFoundException e) {
             throw new CfnNotFoundException(ResourceModel.TYPE_NAME, deleteIndexRequest.id(), e);
         } catch (ConflictException e) {
