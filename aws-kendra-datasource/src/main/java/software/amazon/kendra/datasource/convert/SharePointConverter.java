@@ -22,6 +22,7 @@ public class SharePointConverter {
             .fieldMappings(ListConverter.toSdk(model.getFieldMappings(), FieldMappingConverter::toSdk))
             .documentTitleFieldName(model.getDocumentTitleFieldName())
             .disableLocalGroups(model.getDisableLocalGroups())
+            .sslCertificateS3Path(S3PathConverter.toSdk(model.getSslCertificateS3Path()))
             .build();
   }
 
@@ -48,6 +49,7 @@ public class SharePointConverter {
             .fieldMappings(ListConverter.toModel(sdk.fieldMappings(), FieldMappingConverter::toModel))
             .documentTitleFieldName(sdk.documentTitleFieldName())
             .disableLocalGroups(sdk.disableLocalGroups())
+            .sslCertificateS3Path(S3PathConverter.toModel(sdk.sslCertificateS3Path()))
             .build();
   }
 
