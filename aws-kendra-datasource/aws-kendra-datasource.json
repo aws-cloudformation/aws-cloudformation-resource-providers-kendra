@@ -215,7 +215,9 @@
         "SharePointVersion": {
           "type": "string",
           "enum": [
-            "SHAREPOINT_ONLINE"
+            "SHAREPOINT_ONLINE",
+            "SHAREPOINT_2013",
+            "SHAREPOINT_2016"
           ]
         },
         "Urls": {
@@ -251,6 +253,9 @@
         },
         "DisableLocalGroups": {
           "$ref": "#/definitions/DisableLocalGroups"
+        },
+        "SslCertificateS3Path": {
+          "$ref": "#/definitions/S3Path"
         }
       },
       "additionalProperties": false,
