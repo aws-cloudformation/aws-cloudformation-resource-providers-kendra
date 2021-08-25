@@ -21,6 +21,7 @@ import software.amazon.kendra.datasource.convert.S3Converter;
 import software.amazon.kendra.datasource.convert.ServiceNowConverter;
 import software.amazon.kendra.datasource.convert.SharePointConverter;
 import software.amazon.kendra.datasource.convert.SalesforceConverter;
+import software.amazon.kendra.datasource.convert.WebCrawlerConverter;
 import software.amazon.kendra.datasource.convert.confluence.ConfluenceConverter;
 
 import java.util.Collection;
@@ -219,6 +220,7 @@ public class Translator {
     modelDataSourceConfiguration.oneDriveConfiguration(OneDriveConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getOneDriveConfiguration()));
     modelDataSourceConfiguration.confluenceConfiguration(ConfluenceConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getConfluenceConfiguration()));
     modelDataSourceConfiguration.googleDriveConfiguration(GoogleDriveConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getGoogleDriveConfiguration()));
+    modelDataSourceConfiguration.webCrawlerConfiguration(WebCrawlerConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getWebCrawlerConfiguration()));
     return modelDataSourceConfiguration.build();
   }
 
@@ -240,7 +242,10 @@ public class Translator {
       return ConfluenceConverter.toModelDataSourceConfiguration(dataSourceConfiguration.confluenceConfiguration());
     } else if (DataSourceType.GOOGLEDRIVE.toString().equals(dataSourceType)) {
       return GoogleDriveConverter.toModelDataSourceConfiguration(dataSourceConfiguration.googleDriveConfiguration());
-    } else {
+    } else if (DataSourceType.WEBCRAWLER.toString().equals(dataSourceType)) {
+      return WebCrawlerConverter.toModelDataSourceConfiguration(dataSourceConfiguration.webCrawlerConfiguration());
+    }
+    else {
       return null;
     }
   }
