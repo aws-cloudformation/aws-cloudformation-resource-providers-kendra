@@ -1173,6 +1173,36 @@
         "VERSION"
       ]
     },
+    "WorkDocsConfiguration": {
+      "type": "object",
+      "properties": {
+        "OrganizationId": {
+          "type": "string",
+          "minLength": 12,
+          "maxLength": 12,
+          "pattern": "d-[0-9a-fA-F]{10}"
+        },
+        "CrawlComments": {
+          "type": "boolean"
+        },
+        "UseChangeLog": {
+          "type": "boolean"
+        },
+        "InclusionPatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "ExclusionPatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "FieldMappings": {
+          "$ref": "#/definitions/DataSourceToIndexFieldMappingList"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "OrganizationId"
+      ]
+    },
     "DataSourceConfiguration": {
       "type": "object",
       "properties": {
@@ -1199,6 +1229,9 @@
         },
         "GoogleDriveConfiguration": {
           "$ref": "#/definitions/GoogleDriveConfiguration"
+        },
+        "WorkDocsConfiguration": {
+          "$ref": "#/definitions/WorkDocsConfiguration"
         }
       },
       "additionalProperties": false,
@@ -1242,6 +1275,11 @@
           "required": [
             "GoogleDriveConfiguration"
           ]
+        },
+        {
+          "required": [
+            "WorkDocsConfiguration"
+          ]
         }
       ]
     },
@@ -1263,7 +1301,8 @@
         "DATABASE",
         "CUSTOM",
         "CONFLUENCE",
-        "GOOGLEDRIVE"
+        "GOOGLEDRIVE",
+        "WORKDOCS"
       ]
     },
     "Description": {

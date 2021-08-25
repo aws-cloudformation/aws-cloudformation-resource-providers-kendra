@@ -446,6 +446,32 @@ public class TranslatorTest {
     }
 
     @Test
+    void testTranslateToModelWorkDocs() {
+        software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration =
+            software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
+                .workDocsConfiguration(software.amazon.awssdk.services.kendra.model.WorkDocsConfiguration.builder().build())
+                .build();
+
+        assertThat(Translator.toModelDataSourceConfiguration(dataSourceConfiguration, DataSourceType.WORKDOCS.toString()))
+            .isEqualTo(DataSourceConfiguration.builder()
+                .workDocsConfiguration(WorkDocsConfiguration.builder().build())
+                .build());
+    }
+
+    @Test
+    void testTranslateToSdkWorkDocs() {
+        DataSourceConfiguration dataSourceConfiguration = DataSourceConfiguration
+            .builder()
+            .workDocsConfiguration(WorkDocsConfiguration.builder().build())
+            .build();
+
+        assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration))
+            .isEqualTo(software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
+                .workDocsConfiguration(software.amazon.awssdk.services.kendra.model.WorkDocsConfiguration.builder().build())
+                .build());
+    }
+
+    @Test
     void translateToSdkConfiguration_WHEN_Configuration_Null(){
         assertThat(Translator.toSdkDataSourceConfiguration(null))
             .isEqualTo(null);
