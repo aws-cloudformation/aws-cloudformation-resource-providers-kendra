@@ -1173,6 +1173,187 @@
         "VERSION"
       ]
     },
+    "WebCrawlerSiteMap": {
+      "type": "string",
+      "pattern": "^(https?):\\/\\/([^\\s]*)",
+      "minLength": 1,
+      "maxLength": 2048
+    },
+    "WebCrawlerSiteMaps": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 3,
+      "items": {
+        "$ref": "#/definitions/WebCrawlerSiteMap"
+      }
+    },
+    "WebCrawlerSiteMapsConfiguration": {
+      "type": "object",
+      "properties": {
+        "SiteMaps": {
+          "$ref": "#/definitions/WebCrawlerSiteMaps"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "SiteMaps"
+      ]
+    },
+    "WebCrawlerSeedUrl": {
+      "type": "string",
+      "pattern": "^(https?):\/\/([^\\s]*)",
+      "minLength": 1,
+      "maxLength": 2048
+    },
+    "WebCrawlerSeedUrlList": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 100,
+      "items": {
+        "$ref": "#/definitions/WebCrawlerSeedUrl"
+      }
+    },
+    "WebCrawlerSeedUrlConfiguration": {
+      "type": "object",
+      "properties": {
+        "SeedUrls": {
+          "$ref": "#/definitions/WebCrawlerSeedUrlList"
+        },
+        "WebCrawlerMode": {
+          "type": "string",
+          "enum": [
+            "HOST_ONLY",
+            "SUBDOMAINS",
+            "EVERYTHING"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "SeedUrls"
+      ]
+    },
+    "WebCrawlerUrls": {
+      "type": "object",
+      "properties": {
+        "SeedUrlConfiguration": {
+          "$ref": "#/definitions/WebCrawlerSeedUrlConfiguration"
+        },
+        "SiteMapsConfiguration": {
+          "$ref": "#/definitions/WebCrawlerSiteMapsConfiguration"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ProxyConfiguration": {
+      "type": "object",
+      "properties": {
+        "Host": {
+          "type": "string",
+          "pattern": "([^\\s]*)",
+          "minLength": 1,
+          "maxLength": 253
+        },
+        "Port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "Credentials":{
+          "$ref": "#/definitions/SecretArn"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Host",
+        "Port"
+      ]
+    },
+    "WebCrawlerBasicAuthentication": {
+      "type": "object",
+      "properties": {
+        "Host": {
+          "type": "string",
+          "pattern": "([^\\s]*)",
+          "minLength": 1,
+          "maxLength": 253
+        },
+        "Port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "Credentials":{
+          "$ref": "#/definitions/SecretArn"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Host",
+        "Port",
+        "Credentials"
+      ]
+    },
+    "WebCrawlerBasicAuthenticationList": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "$ref": "#/definitions/WebCrawlerBasicAuthentication"
+      }
+    },
+    "WebCrawlerAuthenticationConfiguration": {
+      "type": "object",
+      "properties": {
+        "BasicAuthentication": {
+          "$ref": "#/definitions/WebCrawlerBasicAuthenticationList"
+        }
+      },
+      "additionalProperties": false
+    },
+    "WebCrawlerConfiguration": {
+      "type": "object",
+      "properties": {
+        "Urls": {
+          "$ref": "#/definitions/WebCrawlerUrls"
+        },
+        "CrawlDepth": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "MaxLinksPerPage": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "MaxContentSizePerPageInMegaBytes": {
+          "type": "number",
+          "minimum": 0.000001,
+          "maximum": 50
+        },
+        "MaxUrlsPerMinuteCrawlRate": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300
+        },
+        "UrlInclusionPatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "UrlExclusionPatterns": {
+          "$ref": "#/definitions/DataSourceInclusionsExclusionsStrings"
+        },
+        "ProxyConfiguration": {
+          "$ref": "#/definitions/ProxyConfiguration"
+        },
+        "AuthenticationConfiguration": {
+          "$ref": "#/definitions/WebCrawlerAuthenticationConfiguration"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "Urls"
+      ]
+    },
     "DataSourceConfiguration": {
       "type": "object",
       "properties": {
@@ -1199,6 +1380,9 @@
         },
         "GoogleDriveConfiguration": {
           "$ref": "#/definitions/GoogleDriveConfiguration"
+        },
+        "WebCrawlerConfiguration": {
+          "$ref": "#/definitions/WebCrawlerConfiguration"
         }
       },
       "additionalProperties": false,
@@ -1242,6 +1426,11 @@
           "required": [
             "GoogleDriveConfiguration"
           ]
+        },
+        {
+          "required": [
+            "WebCrawlerConfiguration"
+          ]
         }
       ]
     },
@@ -1263,7 +1452,8 @@
         "DATABASE",
         "CUSTOM",
         "CONFLUENCE",
-        "GOOGLEDRIVE"
+        "GOOGLEDRIVE",
+        "WEBCRAWLER"
       ]
     },
     "Description": {
