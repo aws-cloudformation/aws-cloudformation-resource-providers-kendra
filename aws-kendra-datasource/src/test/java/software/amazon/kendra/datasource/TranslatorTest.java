@@ -446,6 +446,32 @@ public class TranslatorTest {
     }
 
     @Test
+    void testTranslateToModelWebCrawler() {
+        software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration =
+            software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
+                .webCrawlerConfiguration(software.amazon.awssdk.services.kendra.model.WebCrawlerConfiguration.builder().build())
+                .build();
+
+        assertThat(Translator.toModelDataSourceConfiguration(dataSourceConfiguration, DataSourceType.WEBCRAWLER.toString()))
+            .isEqualTo(DataSourceConfiguration.builder()
+                .webCrawlerConfiguration(WebCrawlerConfiguration.builder().build())
+                .build());
+    }
+
+    @Test
+    void testTranslateToSdkWebCrawler() {
+        DataSourceConfiguration dataSourceConfiguration = DataSourceConfiguration
+            .builder()
+            .webCrawlerConfiguration(WebCrawlerConfiguration.builder().build())
+            .build();
+
+        assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration))
+            .isEqualTo(software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
+                .webCrawlerConfiguration(software.amazon.awssdk.services.kendra.model.WebCrawlerConfiguration.builder().build())
+                .build());
+        }
+
+    @Test
     void testTranslateToModelWorkDocs() {
         software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration =
             software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
