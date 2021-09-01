@@ -1328,7 +1328,7 @@
         },
         "MaxContentSizePerPageInMegaBytes": {
           "type": "number",
-          "minimum": 0.000001,
+          "minimum": 0,
           "maximum": 50
         },
         "MaxUrlsPerMinuteCrawlRate": {
