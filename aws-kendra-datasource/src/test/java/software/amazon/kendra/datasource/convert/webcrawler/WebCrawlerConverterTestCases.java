@@ -7,6 +7,8 @@ import software.amazon.awssdk.services.kendra.model.SeedUrlConfiguration;
 import software.amazon.awssdk.services.kendra.model.SiteMapsConfiguration;
 import software.amazon.awssdk.services.kendra.model.Urls;
 import software.amazon.awssdk.services.kendra.model.WebCrawlerConfiguration;
+import software.amazon.kendra.datasource.WebCrawlerSeedUrlConfiguration;
+import software.amazon.kendra.datasource.WebCrawlerUrls;
 
 import java.util.Arrays;
 
@@ -257,7 +259,61 @@ public class WebCrawlerConverterTestCases {
                             .build())
                     .build()
             ))
-            .build()
+            .build(),
+
+        WebCrawlerConverterTestCase.builder()
+            .description("Failing test case - invalid")
+            .isSymmetrical(false)
+            .input(new WebCrawlerConverterTestCase.ModelData(
+                software.amazon.kendra.datasource.WebCrawlerConfiguration.builder()
+                    .crawlDepth(10)
+                    .urls(WebCrawlerUrls.builder()
+                        .seedUrlConfiguration(WebCrawlerSeedUrlConfiguration.builder()
+                            .seedUrls(Arrays.asList("https://www.amazon.com"))
+                            .webCrawlerMode("This is some value that isn't valid by our API but our converter will handle")
+                            .build())
+                        .build())
+                    .build()
+            ))
+            .expectedOutput(new WebCrawlerConverterTestCase.SdkData(
+                WebCrawlerConfiguration.builder()
+                    .crawlDepth(10)
+                    .urls(Urls.builder()
+                        .seedUrlConfiguration(SeedUrlConfiguration.builder()
+                            .seedUrls("https://www.amazon.com")
+                            .webCrawlerMode("This is some value that isn't valid by our API but our converter will handle")
+                            .build())
+                        .build())
+                    .build()
+            ))
+            .build(),
+
+        WebCrawlerConverterTestCase.builder()
+            .description("Failing test case - null web crawler mode")
+            .isSymmetrical(false)
+            .input(new WebCrawlerConverterTestCase.ModelData(
+                software.amazon.kendra.datasource.WebCrawlerConfiguration.builder()
+                    .crawlDepth(10)
+                    .urls(WebCrawlerUrls.builder()
+                        .seedUrlConfiguration(WebCrawlerSeedUrlConfiguration.builder()
+                            .seedUrls(Arrays.asList("https://www.amazon.com"))
+                            .webCrawlerMode(null)
+                            .build())
+                        .build())
+                    .build()
+            ))
+            .expectedOutput(new WebCrawlerConverterTestCase.SdkData(
+                WebCrawlerConfiguration.builder()
+                    .crawlDepth(10)
+                    .urls(Urls.builder()
+                        .seedUrlConfiguration(SeedUrlConfiguration.builder()
+                            .seedUrls("https://www.amazon.com")
+                            .webCrawlerMode((String) null)
+                            .build())
+                        .build())
+                    .build()
+            ))
+            .build(),
     };
 
     private WebCrawlerConverterTestCases() {
