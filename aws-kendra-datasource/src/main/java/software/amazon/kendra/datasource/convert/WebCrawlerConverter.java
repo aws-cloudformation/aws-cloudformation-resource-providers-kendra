@@ -70,7 +70,7 @@ public class WebCrawlerConverter {
 
         return WebCrawlerSeedUrlConfiguration.builder()
             .seedUrls(StringListConverter.toModel(sdk.seedUrls()))
-            .webCrawlerMode(sdk.webCrawlerMode().toString())
+            .webCrawlerMode(sdk.webCrawlerModeAsString())
             .build();
     }
 
