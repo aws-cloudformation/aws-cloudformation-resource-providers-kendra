@@ -23,6 +23,7 @@ import software.amazon.kendra.datasource.convert.SharePointConverter;
 import software.amazon.kendra.datasource.convert.SalesforceConverter;
 import software.amazon.kendra.datasource.convert.WebCrawlerConverter;
 import software.amazon.kendra.datasource.convert.WorkDocsConverter;
+import software.amazon.kendra.datasource.convert.cde.CustomDocumentEnrichmentConfigurationConverter;
 import software.amazon.kendra.datasource.convert.confluence.ConfluenceConverter;
 
 import java.util.Collection;
@@ -55,7 +56,9 @@ public class Translator {
       .configuration(toSdkDataSourceConfiguration(model.getDataSourceConfiguration()))
       .description(model.getDescription())
       .schedule(model.getSchedule())
-      .roleArn(model.getRoleArn());
+      .roleArn(model.getRoleArn())
+      .customDocumentEnrichmentConfiguration(CustomDocumentEnrichmentConfigurationConverter
+          .toSdkCustomDocumentEnrichmentConfiguration(model.getCustomDocumentEnrichmentConfiguration()));
     if (model.getTags() != null && !model.getTags().isEmpty()) {
       builder.tags(model.getTags().stream().map(
               x -> Tag.builder().key(x.getKey()).value(x.getValue()).build())
@@ -96,7 +99,9 @@ public class Translator {
             .schedule(describeDataSourceResponse.schedule())
             .type(describeDataSourceResponse.typeAsString())
             .dataSourceConfiguration(toModelDataSourceConfiguration(describeDataSourceResponse.configuration(),
-                    describeDataSourceResponse.typeAsString()));
+                    describeDataSourceResponse.typeAsString()))
+            .customDocumentEnrichmentConfiguration(CustomDocumentEnrichmentConfigurationConverter
+                .toModelCustomDocumentEnrichmentConfiguration(describeDataSourceResponse.customDocumentEnrichmentConfiguration()));
     List<software.amazon.kendra.datasource.Tag> tags = ListConverter.toModel(
             listTagsForResourceResponse.tags(),
             x -> software.amazon.kendra.datasource.Tag.builder().key(x.key()).value(x.value()).build());
@@ -136,6 +141,8 @@ public class Translator {
           .description(description)
           .configuration(dataSourceConfiguration)
           .schedule(schedule)
+          .customDocumentEnrichmentConfiguration(CustomDocumentEnrichmentConfigurationConverter
+              .toSdkCustomDocumentEnrichmentConfiguration(model.getCustomDocumentEnrichmentConfiguration()))
           .build();
       return updateDataSourceRequest;
   }
