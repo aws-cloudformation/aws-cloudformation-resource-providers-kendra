@@ -1,0 +1,80 @@
+{
+  "connectionConfiguration": {
+    "repositoryEndpointMetadata": {
+      "hostUrl": "https://persistentsystems6060.zendesk.com"
+    }
+  },
+  "repositoryConfigurations": {
+    "ticket": {
+      "fieldMappings": [
+        {
+          "indexFieldName": "_category",
+          "indexFieldType": "STRING",
+          "dataSourceFieldName": "category"
+        },
+        {
+          "indexFieldName": "_source_uri",
+          "indexFieldType": "STRING",
+          "dataSourceFieldName": "sourceUrl"
+        },
+        {
+          "indexFieldName": "zd_status",
+          "indexFieldType": "STRING",
+          "dataSourceFieldName": "status"
+        },
+        {
+          "indexFieldName": "zd_channel",
+          "indexFieldType": "STRING",
+          "dataSourceFieldName": "ticketChannel"
+        },
+        {
+          "indexFieldName": "zd_assignee",
+          "indexFieldType": "STRING",
+          "dataSourceFieldName": "assignee"
+        },
+        {
+          "indexFieldName": "_created_at",
+          "indexFieldType": "DATE",
+          "dateFieldFormat": "dd-MM-yyyy HH:mm:ss",
+          "dataSourceFieldName": "createdAt"
+        },
+        {
+          "indexFieldName": "_last_updated_at",
+          "indexFieldType": "DATE",
+          "dateFieldFormat": "dd-MM-yyyy HH:mm:ss",
+          "dataSourceFieldName": "updatedAt"
+        },
+        {
+          "indexFieldName": "zd_organization_name",
+          "indexFieldType": "STRING",
+          "dataSourceFieldName": "organizationName"
+        },
+        {
+          "indexFieldName": "_authors",
+          "indexFieldType": "STRING_LIST",
+          "dataSourceFieldName": "authors"
+        },
+        {
+          "indexFieldName": "zd_tags",
+          "indexFieldType": "STRING_LIST",
+          "dataSourceFieldName": "tags"
+        }
+      ]
+    }
+  },
+  "type" : "ZENDESK",
+  "useChangeLog": "true",
+  "secretArn": "arn:aws",
+  "additionalProperties": {
+    "organizationNameFilter": null,
+    "isCrawTicket": "true",
+    "isCrawTicketComment": "true",
+    "isCrawTicketCommentAttachment": "true",
+    "isCrawlArticle": "true",
+    "isCrawlArticleAttachment": "true",
+    "isCrawlArticleComment": "true",
+    "isCrawlCommunityTopic": "true",
+    "isCrawlCommunityPost": "true",
+    "isCrawlCommunityPostComment": "true"
+  }
+}
