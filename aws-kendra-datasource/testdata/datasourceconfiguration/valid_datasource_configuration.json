@@ -62,11 +62,10 @@
       ]
     }
   },
-  "type" : "ZENDESK",
+  "type": "ZENDESK",
   "useChangeLog": "true",
-  "secretArn": "arn:aws",
+  "secretArn": "arn:aws:secretsmanager:us-west-2:254939860449:secret:CanaryDataSourceSecret-udemqW",
   "additionalProperties": {
-    "organizationNameFilter": null,
     "isCrawTicket": "true",
     "isCrawTicketComment": "true",
     "isCrawTicketCommentAttachment": "true",

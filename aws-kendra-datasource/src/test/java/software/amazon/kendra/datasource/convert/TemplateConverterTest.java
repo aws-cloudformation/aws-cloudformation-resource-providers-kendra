@@ -1,10 +1,13 @@
 package software.amazon.kendra.datasource.convert;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 
 import software.amazon.awssdk.core.document.Document;
 import software.amazon.kendra.datasource.DataSourceConfiguration;
+import software.amazon.kendra.datasource.utils.DocumentTypeAdapter;
 import software.amazon.kendra.datasource.TemplateConfiguration;
 
 import java.io.File;
@@ -61,11 +64,13 @@ public class TemplateConverterTest {
 
         assertThat(TemplateConverter.toModelDataSourceConfiguration(sdkDataSourceConfiguration))
                 .isEqualTo(expectedDataSourceConfiguration);
-
     }
 
     private Document getTemplate(String filePath) throws IOException {
-        return Document.fromString(this.readFileFromLocal(filePath));
+        Gson builder = new GsonBuilder()
+                .registerTypeAdapter(Document.class, new DocumentTypeAdapter())
+                .create();
+        return builder.fromJson(this.readFileFromLocal(filePath), Document.class);
     }
 
     private String readFileFromLocal(String filePath) throws IOException {

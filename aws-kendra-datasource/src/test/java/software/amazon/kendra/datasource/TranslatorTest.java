@@ -1,5 +1,7 @@
 package software.amazon.kendra.datasource;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.core.document.Document;
@@ -19,6 +21,7 @@ import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import software.amazon.awssdk.services.kendra.model.DataSourceType;
+import software.amazon.kendra.datasource.utils.DocumentTypeAdapter;
 
 public class TranslatorTest {
     private static final String DATASOURCE_CONFIGURATION =
@@ -555,7 +558,10 @@ public class TranslatorTest {
     }
 
     private Document getTemplate() throws IOException {
-        return Document.fromString(this.readFileFromLocal());
+      Gson builder = new GsonBuilder()
+                .registerTypeAdapter(Document.class, new DocumentTypeAdapter())
+                .create();
+        return builder.fromJson(this.readFileFromLocal(), Document.class);
     }
 
     private String readFileFromLocal() throws IOException {
