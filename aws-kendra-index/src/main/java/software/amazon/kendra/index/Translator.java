@@ -219,7 +219,12 @@ public class Translator {
 
     Map<String, String> previousMetadataNames = new HashMap<>();
     if (prev != null && !prev.isEmpty()) {
-      previousMetadataNames = prev.stream().collect(Collectors.toMap(x -> x.getName(), x -> x.getType()));
+      // duplicated config name is not checked, so some cloudformation template might contain duplicated names
+      // use for loop instead of stream since collect to map does not support duplicated key. This prevents
+      // any updates for the existing cloudformation templates that has duplicated keys
+      for (software.amazon.kendra.index.DocumentMetadataConfiguration documentMetadataConfiguration : prev) {
+        previousMetadataNames.put(documentMetadataConfiguration.getName(), documentMetadataConfiguration.getType());
+      }
     }
     Set<String> currMetadataNames = new HashSet<>();
     if (curr != null && !curr.isEmpty()) {
