@@ -1,7 +1,7 @@
 {
   "connectionConfiguration": {
     "repositoryEndpointMetadata": {
-      "hostUrl": "https://persistentsystems6060.zendesk.com"
+      "hostUrl": "https://demosite"
     }
   },
   "repositoryConfigurations": {
@@ -64,7 +64,7 @@
   },
   "type": "ZENDESK",
   "useChangeLog": "true",
-  "secretArn": "arn:aws:secretsmanager:us-west-2:254939860449:secret:CanaryDataSourceSecret-udemqW",
+  "secretArn": "arn:abc",
   "additionalProperties": {
     "isCrawTicket": "true",
     "isCrawTicketComment": "true",

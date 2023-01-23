@@ -2,11 +2,10 @@ package software.amazon.kendra.datasource.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.core.document.Document;
-import software.amazon.awssdk.protocols.json.internal.unmarshall.document.DocumentUnmarshaller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
