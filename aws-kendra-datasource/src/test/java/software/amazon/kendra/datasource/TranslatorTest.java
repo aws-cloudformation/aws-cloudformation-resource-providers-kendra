@@ -1,6 +1,10 @@
 package software.amazon.kendra.datasource;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
+import software.amazon.awssdk.core.document.Document;
 import software.amazon.awssdk.services.kendra.model.CreateDataSourceRequest;
 import software.amazon.awssdk.services.kendra.model.DeleteDataSourceRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeDataSourceRequest;
@@ -9,13 +13,19 @@ import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateDataSourceRequest;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import software.amazon.awssdk.services.kendra.model.DataSourceType;
+import software.amazon.kendra.datasource.utils.DocumentTypeAdapter;
 
 public class TranslatorTest {
+    private static final String DATASOURCE_CONFIGURATION =
+            "testdata/datasourceconfiguration/valid_datasource_configuration.json";
 
     @Test
     void testTranslateToReadRequest() {
@@ -515,5 +525,46 @@ public class TranslatorTest {
             .type(DataSourceType.S3)
             .build();
         assertThat(Translator.translateToCreateRequest(resourceModel)).isEqualTo(expected);
+    }
+
+    @Test
+    void testTranslateToSdkTemplate() throws IOException {
+        DataSourceConfiguration dataSourceConfiguration = DataSourceConfiguration
+                .builder()
+                .templateConfiguration(TemplateConfiguration.builder().template(readFileFromLocal()).build())
+                .build();
+
+        assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration))
+                .isEqualTo(software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
+                        .templateConfiguration(software.amazon.awssdk.services.kendra.model.TemplateConfiguration.builder().
+                                template(getTemplate()).build())
+                        .build());
+    }
+
+    @Test
+    void testTranslateToCreateRequest_WithTemplateConfig() throws IOException {
+        String indexId = "indexId";
+        ResourceModel resourceModel = ResourceModel
+                .builder()
+                .indexId(indexId)
+                .type("TEMPLATE")
+                .dataSourceConfiguration(DataSourceConfiguration.builder()
+                        .templateConfiguration(TemplateConfiguration.builder().template(readFileFromLocal()).build())
+                        .build())
+                .build();
+        CreateDataSourceRequest createDataSourceRequest = Translator.translateToCreateRequest(resourceModel);
+        assertThat(createDataSourceRequest.indexId()).isEqualTo(indexId);
+        assertThat(createDataSourceRequest.configuration().templateConfiguration()).isNotNull();
+    }
+
+    private Document getTemplate() throws IOException {
+      Gson builder = new GsonBuilder()
+                .registerTypeAdapter(Document.class, new DocumentTypeAdapter())
+                .create();
+        return builder.fromJson(this.readFileFromLocal(), Document.class);
+    }
+
+    private String readFileFromLocal() throws IOException {
+        return FileUtils.readFileToString(new File(TranslatorTest.DATASOURCE_CONFIGURATION), Charset.defaultCharset());
     }
 }
