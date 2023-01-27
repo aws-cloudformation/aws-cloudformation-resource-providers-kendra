@@ -1,6 +1,10 @@
 package software.amazon.kendra.datasource;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
+import software.amazon.awssdk.core.document.Document;
 import software.amazon.awssdk.services.kendra.model.CreateDataSourceRequest;
 import software.amazon.awssdk.services.kendra.model.DeleteDataSourceRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeDataSourceRequest;
@@ -9,13 +13,19 @@ import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateDataSourceRequest;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import software.amazon.awssdk.services.kendra.model.DataSourceType;
+import software.amazon.kendra.datasource.utils.DocumentTypeAdapter;
 
 public class TranslatorTest {
+    private static final String DATASOURCE_CONFIGURATION =
+            "testdata/datasourceconfiguration/valid_datasource_configuration.json";
 
     @Test
     void testTranslateToReadRequest() {
@@ -81,13 +91,13 @@ public class TranslatorTest {
     void testTranslateToCreateRequest_WithConfluenceDataSource() {
         String indexId = "indexId";
         ResourceModel resourceModel = ResourceModel
-            .builder()
-            .indexId(indexId)
-            .type(DataSourceType.CONFLUENCE.toString())
-            .dataSourceConfiguration(DataSourceConfiguration.builder()
-                .confluenceConfiguration(ConfluenceConfiguration.builder().build())
-                .build())
-            .build();
+                .builder()
+                .indexId(indexId)
+                .type(DataSourceType.CONFLUENCE.toString())
+                .dataSourceConfiguration(DataSourceConfiguration.builder()
+                        .confluenceConfiguration(ConfluenceConfiguration.builder().build())
+                        .build())
+                .build();
         CreateDataSourceRequest createDataSourceRequest = Translator.translateToCreateRequest(resourceModel);
         assertThat(createDataSourceRequest.indexId()).isEqualTo(indexId);
         assertThat(createDataSourceRequest.configuration().confluenceConfiguration()).isNotNull();
@@ -110,11 +120,11 @@ public class TranslatorTest {
     void testTranslateToCreateRequest_WithCustomDataSource() {
         String indexId = "indexId";
         ResourceModel resourceModel = ResourceModel
-            .builder()
-            .indexId(indexId)
-            .type("CUSTOM")
-            .description("description")
-            .build();
+                .builder()
+                .indexId(indexId)
+                .type("CUSTOM")
+                .description("description")
+                .build();
         CreateDataSourceRequest createDataSourceRequest = Translator.translateToCreateRequest(resourceModel);
         assertThat(createDataSourceRequest.indexId()).isEqualTo(indexId);
         assertThat(createDataSourceRequest.configuration()).isNull();
@@ -161,10 +171,10 @@ public class TranslatorTest {
         String id = "id";
         String indexId = "indexId";
         ResourceModel resourceModel = ResourceModel
-            .builder()
-            .id(id)
-            .indexId(indexId)
-            .build();
+                .builder()
+                .id(id)
+                .indexId(indexId)
+                .build();
         UpdateDataSourceRequest updateDataSourceRequest = Translator.translateToUpdateRequest(resourceModel);
         assertThat(updateDataSourceRequest.id()).isEqualTo(id);
         assertThat(updateDataSourceRequest.indexId()).isEqualTo(indexId);
@@ -173,7 +183,7 @@ public class TranslatorTest {
         assertThat(updateDataSourceRequest.roleArn()).isEqualTo(null);
         assertThat(updateDataSourceRequest.schedule()).isEqualTo(null);
         assertThat(updateDataSourceRequest.configuration())
-            .isEqualTo(null);
+                .isEqualTo(null);
     }
 
     @Test
@@ -395,125 +405,166 @@ public class TranslatorTest {
     void testTranslateToModelConfluence() {
 
         software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration =
-            software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
-            .confluenceConfiguration(software.amazon.awssdk.services.kendra.model.ConfluenceConfiguration.builder().build())
-            .build();
+                software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
+                        .confluenceConfiguration(software.amazon.awssdk.services.kendra.model.ConfluenceConfiguration.builder().build())
+                        .build();
 
         assertThat(Translator.toModelDataSourceConfiguration(dataSourceConfiguration, DataSourceType.CONFLUENCE.toString()))
-            .isEqualTo(DataSourceConfiguration.builder()
-                .confluenceConfiguration(ConfluenceConfiguration.builder().build())
-                .build());
+                .isEqualTo(DataSourceConfiguration.builder()
+                        .confluenceConfiguration(ConfluenceConfiguration.builder().build())
+                        .build());
     }
 
     @Test
     void testTranslateToSdkConfluence() {
         DataSourceConfiguration dataSourceConfiguration = DataSourceConfiguration
-            .builder()
-            .confluenceConfiguration(ConfluenceConfiguration.builder().build())
-            .build();
+                .builder()
+                .confluenceConfiguration(ConfluenceConfiguration.builder().build())
+                .build();
 
         assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration))
-            .isEqualTo(software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
-                .confluenceConfiguration(software.amazon.awssdk.services.kendra.model.ConfluenceConfiguration.builder().build())
-                .build());
+                .isEqualTo(software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
+                        .confluenceConfiguration(software.amazon.awssdk.services.kendra.model.ConfluenceConfiguration.builder().build())
+                        .build());
     }
 
     @Test
     void testTranslateToModelGoogleDrive() {
 
         software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration =
-            software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
-                .googleDriveConfiguration(software.amazon.awssdk.services.kendra.model.GoogleDriveConfiguration.builder().build())
-                .build();
+                software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
+                        .googleDriveConfiguration(software.amazon.awssdk.services.kendra.model.GoogleDriveConfiguration.builder().build())
+                        .build();
 
         assertThat(Translator.toModelDataSourceConfiguration(dataSourceConfiguration, DataSourceType.GOOGLEDRIVE.toString()))
-            .isEqualTo(DataSourceConfiguration.builder()
-                .googleDriveConfiguration(GoogleDriveConfiguration.builder().build())
-                .build());
+                .isEqualTo(DataSourceConfiguration.builder()
+                        .googleDriveConfiguration(GoogleDriveConfiguration.builder().build())
+                        .build());
     }
 
     @Test
     void testTranslateToSdkGoogleDrive() {
         DataSourceConfiguration dataSourceConfiguration = DataSourceConfiguration
-            .builder()
-            .googleDriveConfiguration(GoogleDriveConfiguration.builder().build())
-            .build();
+                .builder()
+                .googleDriveConfiguration(GoogleDriveConfiguration.builder().build())
+                .build();
 
         assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration))
-            .isEqualTo(software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
-                .googleDriveConfiguration(software.amazon.awssdk.services.kendra.model.GoogleDriveConfiguration.builder().build())
-                .build());
+                .isEqualTo(software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
+                        .googleDriveConfiguration(software.amazon.awssdk.services.kendra.model.GoogleDriveConfiguration.builder().build())
+                        .build());
     }
 
     @Test
     void testTranslateToModelWebCrawler() {
         software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration =
-            software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
-                .webCrawlerConfiguration(software.amazon.awssdk.services.kendra.model.WebCrawlerConfiguration.builder().build())
-                .build();
+                software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
+                        .webCrawlerConfiguration(software.amazon.awssdk.services.kendra.model.WebCrawlerConfiguration.builder().build())
+                        .build();
 
         assertThat(Translator.toModelDataSourceConfiguration(dataSourceConfiguration, DataSourceType.WEBCRAWLER.toString()))
-            .isEqualTo(DataSourceConfiguration.builder()
-                .webCrawlerConfiguration(WebCrawlerConfiguration.builder().build())
-                .build());
+                .isEqualTo(DataSourceConfiguration.builder()
+                        .webCrawlerConfiguration(WebCrawlerConfiguration.builder().build())
+                        .build());
     }
 
     @Test
     void testTranslateToSdkWebCrawler() {
         DataSourceConfiguration dataSourceConfiguration = DataSourceConfiguration
-            .builder()
-            .webCrawlerConfiguration(WebCrawlerConfiguration.builder().build())
-            .build();
+                .builder()
+                .webCrawlerConfiguration(WebCrawlerConfiguration.builder().build())
+                .build();
 
         assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration))
-            .isEqualTo(software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
-                .webCrawlerConfiguration(software.amazon.awssdk.services.kendra.model.WebCrawlerConfiguration.builder().build())
-                .build());
-        }
+                .isEqualTo(software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
+                        .webCrawlerConfiguration(software.amazon.awssdk.services.kendra.model.WebCrawlerConfiguration.builder().build())
+                        .build());
+    }
 
     @Test
     void testTranslateToModelWorkDocs() {
         software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration =
-            software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
-                .workDocsConfiguration(software.amazon.awssdk.services.kendra.model.WorkDocsConfiguration.builder().build())
-                .build();
+                software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
+                        .workDocsConfiguration(software.amazon.awssdk.services.kendra.model.WorkDocsConfiguration.builder().build())
+                        .build();
 
         assertThat(Translator.toModelDataSourceConfiguration(dataSourceConfiguration, DataSourceType.WORKDOCS.toString()))
-            .isEqualTo(DataSourceConfiguration.builder()
-                .workDocsConfiguration(WorkDocsConfiguration.builder().build())
-                .build());
+                .isEqualTo(DataSourceConfiguration.builder()
+                        .workDocsConfiguration(WorkDocsConfiguration.builder().build())
+                        .build());
     }
 
     @Test
     void testTranslateToSdkWorkDocs() {
         DataSourceConfiguration dataSourceConfiguration = DataSourceConfiguration
-            .builder()
-            .workDocsConfiguration(WorkDocsConfiguration.builder().build())
-            .build();
+                .builder()
+                .workDocsConfiguration(WorkDocsConfiguration.builder().build())
+                .build();
 
         assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration))
-            .isEqualTo(software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
-                .workDocsConfiguration(software.amazon.awssdk.services.kendra.model.WorkDocsConfiguration.builder().build())
-                .build());
+                .isEqualTo(software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
+                        .workDocsConfiguration(software.amazon.awssdk.services.kendra.model.WorkDocsConfiguration.builder().build())
+                        .build());
     }
 
     @Test
     void translateToSdkConfiguration_WHEN_Configuration_Null(){
         assertThat(Translator.toSdkDataSourceConfiguration(null))
-            .isEqualTo(null);
+                .isEqualTo(null);
     }
 
     @Test
     void testTranslateS3_WHEN_Configuration_NULL() {
         ResourceModel resourceModel = ResourceModel
-            .builder()
-            .type("S3")
-            .dataSourceConfiguration(null)
-            .build();
+                .builder()
+                .type("S3")
+                .dataSourceConfiguration(null)
+                .build();
         CreateDataSourceRequest expected = CreateDataSourceRequest
-            .builder()
-            .type(DataSourceType.S3)
-            .build();
+                .builder()
+                .type(DataSourceType.S3)
+                .build();
         assertThat(Translator.translateToCreateRequest(resourceModel)).isEqualTo(expected);
+    }
+
+    @Test
+    void testTranslateToSdkTemplate() throws IOException {
+        DataSourceConfiguration dataSourceConfiguration = DataSourceConfiguration
+                .builder()
+                .templateConfiguration(TemplateConfiguration.builder().template(readFileFromLocal()).build())
+                .build();
+
+        assertThat(Translator.toSdkDataSourceConfiguration(dataSourceConfiguration))
+                .isEqualTo(software.amazon.awssdk.services.kendra.model.DataSourceConfiguration.builder()
+                        .templateConfiguration(software.amazon.awssdk.services.kendra.model.TemplateConfiguration.builder().
+                                template(getTemplate()).build())
+                        .build());
+    }
+
+    @Test
+    void testTranslateToCreateRequest_WithTemplateConfig() throws IOException {
+        String indexId = "indexId";
+        ResourceModel resourceModel = ResourceModel
+                .builder()
+                .indexId(indexId)
+                .type("TEMPLATE")
+                .dataSourceConfiguration(DataSourceConfiguration.builder()
+                        .templateConfiguration(TemplateConfiguration.builder().template(readFileFromLocal()).build())
+                        .build())
+                .build();
+        CreateDataSourceRequest createDataSourceRequest = Translator.translateToCreateRequest(resourceModel);
+        assertThat(createDataSourceRequest.indexId()).isEqualTo(indexId);
+        assertThat(createDataSourceRequest.configuration().templateConfiguration()).isNotNull();
+    }
+
+    private Document getTemplate() throws IOException {
+        Gson builder = new GsonBuilder()
+                .registerTypeAdapter(Document.class, new DocumentTypeAdapter())
+                .create();
+        return builder.fromJson(this.readFileFromLocal(), Document.class);
+    }
+
+    private String readFileFromLocal() throws IOException {
+        return FileUtils.readFileToString(new File(TranslatorTest.DATASOURCE_CONFIGURATION), Charset.defaultCharset());
     }
 }

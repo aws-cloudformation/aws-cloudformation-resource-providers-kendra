@@ -13,16 +13,7 @@ import software.amazon.awssdk.services.kendra.model.Tag;
 import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateDataSourceRequest;
-import software.amazon.kendra.datasource.convert.DatabaseConverter;
-import software.amazon.kendra.datasource.convert.GoogleDriveConverter;
-import software.amazon.kendra.datasource.convert.ListConverter;
-import software.amazon.kendra.datasource.convert.OneDriveConverter;
-import software.amazon.kendra.datasource.convert.S3Converter;
-import software.amazon.kendra.datasource.convert.ServiceNowConverter;
-import software.amazon.kendra.datasource.convert.SharePointConverter;
-import software.amazon.kendra.datasource.convert.SalesforceConverter;
-import software.amazon.kendra.datasource.convert.WebCrawlerConverter;
-import software.amazon.kendra.datasource.convert.WorkDocsConverter;
+import software.amazon.kendra.datasource.convert.*;
 import software.amazon.kendra.datasource.convert.cde.CustomDocumentEnrichmentConfigurationConverter;
 import software.amazon.kendra.datasource.convert.confluence.ConfluenceConverter;
 
@@ -49,19 +40,19 @@ public class Translator {
    */
   static CreateDataSourceRequest translateToCreateRequest(final ResourceModel model) {
     final CreateDataSourceRequest.Builder builder = CreateDataSourceRequest
-      .builder()
-      .name(model.getName())
-      .indexId(model.getIndexId())
-      .type(model.getType())
-      .configuration(toSdkDataSourceConfiguration(model.getDataSourceConfiguration()))
-      .description(model.getDescription())
-      .schedule(model.getSchedule())
-      .roleArn(model.getRoleArn())
-      .customDocumentEnrichmentConfiguration(CustomDocumentEnrichmentConfigurationConverter
-          .toSdkCustomDocumentEnrichmentConfiguration(model.getCustomDocumentEnrichmentConfiguration()));
+            .builder()
+            .name(model.getName())
+            .indexId(model.getIndexId())
+            .type(model.getType())
+            .configuration(toSdkDataSourceConfiguration(model.getDataSourceConfiguration()))
+            .description(model.getDescription())
+            .schedule(model.getSchedule())
+            .roleArn(model.getRoleArn())
+            .customDocumentEnrichmentConfiguration(CustomDocumentEnrichmentConfigurationConverter
+                    .toSdkCustomDocumentEnrichmentConfiguration(model.getCustomDocumentEnrichmentConfiguration()));
     if (model.getTags() != null && !model.getTags().isEmpty()) {
       builder.tags(model.getTags().stream().map(
-              x -> Tag.builder().key(x.getKey()).value(x.getValue()).build())
+                      x -> Tag.builder().key(x.getKey()).value(x.getValue()).build())
               .collect(Collectors.toList()));
     }
     return builder.build();
@@ -74,9 +65,9 @@ public class Translator {
    */
   static DescribeDataSourceRequest translateToReadRequest(final ResourceModel model) {
     final DescribeDataSourceRequest describeDataSourceRequest = DescribeDataSourceRequest.builder()
-      .id(model.getId())
-      .indexId(model.getIndexId())
-      .build();
+            .id(model.getId())
+            .indexId(model.getIndexId())
+            .build();
     return describeDataSourceRequest;
   }
 
@@ -101,7 +92,7 @@ public class Translator {
             .dataSourceConfiguration(toModelDataSourceConfiguration(describeDataSourceResponse.configuration(),
                     describeDataSourceResponse.typeAsString()))
             .customDocumentEnrichmentConfiguration(CustomDocumentEnrichmentConfigurationConverter
-                .toModelCustomDocumentEnrichmentConfiguration(describeDataSourceResponse.customDocumentEnrichmentConfiguration()));
+                    .toModelCustomDocumentEnrichmentConfiguration(describeDataSourceResponse.customDocumentEnrichmentConfiguration()));
     List<software.amazon.kendra.datasource.Tag> tags = ListConverter.toModel(
             listTagsForResourceResponse.tags(),
             x -> software.amazon.kendra.datasource.Tag.builder().key(x.key()).value(x.value()).build());
@@ -116,9 +107,9 @@ public class Translator {
    */
   static DeleteDataSourceRequest translateToDeleteRequest(final ResourceModel model) {
     final DeleteDataSourceRequest deleteDataSourceRequest = DeleteDataSourceRequest.builder()
-      .id(model.getId())
-      .indexId(model.getIndexId())
-      .build();
+            .id(model.getId())
+            .indexId(model.getIndexId())
+            .build();
     return deleteDataSourceRequest;
   }
 
@@ -128,23 +119,23 @@ public class Translator {
    * @return awsRequest the aws service request to modify a resource
    */
   static UpdateDataSourceRequest translateToUpdateRequest(final ResourceModel model) {
-      String description = model.getDescription() == null ? "" : model.getDescription();
-      String name =  model.getName();
-      String roleArn =  model.getRoleArn();
-      String schedule =  model.getSchedule();
-      software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration = toSdkDataSourceConfiguration(model.getDataSourceConfiguration());
-      final UpdateDataSourceRequest updateDataSourceRequest = UpdateDataSourceRequest.builder()
-          .id(model.getId())
-          .indexId(model.getIndexId())
-          .roleArn(roleArn)
-          .name(name)
-          .description(description)
-          .configuration(dataSourceConfiguration)
-          .schedule(schedule)
-          .customDocumentEnrichmentConfiguration(CustomDocumentEnrichmentConfigurationConverter
-              .toSdkCustomDocumentEnrichmentConfiguration(model.getCustomDocumentEnrichmentConfiguration()))
-          .build();
-      return updateDataSourceRequest;
+    String description = model.getDescription() == null ? "" : model.getDescription();
+    String name =  model.getName();
+    String roleArn =  model.getRoleArn();
+    String schedule =  model.getSchedule();
+    software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration = toSdkDataSourceConfiguration(model.getDataSourceConfiguration());
+    final UpdateDataSourceRequest updateDataSourceRequest = UpdateDataSourceRequest.builder()
+            .id(model.getId())
+            .indexId(model.getIndexId())
+            .roleArn(roleArn)
+            .name(name)
+            .description(description)
+            .configuration(dataSourceConfiguration)
+            .schedule(schedule)
+            .customDocumentEnrichmentConfiguration(CustomDocumentEnrichmentConfigurationConverter
+                    .toSdkCustomDocumentEnrichmentConfiguration(model.getCustomDocumentEnrichmentConfiguration()))
+            .build();
+    return updateDataSourceRequest;
   }
 
   /**
@@ -155,9 +146,9 @@ public class Translator {
    */
   static ListDataSourcesRequest translateToListRequest(final String indexId, final String nextToken) {
     final ListDataSourcesRequest listDataSourcesRequest = ListDataSourcesRequest.builder()
-      .indexId(indexId)
-      .nextToken(nextToken)
-      .build();
+            .indexId(indexId)
+            .nextToken(nextToken)
+            .build();
     return listDataSourcesRequest;
   }
 
@@ -168,20 +159,20 @@ public class Translator {
    * @return list of resource models
    */
   static List<ResourceModel> translateFromListResponse(final ListDataSourcesResponse listDataSourcesResponse,
-    final String indexId) {
+                                                       final String indexId) {
     // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/2077c92299aeb9a68ae8f4418b5e932b12a8b186/aws-logs-loggroup/src/main/java/com/aws/logs/loggroup/Translator.java#L75-L82
     return streamOfOrEmpty(listDataSourcesResponse.summaryItems())
-        .map(resource -> ResourceModel.builder()
-            .id(resource.id())
-            .indexId(indexId)
-            .build())
-        .collect(Collectors.toList());
+            .map(resource -> ResourceModel.builder()
+                    .id(resource.id())
+                    .indexId(indexId)
+                    .build())
+            .collect(Collectors.toList());
   }
 
   private static <T> Stream<T> streamOfOrEmpty(final Collection<T> collection) {
     return Optional.ofNullable(collection)
-        .map(Collection::stream)
-        .orElseGet(Stream::empty);
+            .map(Collection::stream)
+            .orElseGet(Stream::empty);
   }
 
   static ListTagsForResourceRequest translateToListTagsRequest(final String arn) {
@@ -204,9 +195,9 @@ public class Translator {
             .builder()
             .resourceARN(arn)
             .tags(tags.stream().map(x -> Tag
-                    .builder()
-                    .key(x.getKey())
-                    .value(x.getValue()).build())
+                            .builder()
+                            .key(x.getKey())
+                            .value(x.getValue()).build())
                     .collect(Collectors.toList()))
             .build();
   }
@@ -230,11 +221,12 @@ public class Translator {
     modelDataSourceConfiguration.googleDriveConfiguration(GoogleDriveConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getGoogleDriveConfiguration()));
     modelDataSourceConfiguration.webCrawlerConfiguration(WebCrawlerConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getWebCrawlerConfiguration()));
     modelDataSourceConfiguration.workDocsConfiguration(WorkDocsConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getWorkDocsConfiguration()));
+    modelDataSourceConfiguration.templateConfiguration(TemplateConverter.toSdkDataSourceConfiguration(dataSourceConfiguration.getTemplateConfiguration()));
     return modelDataSourceConfiguration.build();
   }
 
   static DataSourceConfiguration toModelDataSourceConfiguration(
-    final software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration, final String dataSourceType) {
+          final software.amazon.awssdk.services.kendra.model.DataSourceConfiguration dataSourceConfiguration, final String dataSourceType) {
     if (DataSourceType.S3.toString().equals(dataSourceType)) {
       return S3Converter.toModelDataSourceConfiguration(dataSourceConfiguration.s3Configuration());
     } else if(DataSourceType.SHAREPOINT.toString().equals(dataSourceType)) {
@@ -255,7 +247,9 @@ public class Translator {
       return WebCrawlerConverter.toModelDataSourceConfiguration(dataSourceConfiguration.webCrawlerConfiguration());
     } else if (DataSourceType.WORKDOCS.toString().equals(dataSourceType)) {
       return WorkDocsConverter.toModelDataSourceConfiguration(dataSourceConfiguration.workDocsConfiguration());
-    } else {
+    } else if(DataSourceType.TEMPLATE.toString().equals(dataSourceType)){
+      return TemplateConverter.toModelDataSourceConfiguration(dataSourceConfiguration.templateConfiguration());
+    }else {
       return null;
     }
   }
