@@ -1,13 +1,17 @@
 package software.amazon.kendra.datasource.utils;
 
-import com.google.gson.*;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import software.amazon.awssdk.core.document.Document;
 import software.amazon.awssdk.protocols.json.internal.unmarshall.document.DocumentUnmarshaller;
 import software.amazon.awssdk.protocols.jsoncore.JsonNode;
 import software.amazon.awssdk.protocols.jsoncore.JsonNodeParser;
 
 import java.lang.reflect.Type;
-
 
 public class DocumentTypeAdapter implements JsonDeserializer<Document>, JsonSerializer<Document> {
     private final DocumentUnmarshaller documentUnmarshaller = new DocumentUnmarshaller();

@@ -13,7 +13,17 @@ import software.amazon.awssdk.services.kendra.model.Tag;
 import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateDataSourceRequest;
-import software.amazon.kendra.datasource.convert.*;
+import software.amazon.kendra.datasource.convert.DatabaseConverter;
+import software.amazon.kendra.datasource.convert.GoogleDriveConverter;
+import software.amazon.kendra.datasource.convert.ListConverter;
+import software.amazon.kendra.datasource.convert.OneDriveConverter;
+import software.amazon.kendra.datasource.convert.S3Converter;
+import software.amazon.kendra.datasource.convert.SalesforceConverter;
+import software.amazon.kendra.datasource.convert.ServiceNowConverter;
+import software.amazon.kendra.datasource.convert.SharePointConverter;
+import software.amazon.kendra.datasource.convert.TemplateConverter;
+import software.amazon.kendra.datasource.convert.WebCrawlerConverter;
+import software.amazon.kendra.datasource.convert.WorkDocsConverter;
 import software.amazon.kendra.datasource.convert.cde.CustomDocumentEnrichmentConfigurationConverter;
 import software.amazon.kendra.datasource.convert.confluence.ConfluenceConverter;
 
