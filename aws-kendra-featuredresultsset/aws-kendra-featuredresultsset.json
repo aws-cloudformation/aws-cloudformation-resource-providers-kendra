@@ -1,0 +1,161 @@
+{
+    "typeName": "AWS::Kendra::FeaturedResultsSet",
+    "description": "A Kendra Featured Results Set",
+    "taggable": false,
+    "definitions": {
+        "FeaturedResultsSetId": {
+            "type": "string"
+        },
+        "FeaturedResultsSetName": {
+            "type": "string"
+        },
+        "Description": {
+            "type": "string"
+        },
+        "IndexId": {
+            "type": "string"
+        },
+        "Status": {
+            "type": "string",
+            "enum": [
+                "ACTIVE",
+                "INACTIVE"
+            ]
+        },
+        "Arn": {
+            "type": "string"
+        },
+        "Tag": {
+            "description": "A label for tagging Kendra resources",
+            "type": "object",
+            "properties": {
+                "Key": {
+                    "description": "A string used to identify this tag",
+                    "type": "string"
+                },
+                "Value": {
+                    "description": "A string containing the value for the tag",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "Key",
+                "Value"
+            ],
+            "additionalProperties": false
+        },
+        "TagList": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Tag"
+            }
+        },
+        "FeaturedDocuments": {
+            "type": "array",
+            "insertionOrder": true,
+            "items": {
+                "$ref": "#/definitions/FeaturedDocument"
+            }
+        },
+        "FeaturedDocument": {
+            "type": "object",
+            "properties": {
+                "Id": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false,
+            "required": [
+                "Id"
+            ]
+        },
+        "QueryTexts": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/QueryText"
+            }
+        },
+        "QueryText": {
+            "type": "string"
+        }
+    },
+    "properties": {
+        "FeaturedResultsSetId": {
+            "$ref": "#/definitions/FeaturedResultsSetId"
+        },
+        "IndexId": {
+            "$ref": "#/definitions/IndexId"
+        },
+        "Arn": {
+            "$ref": "#/definitions/Arn"
+        },
+        "Description": {
+            "$ref": "#/definitions/Description"
+        },
+        "FeaturedResultsSetName": {
+            "$ref": "#/definitions/FeaturedResultsSetName"
+        },
+        "FeaturedDocuments": {
+            "$ref": "#/definitions/FeaturedDocuments"
+        },
+        "QueryTexts": {
+            "$ref": "#/definitions/QueryTexts"
+        },
+        "Status": {
+            "$ref": "#/definitions/Status"
+        }
+    },
+    "required": [
+        "FeaturedResultsSetName",
+        "IndexId"
+    ],
+    "handlers": {
+        "create": {
+            "permissions": [
+                "kendra:CreateFeaturedResultsSet",
+                "kendra:DescribeFeaturedResultsSet",
+                "iam:PassRole"
+            ],
+            "timeoutInMinutes": 10
+        },
+        "read": {
+            "permissions": [
+                "kendra:DescribeFeaturedResultsSet",
+                "iam:PassRole"
+            ]
+        },
+        "update": {
+            "permissions": [
+                "kendra:DescribeFeaturedResultsSet",
+                "kendra:UpdateFeaturedResultsSet",
+                "iam:PassRole"
+            ],
+            "timeoutInMinutes": 10
+        },
+        "delete": {
+            "permissions": [
+                "kendra:DescribeFeaturedResultsSet",
+                "kendra:BatchDeleteFeaturedResultsSet",
+                "iam:PassRole"
+            ],
+            "timeoutInMinutes": 10
+        },
+        "list": {
+            "permissions": [
+                "kendra:ListFeaturedResultsSets",
+                "iam:PassRole"
+            ]
+        }
+    },
+    "additionalProperties": false,
+    "primaryIdentifier": [
+        "/properties/FeaturedResultsSetId",
+        "/properties/IndexId"
+    ],
+    "createOnlyProperties": [
+        "/properties/IndexId"
+    ],
+    "readOnlyProperties": [
+        "/properties/FeaturedResultsSetId"
+    ]
+}
