@@ -1,4 +1,5 @@
 {
+    "artifact_type": "RESOURCE",
     "typeName": "AWS::Kendra::Faq",
     "language": "java",
     "runtime": "java8",
@@ -13,6 +14,7 @@
         ],
 	"codegen_template_path": "guided_aws",
 	"protocolVersion": "2.0.0"
-
-    }
+    },
+    "logProcessorEnabled": "true",
+    "executableEntrypoint": "software.amazon.kendra.faq.HandlerWrapperExecutable"
 }
