@@ -1,0 +1,67 @@
+name: Maven Verify Pipeline
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  Build-And-Verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.9" ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'adopt'
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Python packages
+        run: |
+          python -m pip install --upgrade pip
+          pip install pre-commit cloudformation-cli cloudformation-cli-java-plugin
+      - name: Run pre-commit
+        run: pre-commit run --all-files
+
+
+      - name: Verify AWS::Kendra::Index
+        working-directory: aws-kendra-index
+        run: mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -B clean verify --no-transfer-progress
+
+      - name: Install AWS::Kendra::Index
+        working-directory: aws-kendra-index
+        run: mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -B clean install --no-transfer-progress
+
+
+      - name: Verify AWS::Kendra::DataSource
+        working-directory: aws-kendra-datasource
+        run: mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -B clean verify --no-transfer-progress
+
+      - name: Install AWS::Kendra::DataSource
+        working-directory: aws-kendra-datasource
+        run: mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -B clean install --no-transfer-progress
+
+
+      - name: Verify AWS::Kendra::Faq
+        working-directory: aws-kendra-faq
+        run: mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -B clean verify --no-transfer-progress
+
+      - name: Install AWS::Kendra::Faq
+        working-directory: aws-kendra-faq
+        run: mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -B clean install --no-transfer-progress
+
+
+      - name: Verify AWS::Kendra::FeaturedResultsSet
+        working-directory: aws-kendra-featuredresultsset
+        run: mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -B clean verify --no-transfer-progress
+
+      - name: Install AWS::Kendra::FeaturedResultsSet
+        working-directory: aws-kendra-featuredresultsset
+        run: mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -B clean install --no-transfer-progress
