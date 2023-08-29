@@ -1,10 +1,12 @@
 package software.amazon.kendra.datasource;
 
 import java.time.Duration;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.KendraClient;
+import software.amazon.awssdk.services.kendra.model.AccessDeniedException;
 import software.amazon.awssdk.services.kendra.model.ConflictException;
 import software.amazon.awssdk.services.kendra.model.DataSourceStatus;
 import software.amazon.awssdk.services.kendra.model.DeleteDataSourceRequest;
@@ -12,9 +14,14 @@ import software.amazon.awssdk.services.kendra.model.DeleteDataSourceResponse;
 import software.amazon.awssdk.services.kendra.model.DescribeDataSourceRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeDataSourceResponse;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.kendra.model.ThrottlingException;
+import software.amazon.awssdk.services.kendra.model.ValidationException;
+import software.amazon.cloudformation.exceptions.CfnAccessDeniedException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
+import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
+import software.amazon.cloudformation.exceptions.CfnThrottlingException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Delay;
 import software.amazon.cloudformation.proxy.OperationStatus;
@@ -24,12 +31,15 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.cloudformation.proxy.delay.Constant;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -136,72 +146,40 @@ public class DeleteHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(2)).describeDataSource(any(DescribeDataSourceRequest.class));
     }
 
-    @Test
-    public void handleRequest_throwsCfnNotFoundException() {
-       final DeleteHandler handler = new DeleteHandler(testDelay);
-
-        final ResourceModel model = ResourceModel.builder()
-            .id(TEST_ID)
-            .indexId(TEST_INDEX_ID)
-            .build();
-
-        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-            .desiredResourceState(model)
-            .build();
-
-        when(proxyClient.client().deleteDataSource(any(DeleteDataSourceRequest.class)))
-            .thenThrow(ResourceNotFoundException.builder().build());
-
-        assertThrows(CfnNotFoundException.class, () -> {
-            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
-        });
-
-        verify(proxyClient.client(), times(1)).deleteDataSource(any(DeleteDataSourceRequest.class));
+    private static Stream<Arguments> testThatItThrowsExpectedCfnErrorForKendraErrorArguments() {
+      return Stream.of(
+          Arguments.of(ThrottlingException.builder().build(), CfnThrottlingException.class),
+          Arguments.of(AccessDeniedException.builder().build(), CfnAccessDeniedException.class),
+          Arguments.of(ValidationException.builder().build(), CfnInvalidRequestException.class),
+          Arguments.of(ConflictException.builder().build(), CfnResourceConflictException.class),
+          Arguments.of(AwsServiceException.builder().build(), CfnGeneralServiceException.class),
+          Arguments.of(ResourceNotFoundException.builder().build(), CfnNotFoundException.class)
+      );
     }
 
-    @Test
-    public void handleRequest_throwsCfnResourceConflictException() {
-       final DeleteHandler handler = new DeleteHandler(testDelay);
+    @ParameterizedTest
+    @MethodSource("testThatItThrowsExpectedCfnErrorForKendraErrorArguments")
+    public void testThatItThrowsExpectedCfnErrorForKendraError(
+        AwsServiceException serviceException,
+        Class<? extends RuntimeException> cfnErrorExpected
+    ) {
+      // set up scenario
+      final DeleteHandler handler = new DeleteHandler(testDelay);
 
-        final ResourceModel model = ResourceModel.builder()
-            .id(TEST_ID)
-            .indexId(TEST_INDEX_ID)
-            .build();
+      final ResourceModel model = ResourceModel.builder()
+          .id(TEST_ID)
+          .indexId(TEST_INDEX_ID)
+          .build();
+      final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+          .desiredResourceState(model)
+          .build();
+      when(proxyClient.client().deleteDataSource(any(DeleteDataSourceRequest.class)))
+          .thenThrow(serviceException);
 
-        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-            .desiredResourceState(model)
-            .build();
-
-        when(proxyClient.client().deleteDataSource(any(DeleteDataSourceRequest.class)))
-            .thenThrow(ConflictException.builder().build());
-
-        assertThrows(CfnResourceConflictException.class, () -> {
-            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
-        });
-
-        verify(proxyClient.client(), times(1)).deleteDataSource(any(DeleteDataSourceRequest.class));
-    }
-
-    @Test
-    public void handleRequest_throwsCfnGeneralServiceException() {
-       final DeleteHandler handler = new DeleteHandler(testDelay);
-
-        final ResourceModel model = ResourceModel.builder()
-            .id(TEST_ID)
-            .indexId(TEST_INDEX_ID)
-            .build();
-
-        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-            .desiredResourceState(model)
-            .build();
-
-        when(proxyClient.client().deleteDataSource(any(DeleteDataSourceRequest.class)))
-            .thenThrow(AwsServiceException.builder().build());
-
-        assertThrows(CfnGeneralServiceException.class, () -> {
-            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
-        });
-
-        verify(proxyClient.client(), times(1)).deleteDataSource(any(DeleteDataSourceRequest.class));
+      // call and verify error thrown
+      assertThatThrownBy(() -> handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger))
+          .isInstanceOf(cfnErrorExpected);
+      verify(proxyClient.client(), times(1)).deleteDataSource(any(DeleteDataSourceRequest.class));
+      verify(proxyClient.client(), times(0)).describeDataSource(any(DescribeDataSourceRequest.class));
     }
 }

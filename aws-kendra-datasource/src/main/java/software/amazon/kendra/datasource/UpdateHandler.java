@@ -3,21 +3,27 @@ package software.amazon.kendra.datasource;
 import com.google.common.collect.Sets;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.KendraClient;
+import software.amazon.awssdk.services.kendra.model.AccessDeniedException;
 import software.amazon.awssdk.services.kendra.model.ConflictException;
 import software.amazon.awssdk.services.kendra.model.DataSourceStatus;
 import software.amazon.awssdk.services.kendra.model.DescribeDataSourceRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeDataSourceResponse;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.kendra.model.ServiceQuotaExceededException;
 import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
+import software.amazon.awssdk.services.kendra.model.ThrottlingException;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateDataSourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateDataSourceResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
+import software.amazon.cloudformation.exceptions.CfnAccessDeniedException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnNotUpdatableException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
+import software.amazon.cloudformation.exceptions.CfnServiceLimitExceededException;
+import software.amazon.cloudformation.exceptions.CfnThrottlingException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -35,7 +41,7 @@ public class UpdateHandler extends BaseHandlerStd {
 
     private Logger logger;
 
-    private DataSourceArnBuilder dataSourceArnBuilder;
+    private final DataSourceArnBuilder dataSourceArnBuilder;
 
     public UpdateHandler() {
        super();
@@ -106,6 +112,12 @@ public class UpdateHandler extends BaseHandlerStd {
             throw new CfnNotFoundException(ResourceModel.TYPE_NAME, updateDataSourceRequest.id(), e);
         } catch (ConflictException e) {
             throw new CfnResourceConflictException(e);
+        } catch (ServiceQuotaExceededException e) {
+            throw new CfnServiceLimitExceededException(ResourceModel.TYPE_NAME, e.getMessage(), e);
+        } catch (AccessDeniedException e) {
+            throw new CfnAccessDeniedException(UPDATE_DATASOURCE, e);
+        } catch (ThrottlingException e) {
+            throw new CfnThrottlingException(UPDATE_DATASOURCE, e);
         } catch (final AwsServiceException e) {
            /*
             * While the handler contract states that the handler must always return a progress event,

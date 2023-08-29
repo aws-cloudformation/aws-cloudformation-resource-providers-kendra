@@ -2,10 +2,12 @@ package software.amazon.kendra.datasource;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.KendraClient;
+import software.amazon.awssdk.services.kendra.model.AccessDeniedException;
 import software.amazon.awssdk.services.kendra.model.ConflictException;
 import software.amazon.awssdk.services.kendra.model.CreateDataSourceRequest;
 import software.amazon.awssdk.services.kendra.model.CreateDataSourceResponse;
@@ -14,11 +16,18 @@ import software.amazon.awssdk.services.kendra.model.DescribeDataSourceRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeDataSourceResponse;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
+import software.amazon.awssdk.services.kendra.model.ThrottlingException;
+import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.kendra.model.ServiceQuotaExceededException;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
+import software.amazon.cloudformation.exceptions.CfnAccessDeniedException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
+import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnNotStabilizedException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
+import software.amazon.cloudformation.exceptions.CfnServiceLimitExceededException;
+import software.amazon.cloudformation.exceptions.CfnThrottlingException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -27,10 +36,14 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
@@ -62,11 +75,22 @@ public class CreateHandlerTest extends AbstractTestBase {
 
     TestDataSourceArnBuilder testDataSourceArnBuilder = new TestDataSourceArnBuilder();
 
+    private ResourceModel standardResourceModel;
+
     @BeforeEach
     public void setup() {
         proxy = new AmazonWebServicesClientProxy(logger, MOCK_CREDENTIALS, () -> Duration.ofSeconds(600).toMillis());
         awsKendraClient = mock(KendraClient.class);
         proxyClient = MOCK_PROXY(proxy, awsKendraClient);
+        standardResourceModel = ResourceModel.builder()
+            .name(TEST_DATA_SOURCE_NAME)
+            .indexId(TEST_INDEX_ID)
+            .type(TEST_DATA_SOURCE_TYPE)
+            .dataSourceConfiguration(DataSourceConfiguration.builder().build())
+            .description(TEST_DESCRIPTION)
+            .roleArn(TEST_ROLE_ARN)
+            .schedule(TEST_SCHEDULE)
+            .build();
     }
 
     @AfterEach
@@ -231,6 +255,40 @@ public class CreateHandlerTest extends AbstractTestBase {
         assertThrows(CfnInvalidRequestException.class, () -> {
             handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
         });
+    }
+
+    private static Stream<Arguments> testThatItThrowsExpectedCfnErrorForKendraExceptionArguments() {
+        return Stream.of(
+            Arguments.of(ThrottlingException.builder().build(), CfnThrottlingException.class),
+            Arguments.of(ServiceQuotaExceededException.builder().build(), CfnServiceLimitExceededException.class),
+            Arguments.of(AccessDeniedException.builder().build(), CfnAccessDeniedException.class),
+            Arguments.of(ResourceNotFoundException.builder().build(), CfnNotFoundException.class)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("testThatItThrowsExpectedCfnErrorForKendraExceptionArguments")
+    public void testThatItThrowsExpectedCfnErrorForKendraException(
+        AwsServiceException kendraException,
+        Class<? extends RuntimeException> expectedCfnError
+    ) {
+        // setup scenario
+        final CreateHandler handler = new CreateHandler(testDataSourceArnBuilder);
+
+        when(proxyClient.client().createDataSource(any(CreateDataSourceRequest.class)))
+            .thenThrow(kendraException);
+
+        // Request to call method under test
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+            .desiredResourceState(standardResourceModel)
+            .build();
+
+        // call & verify error is thrown
+        assertThatThrownBy(() -> handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger))
+            .isInstanceOf(expectedCfnError);
+        verify(proxyClient.client(), times(1)).createDataSource(any(CreateDataSourceRequest.class));
+        verify(proxyClient.client(), times(0)).describeDataSource(any(DescribeDataSourceRequest.class));
+        verify(proxyClient.client(), times(0)).listTagsForResource(any(ListTagsForResourceRequest.class));
     }
 
     @Test
