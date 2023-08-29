@@ -1,21 +1,32 @@
 package software.amazon.kendra.faq;
 
 import java.time.Duration;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
+
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.KendraClient;
+import software.amazon.awssdk.services.kendra.model.AccessDeniedException;
 import software.amazon.awssdk.services.kendra.model.CreateFaqRequest;
 import software.amazon.awssdk.services.kendra.model.CreateFaqResponse;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqResponse;
 import software.amazon.awssdk.services.kendra.model.FaqStatus;
+import software.amazon.awssdk.services.kendra.model.KendraException;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
+import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.kendra.model.ServiceQuotaExceededException;
+import software.amazon.awssdk.services.kendra.model.ThrottlingException;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
+import software.amazon.cloudformation.exceptions.CfnAccessDeniedException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
+import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnNotStabilizedException;
+import software.amazon.cloudformation.exceptions.CfnServiceLimitExceededException;
+import software.amazon.cloudformation.exceptions.CfnThrottlingException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -24,6 +35,9 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -371,68 +385,37 @@ public class CreateHandlerTest extends AbstractTestBase {
         });
     }
 
-    @Test
-    public void handleRequest_ServiceError() {
-        final CreateHandler handler = new CreateHandler(faqArnBuilder);
-
-        String indexId = "indexId";
-        String roleArn = "roleArn";
-        String description = "description";
-        String name = "name";
-        String s3Key = "s3Key";
-        String s3Bucket = "s3Bucket";
-        String fileFormat = "CSV";
-        S3Path s3Path = S3Path
-                .builder()
-                .key(s3Key)
-                .bucket(s3Bucket)
-                .build();
-        ResourceModel resourceModel = ResourceModel
-                .builder()
-                .indexId(indexId)
-                .description(description)
-                .name(name)
-                .fileFormat(fileFormat)
-                .s3Path(s3Path)
-                .roleArn(roleArn)
-                .build();
-
-        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-                .desiredResourceState(resourceModel)
-                .build();
-
-        when(proxyClient.client().createFaq(any(CreateFaqRequest.class)))
-                .thenThrow(AwsServiceException.builder().build());
-
-        assertThrows(CfnGeneralServiceException.class, () -> {
-            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
-        });
+    private static Stream<Arguments> testItThrowsExpectedCfnErrorForCreateFaqKendraError_Arguments() {
+        return Stream.of(
+            Arguments.of(ValidationException.builder().build(), CfnInvalidRequestException.class),
+            Arguments.of(AwsServiceException.builder().build(), CfnGeneralServiceException.class),
+            Arguments.of(ResourceNotFoundException.builder().build(), CfnNotFoundException.class),
+            Arguments.of(ServiceQuotaExceededException.builder().build(), CfnServiceLimitExceededException.class),
+            Arguments.of(AccessDeniedException.builder().build(), CfnAccessDeniedException.class),
+            Arguments.of(ThrottlingException.builder().build(), CfnThrottlingException.class)
+        );
     }
 
-    @Test
-    public void handleRequest_ValidationException() {
+    @ParameterizedTest
+    @MethodSource("testItThrowsExpectedCfnErrorForCreateFaqKendraError_Arguments")
+    public void testItThrowsExpectedCfnErrorForCreateFaqKendraError(
+        AwsServiceException kendraException,
+        Class<? extends RuntimeException> expectedCfnErrorClass
+    ) {
         final CreateHandler handler = new CreateHandler(faqArnBuilder);
-
-        String indexId = "indexId";
-        String roleArn = "roleArn";
-        String description = "description";
-        String name = "name";
-        String s3Key = "s3Key";
-        String s3Bucket = "s3Bucket";
-        String fileFormat = "CSV";
         S3Path s3Path = S3Path
                 .builder()
-                .key(s3Key)
-                .bucket(s3Bucket)
+                .key("s3Key")
+                .bucket("s3Bucket")
                 .build();
         ResourceModel resourceModel = ResourceModel
                 .builder()
-                .indexId(indexId)
-                .description(description)
-                .name(name)
-                .fileFormat(fileFormat)
+                .indexId("indexId")
+                .description("description")
+                .name("name")
+                .fileFormat("CSV")
                 .s3Path(s3Path)
-                .roleArn(roleArn)
+                .roleArn("roleArn")
                 .build();
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
@@ -440,10 +423,11 @@ public class CreateHandlerTest extends AbstractTestBase {
                 .build();
 
         when(proxyClient.client().createFaq(any(CreateFaqRequest.class)))
-                .thenThrow(ValidationException.builder().build());
+                .thenThrow(kendraException);
 
-        assertThrows(CfnInvalidRequestException.class, () -> {
-            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
-        });
+        assertThrows(expectedCfnErrorClass, () -> handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger));
+
+        verify(proxyClient.client(), times(1)).createFaq(any(CreateFaqRequest.class));
+        verify(proxyClient.client(), times(0)).describeFaq(any(DescribeFaqRequest.class));
     }
 }
