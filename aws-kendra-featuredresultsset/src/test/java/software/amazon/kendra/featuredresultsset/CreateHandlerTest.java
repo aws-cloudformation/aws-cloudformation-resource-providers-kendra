@@ -194,7 +194,7 @@ public class CreateHandlerTest extends AbstractTestBase {
 
         when(proxyClient.client().createFeaturedResultsSet(any(CreateFeaturedResultsSetRequest.class)))
             .thenThrow(AwsServiceException.builder().build());
-        
+
 
         assertThrows(CfnGeneralServiceException.class, () -> {
             handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);

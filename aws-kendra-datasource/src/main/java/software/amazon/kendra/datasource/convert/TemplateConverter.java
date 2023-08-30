@@ -12,7 +12,7 @@ public class TemplateConverter {
             .registerTypeAdapter(Document.class, new DocumentTypeAdapter())
             .setPrettyPrinting()
             .create();
-    
+
     public static software.amazon.awssdk.services.kendra.model.TemplateConfiguration toSdkDataSourceConfiguration(TemplateConfiguration model) {
         if (model == null) {
             return null;

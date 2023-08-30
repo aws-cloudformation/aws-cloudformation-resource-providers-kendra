@@ -2,6 +2,8 @@ package software.amazon.kendra.datasource.convert;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.core.document.Document;
@@ -61,8 +63,16 @@ public class TemplateConverterTest {
                         .build())
                 .build();
 
-        assertThat(TemplateConverter.toModelDataSourceConfiguration(sdkDataSourceConfiguration))
-                .isEqualTo(expectedDataSourceConfiguration);
+        Gson gson = new Gson();
+        DataSourceConfiguration result = TemplateConverter.toModelDataSourceConfiguration(sdkDataSourceConfiguration);
+        JsonObject resultTemplateConfig = gson.fromJson(result.getTemplateConfiguration().getTemplate(), JsonObject.class);
+
+        JsonObject expectedDataSourceConfigurationTemplateConfig = gson.fromJson(
+            expectedDataSourceConfiguration.getTemplateConfiguration().getTemplate(), JsonObject.class
+        );
+
+        assertThat(expectedDataSourceConfigurationTemplateConfig)
+                .isEqualTo(resultTemplateConfig);
     }
 
     private Document getTemplate(String filePath) throws IOException {

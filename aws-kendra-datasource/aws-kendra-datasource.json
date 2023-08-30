@@ -1201,7 +1201,7 @@
     },
     "WebCrawlerSeedUrl": {
       "type": "string",
-      "pattern": "^(https?):\/\/([^\\s]*)",
+      "pattern": "^(https?)://([^\\s]*)",
       "minLength": 1,
       "maxLength": 2048
     },
@@ -1259,7 +1259,7 @@
           "minimum": 1,
           "maximum": 65535
         },
-        "Credentials":{
+        "Credentials": {
           "$ref": "#/definitions/SecretArn"
         }
       },
@@ -1283,7 +1283,7 @@
           "minimum": 1,
           "maximum": 65535
         },
-        "Credentials":{
+        "Credentials": {
           "$ref": "#/definitions/SecretArn"
         }
       },
@@ -1599,7 +1599,8 @@
         }
       },
       "required": [
-        "ConditionDocumentAttributeKey", "Operator"
+        "ConditionDocumentAttributeKey",
+        "Operator"
       ],
       "additionalProperties": false
     },
@@ -1687,7 +1688,8 @@
         }
       },
       "required": [
-        "LambdaArn", "S3Bucket"
+        "LambdaArn",
+        "S3Bucket"
       ],
       "additionalProperties": false
     },
