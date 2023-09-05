@@ -1201,7 +1201,7 @@
     },
     "WebCrawlerSeedUrl": {
       "type": "string",
-      "pattern": "^(https?)://([^\\s]*)",
+      "pattern": "^(https?):\/\/([^\\s]*)",
       "minLength": 1,
       "maxLength": 2048
     },
