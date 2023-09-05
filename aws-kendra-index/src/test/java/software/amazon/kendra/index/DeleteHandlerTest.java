@@ -1,9 +1,13 @@
 package software.amazon.kendra.index;
 
 import java.time.Duration;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
+
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.KendraClient;
+import software.amazon.awssdk.services.kendra.model.AccessDeniedException;
 import software.amazon.awssdk.services.kendra.model.ConflictException;
 import software.amazon.awssdk.services.kendra.model.DeleteIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DeleteIndexResponse;
@@ -11,8 +15,13 @@ import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
 import software.amazon.awssdk.services.kendra.model.IndexEdition;
 import software.amazon.awssdk.services.kendra.model.IndexStatus;
+import software.amazon.awssdk.services.kendra.model.KendraException;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.kendra.model.ThrottlingException;
+import software.amazon.cloudformation.exceptions.CfnAccessDeniedException;
+import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
+import software.amazon.cloudformation.exceptions.CfnThrottlingException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Delay;
 import software.amazon.cloudformation.proxy.OperationStatus;
@@ -22,12 +31,15 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.cloudformation.proxy.delay.Constant;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -151,15 +163,25 @@ public class DeleteHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(3)).describeIndex(any(DescribeIndexRequest.class));
     }
 
-    @Test
-    public void handleRequest_FailWith_ConflictException() {
+    private static Stream<Arguments> kendraUpdateIndexExceptionTestArgs() {
+        return Stream.of(
+          Arguments.of(ConflictException.builder().build(), CfnResourceConflictException.class),
+          Arguments.of(AccessDeniedException.builder().build(), CfnAccessDeniedException.class),
+          Arguments.of(ThrottlingException.builder().build(), CfnThrottlingException.class),
+          Arguments.of(AwsServiceException.builder().build(), CfnGeneralServiceException.class)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("kendraUpdateIndexExceptionTestArgs")
+    public void handleRequest_FailWith_ConflictException(AwsServiceException kendraException, Class<? extends RuntimeException> cfnError) {
         final DeleteHandler handler = new DeleteHandler(testDelay);
 
         when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
                .thenReturn(DescribeIndexResponse.builder().build());
 
         when(proxyClient.client().deleteIndex(any(DeleteIndexRequest.class)))
-                .thenThrow(ConflictException.builder().build());
+                .thenThrow(kendraException);
 
         final ResourceModel model = ResourceModel
                 .builder()
@@ -172,11 +194,10 @@ public class DeleteHandlerTest extends AbstractTestBase {
                 .desiredResourceState(model)
                 .build();
 
-        assertThrows(CfnResourceConflictException.class, () -> {
-            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
-        });
+        assertThatThrownBy(() -> handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger))
+            .isInstanceOf(cfnError);
 
-        verify(proxyClient.client(), times(1)).deleteIndex(any(DeleteIndexRequest.class));
         verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
+        verify(proxyClient.client(), times(1)).deleteIndex(any(DeleteIndexRequest.class));
     }
 }

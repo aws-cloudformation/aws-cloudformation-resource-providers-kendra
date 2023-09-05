@@ -2,14 +2,18 @@ package software.amazon.kendra.index;
 
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.KendraClient;
+import software.amazon.awssdk.services.kendra.model.AccessDeniedException;
 import software.amazon.awssdk.services.kendra.model.ConflictException;
 import software.amazon.awssdk.services.kendra.model.DeleteIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DeleteIndexResponse;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.kendra.model.ThrottlingException;
+import software.amazon.cloudformation.exceptions.CfnAccessDeniedException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
+import software.amazon.cloudformation.exceptions.CfnThrottlingException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Delay;
 import software.amazon.cloudformation.proxy.Logger;
@@ -31,7 +35,7 @@ public class DeleteHandler extends BaseHandlerStd {
             // Set the delay to one minute so the stabilization code only calls
             // DescribeIndex every minute - delete can take a few minutes
             // so there's no need to check the index has been deleted more than once a minute.
-            .delay(Duration.ofMinutes(1))
+            .delay(Duration.ofMinutes(5))
             .build();
 
     private Logger logger;
@@ -141,6 +145,10 @@ public class DeleteHandler extends BaseHandlerStd {
             throw new CfnNotFoundException(ResourceModel.TYPE_NAME, deleteIndexRequest.id(), e);
         } catch (ConflictException e) {
             throw new CfnResourceConflictException(e);
+        } catch (AccessDeniedException e) {
+            throw new CfnAccessDeniedException(DELETE_INDEX, e);
+        } catch (ThrottlingException e) {
+            throw new CfnThrottlingException(DELETE_INDEX, e);
         } catch (final AwsServiceException e) {
             /*
              * While the handler contract states that the handler must always return a progress event,

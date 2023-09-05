@@ -2,10 +2,15 @@ package software.amazon.kendra.index;
 
 import org.junit.jupiter.api.AfterEach;
 import software.amazon.awssdk.services.kendra.KendraClient;
+import software.amazon.awssdk.services.kendra.model.AccessDeniedException;
 import software.amazon.awssdk.services.kendra.model.IndexConfigurationSummary;
-import software.amazon.awssdk.services.kendra.model.IndexEdition;
+import software.amazon.awssdk.services.kendra.model.KendraException;
 import software.amazon.awssdk.services.kendra.model.ListIndicesRequest;
 import software.amazon.awssdk.services.kendra.model.ListIndicesResponse;
+import software.amazon.awssdk.services.kendra.model.ThrottlingException;
+import software.amazon.cloudformation.exceptions.CfnAccessDeniedException;
+import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
+import software.amazon.cloudformation.exceptions.CfnThrottlingException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -14,16 +19,20 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -88,6 +97,35 @@ public class ListHandlerTest extends AbstractTestBase {
         assertThat(response.getMessage()).isNull();
         assertThat(response.getErrorCode()).isNull();
 
+        verify(proxyClient.client(), times(1)).listIndices(any(ListIndicesRequest.class));
+    }
+
+    private static Stream<Arguments> testItThrowsExpectedCfnErrorForKendraErrorArguments() {
+        return Stream.of(
+            Arguments.of(KendraException.builder().build(), CfnGeneralServiceException.class),
+            Arguments.of(ThrottlingException.builder().build(), CfnThrottlingException.class),
+            Arguments.of(AccessDeniedException.builder().build(), CfnAccessDeniedException.class)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("testItThrowsExpectedCfnErrorForKendraErrorArguments")
+    public void testItThrowsExpectedCfnErrorForKendraError(
+        KendraException kendraException,
+        Class<? extends RuntimeException> expectedCfnError) {
+        // set up
+        final ListHandler handler = new ListHandler();
+        final ResourceModel model = ResourceModel.builder().id("id").build();
+        when(proxyClient.client().listIndices(any(ListIndicesRequest.class)))
+            .thenThrow(kendraException);
+
+        // call and verify
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+            .desiredResourceState(model)
+            .build();
+
+        assertThatThrownBy(() -> handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger))
+            .isInstanceOf(expectedCfnError);
         verify(proxyClient.client(), times(1)).listIndices(any(ListIndicesRequest.class));
     }
 }

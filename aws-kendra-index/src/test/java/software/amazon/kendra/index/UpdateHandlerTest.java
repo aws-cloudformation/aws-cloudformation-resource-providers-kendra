@@ -3,30 +3,36 @@ package software.amazon.kendra.index;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import software.amazon.awssdk.services.kendra.KendraClient;
+import software.amazon.awssdk.services.kendra.model.AccessDeniedException;
 import software.amazon.awssdk.services.kendra.model.ConflictException;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
 import software.amazon.awssdk.services.kendra.model.IndexEdition;
 import software.amazon.awssdk.services.kendra.model.IndexStatus;
+import software.amazon.awssdk.services.kendra.model.KendraException;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.kendra.model.ServiceQuotaExceededException;
 import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.TagResourceResponse;
+import software.amazon.awssdk.services.kendra.model.ThrottlingException;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UntagResourceResponse;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
+import software.amazon.cloudformation.exceptions.CfnAccessDeniedException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnNotUpdatableException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
 import software.amazon.cloudformation.exceptions.CfnServiceLimitExceededException;
+import software.amazon.cloudformation.exceptions.CfnThrottlingException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Delay;
 import software.amazon.cloudformation.proxy.OperationStatus;
@@ -36,11 +42,15 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.cloudformation.proxy.delay.Constant;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
@@ -242,8 +252,18 @@ public class UpdateHandlerTest extends AbstractTestBase {
         verify(sdkClient, atLeastOnce()).serviceName();
     }
 
-    @Test
-    public void handleRequest_FailWith_ConflictException() {
+    private static Stream<Arguments> updateIndexTestErrorArgs() {
+        return Stream.of(
+          Arguments.of(ConflictException.builder().build(), CfnResourceConflictException.class),
+          Arguments.of(AccessDeniedException.builder().build(), CfnAccessDeniedException.class),
+          Arguments.of(ThrottlingException.builder().build(), CfnThrottlingException.class),
+          Arguments.of(ServiceQuotaExceededException.builder().build(), CfnServiceLimitExceededException.class)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("updateIndexTestErrorArgs")
+    public void testItThrowsExpectedErrorForKendraException(KendraException kendraException, Class<? extends RuntimeException> cfnError) {
         final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder, testDelay);
 
         when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
@@ -251,7 +271,7 @@ public class UpdateHandlerTest extends AbstractTestBase {
                         .builder()
                         .build());
         when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
-                .thenThrow(ConflictException.builder().build());
+                .thenThrow(kendraException);
 
         final ResourceModel model = ResourceModel
                 .builder()
@@ -264,9 +284,8 @@ public class UpdateHandlerTest extends AbstractTestBase {
                 .desiredResourceState(model)
                 .build();
 
-        assertThrows(CfnResourceConflictException.class, () -> {
-            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
-        });
+        assertThatThrownBy(() -> handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger))
+            .isInstanceOf(cfnError);
         verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
         verify(sdkClient, atLeastOnce()).serviceName();
@@ -587,36 +606,6 @@ public class UpdateHandlerTest extends AbstractTestBase {
 
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
         verify(proxyClient.client(), times(2)).describeIndex(any(DescribeIndexRequest.class));
-        verify(sdkClient, atLeastOnce()).serviceName();
-    }
-
-    @Test
-    public void handleRequest_FailWith_QuotaException() {
-        final UpdateHandler handler = new UpdateHandler(testIndexArnBuilder, testDelay);
-
-        when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
-                .thenReturn(DescribeIndexResponse
-                        .builder()
-                        .build());
-        when(proxyClient.client().updateIndex(any(UpdateIndexRequest.class)))
-                .thenThrow(ServiceQuotaExceededException.builder().build());
-
-        final ResourceModel model = ResourceModel
-                .builder()
-                .name("name")
-                .roleArn("role")
-                .edition(IndexEdition.ENTERPRISE_EDITION.toString())
-                .build();
-
-        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-                .desiredResourceState(model)
-                .build();
-
-        assertThrows(CfnServiceLimitExceededException.class, () -> {
-            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
-        });
-        verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
-        verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
         verify(sdkClient, atLeastOnce()).serviceName();
     }
 

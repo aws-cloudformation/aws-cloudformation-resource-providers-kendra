@@ -3,6 +3,7 @@ package software.amazon.kendra.index;
 import com.google.common.collect.Sets;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.KendraClient;
+import software.amazon.awssdk.services.kendra.model.AccessDeniedException;
 import software.amazon.awssdk.services.kendra.model.ConflictException;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
@@ -10,16 +11,19 @@ import software.amazon.awssdk.services.kendra.model.IndexStatus;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.kendra.model.ServiceQuotaExceededException;
 import software.amazon.awssdk.services.kendra.model.TagResourceRequest;
+import software.amazon.awssdk.services.kendra.model.ThrottlingException;
 import software.amazon.awssdk.services.kendra.model.UntagResourceRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
+import software.amazon.cloudformation.exceptions.CfnAccessDeniedException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnNotUpdatableException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
 import software.amazon.cloudformation.exceptions.CfnServiceLimitExceededException;
+import software.amazon.cloudformation.exceptions.CfnThrottlingException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Delay;
 import software.amazon.cloudformation.proxy.Logger;
@@ -45,7 +49,7 @@ public class UpdateHandler extends BaseHandlerStd {
             // Set the delay to two minutes so the stabilization code only calls
             // DescribeIndex every two minutes - update takes
             // 30/45+ minutes so there's no need to check the index is active more than every couple minutes.
-            .delay(Duration.ofMinutes(2))
+            .delay(Duration.ofMinutes(5))
             .build();
 
     private Delay delay;
@@ -155,6 +159,10 @@ public class UpdateHandler extends BaseHandlerStd {
             throw new CfnResourceConflictException(e);
         } catch (ServiceQuotaExceededException e) {
             throw new CfnServiceLimitExceededException(ResourceModel.TYPE_NAME, e.getMessage(), e.getCause());
+        }  catch (AccessDeniedException e) {
+            throw new CfnAccessDeniedException(UPDATE_INDEX, e);
+        } catch (ThrottlingException e) {
+            throw new CfnThrottlingException(UPDATE_INDEX, e);
         } catch (final AwsServiceException e) {
             /*
              * While the handler contract states that the handler must always return a progress event,
