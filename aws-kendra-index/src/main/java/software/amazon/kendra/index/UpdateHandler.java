@@ -48,7 +48,7 @@ public class UpdateHandler extends BaseHandlerStd {
             .timeout(Duration.ofDays(365L))
             // Set the delay to two minutes so the stabilization code only calls
             // DescribeIndex every two minutes - update takes
-            // 30/45+ minutes so there's no need to check the index is active more than every couple minutes.
+            // 30/45+ minutes so there's no need to check the index is active more than every five minutes.
             .delay(Duration.ofMinutes(5))
             .build();
 

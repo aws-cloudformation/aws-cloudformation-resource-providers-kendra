@@ -34,13 +34,13 @@ public class DeleteHandler extends BaseHandlerStd {
             .timeout(Duration.ofDays(365L))
             // Set the delay to one minute so the stabilization code only calls
             // DescribeIndex every minute - delete can take a few minutes
-            // so there's no need to check the index has been deleted more than once a minute.
-            .delay(Duration.ofMinutes(5))
+            // so there's no need to check the index has been deleted more than once every two minutes.
+            .delay(Duration.ofMinutes(2))
             .build();
 
     private Logger logger;
 
-    private Delay delay;
+    private final Delay delay;
 
     public DeleteHandler() {
         super();
@@ -63,7 +63,6 @@ public class DeleteHandler extends BaseHandlerStd {
 
         final ResourceModel model = request.getDesiredResourceState();
 
-        // TODO: Adjust Progress Chain according to your implementation
         // https://github.com/aws-cloudformation/cloudformation-cli-java-plugin/blob/master/src/main/java/software/amazon/cloudformation/proxy/CallChain.java
 
         return ProgressEvent.progress(model, callbackContext)
@@ -78,12 +77,9 @@ public class DeleteHandler extends BaseHandlerStd {
                         // If your service API throws 'ResourceNotFoundException' for delete requests then DeleteHandler can return just proxy.initiate construction
                         // STEP 2.0 [initialize a proxy context]
                         proxy.initiate("AWS-Kendra-Index::Delete", proxyClient, model, callbackContext)
-                                // STEP 2.1 [TODO: construct a body of a request]
                                 .translateToServiceRequest(Translator::translateToDeleteRequest)
                                 .backoffDelay(delay)
-                                // STEP 2.2 [TODO: make an api call]
                                 .makeServiceCall((awsRequest, sdkProxyClient) -> deleteIndex(awsRequest, sdkProxyClient, callbackContext))
-                                // STEP 2.3 [TODO: stabilize step is not necessarily required but typically involves describing the resource until it is in a certain status, though it can take many forms]
                                 // for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
                                 .stabilize(this::stabilizedOnDelete)
                                 .done(this::setResourceModelToNullAndReturnSuccess));

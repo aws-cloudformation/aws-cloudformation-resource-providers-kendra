@@ -28,17 +28,11 @@ public class ListHandler extends BaseHandlerStd {
             final ProxyClient<KendraClient> proxyClient,
             final Logger logger) {
 
-        // STEP 1 [TODO: construct a body of a request]
         final ListIndicesRequest listIndicesRequest = Translator.translateToListRequest(request.getNextToken());
 
-        // STEP 2 [TODO: make an api call]
         ListIndicesResponse listIndicesResponse = listIndices(listIndicesRequest, proxyClient);
 
-        // STEP 3 [TODO: get a token for the next page]
         String nextToken = listIndicesResponse.nextToken();
-
-        // STEP 4 [TODO: construct resource models]
-        // e.g. https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-logs/blob/master/aws-logs-loggroup/src/main/java/software/amazon/logs/loggroup/ListHandler.java#L19-L21
 
         return ProgressEvent.<ResourceModel, CallbackContext>builder()
                 .resourceModels(Translator.translateFromListResponse(listIndicesResponse))
@@ -53,7 +47,7 @@ public class ListHandler extends BaseHandlerStd {
     } catch (AccessDeniedException e) {
       throw new CfnAccessDeniedException(LIST_INDICES, e);
     } catch (ThrottlingException e) {
-      throw new CfnThrottlingException(e);
+      throw new CfnThrottlingException(LIST_INDICES, e);
     } catch (AwsServiceException e) {
       throw new CfnGeneralServiceException(LIST_INDICES, e);
     }

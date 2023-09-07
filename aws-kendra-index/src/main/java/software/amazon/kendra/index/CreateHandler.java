@@ -45,7 +45,7 @@ public class CreateHandler extends BaseHandlerStd {
             // Set the delay to two minutes so the stabilization code only calls
             // DescribeIndex every two minutes - create takes
             // 30/45+ minutes so there's no need to check the index is active more than every couple minutes.
-            .delay(Duration.ofMinutes(10))
+            .delay(Duration.ofMinutes(2))
             .build();
 
     private final Delay delay;
@@ -79,7 +79,6 @@ public class CreateHandler extends BaseHandlerStd {
 
         this.logger = logger;
 
-        // TODO: Adjust Progress Chain according to your implementation
         // https://github.com/aws-cloudformation/cloudformation-cli-java-plugin/blob/master/src/main/java/software/amazon/cloudformation/proxy/CallChain.java
         return ProgressEvent.progress(request.getDesiredResourceState(), callbackContext)
 
@@ -98,20 +97,16 @@ public class CreateHandler extends BaseHandlerStd {
                 )
                 // stabilize
                 .then(progress -> stabilize(proxy, proxyClient, progress, "AWS-Kendra-Index::PostCreateStabilize"))
-                // STEP 3 [TODO: post create and stabilize update]
                 .then(progress ->
                         // If your resource is provisioned through multiple API calls, you will need to apply each subsequent update
                         // STEP 3.0 [initialize a proxy context]
                         proxy.initiate("AWS-Kendra-Index::PostCreateUpdate", proxyClient, request.getDesiredResourceState(), callbackContext)
-                                // STEP 3.1 [TODO: construct a body of a request]
                                 .translateToServiceRequest(this::translateToPostCreateUpdateIndexRequest)
-                                // STEP 3.2 [TODO: make an api call]
                                 .makeServiceCall(this::postCreate)
                                 .progress()
                 )
                 // stabilize again because VCU changes can cause the index to enter UPDATING state
                 .then(progress -> stabilize(proxy, proxyClient, progress, "AWS-Kendra-Index::PostCreateUpdateStabilize"))
-                // STEP 4 [TODO: describe call/chain to return the resource model]
                 .then(progress -> new ReadHandler(indexArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
     }
 
@@ -183,7 +178,7 @@ public class CreateHandler extends BaseHandlerStd {
             final ProxyClient<KendraClient> proxyClient) {
         UpdateIndexResponse updateIndexResponse;
 
-        // Map UpdateIndex errors: https://code.amazon.com/packages/AWSKendraFrontendServiceModel/blobs/c901da56e4d60392385f5f1bce8e5e783157abc2/--/model/index_management_operations.xml#L24
+        // Map Kendra Errors: https://docs.aws.amazon.com/kendra/latest/APIReference/API_UpdateIndex.html#API_UpdateIndex_Errors
         // to cfn errors.
         try {
             updateIndexResponse = proxyClient.injectCredentialsAndInvokeV2(updateIndexRequest, proxyClient.client()::updateIndex);
