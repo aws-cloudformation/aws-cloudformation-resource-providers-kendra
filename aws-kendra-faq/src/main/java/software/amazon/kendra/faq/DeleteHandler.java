@@ -2,14 +2,20 @@ package software.amazon.kendra.faq;
 
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.KendraClient;
+import software.amazon.awssdk.services.kendra.model.AccessDeniedException;
 import software.amazon.awssdk.services.kendra.model.ConflictException;
 import software.amazon.awssdk.services.kendra.model.DeleteFaqRequest;
 import software.amazon.awssdk.services.kendra.model.DeleteFaqResponse;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqRequest;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.kendra.model.ThrottlingException;
+import software.amazon.awssdk.services.kendra.model.ValidationException;
+import software.amazon.cloudformation.exceptions.CfnAccessDeniedException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
+import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
+import software.amazon.cloudformation.exceptions.CfnThrottlingException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -75,6 +81,12 @@ public class DeleteHandler extends BaseHandlerStd {
             throw new CfnNotFoundException(ResourceModel.TYPE_NAME, deleteFaqRequest.id(), e);
         } catch (ConflictException e) {
             throw new CfnResourceConflictException(e);
+        } catch (AccessDeniedException e) {
+            throw new CfnAccessDeniedException(DELETE_FAQ, e);
+        } catch (ThrottlingException e) {
+            throw new CfnThrottlingException(DELETE_FAQ, e);
+        } catch (ValidationException e) {
+            throw new CfnInvalidRequestException(e);
         } catch (final AwsServiceException e) {
             /*
              * While the handler contract states that the handler must always return a progress event,
@@ -92,8 +104,8 @@ public class DeleteHandler extends BaseHandlerStd {
     /**
      * If deletion of your resource requires some form of stabilization (e.g. propagation delay)
      * for more information -> https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-test-contract.html
-     * @param awsRequest the aws service request to delete a resource
-     * @param awsResponse the aws service response to delete a resource
+     * @param deleteFaqRequest the aws service request to delete a resource
+     * @param deleteFaqResponse the aws service response to delete a resource
      * @param proxyClient the aws service client to make the call
      * @param model resource model
      * @param callbackContext callback context

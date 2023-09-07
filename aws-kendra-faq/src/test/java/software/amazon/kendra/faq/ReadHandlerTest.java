@@ -2,9 +2,13 @@ package software.amazon.kendra.faq;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
+
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.KendraClient;
+import software.amazon.awssdk.services.kendra.model.AccessDeniedException;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqResponse;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
@@ -12,7 +16,13 @@ import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
 import software.amazon.awssdk.services.kendra.model.S3Path;
 import software.amazon.awssdk.services.kendra.model.Tag;
+import software.amazon.awssdk.services.kendra.model.ThrottlingException;
+import software.amazon.awssdk.services.kendra.model.ValidationException;
+import software.amazon.cloudformation.exceptions.CfnAccessDeniedException;
+import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
+import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
+import software.amazon.cloudformation.exceptions.CfnThrottlingException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -21,6 +31,9 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -136,16 +149,27 @@ public class ReadHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(1)).describeFaq(any(DescribeFaqRequest.class));
     }
 
-    @Test
-    public void handleRequest_NotFound() {
-        final ReadHandler handler = new ReadHandler(faqArnBuilder);
+    private static Stream<Arguments> testItThrowsExpectedCfnErrorArguments() {
+        return Stream.of(
+          Arguments.of(AwsServiceException.builder().build(), CfnGeneralServiceException.class),
+          Arguments.of(ValidationException.builder().build(), CfnInvalidRequestException.class),
+          Arguments.of(ResourceNotFoundException.builder().build(), CfnNotFoundException.class),
+          Arguments.of(ThrottlingException.builder().build(), CfnThrottlingException.class),
+          Arguments.of(AccessDeniedException.builder().build(), CfnAccessDeniedException.class)
+        );
+    }
 
-        String id = "id";
-        String indexId = "indexId";
+    @ParameterizedTest
+    @MethodSource("testItThrowsExpectedCfnErrorArguments")
+    public void testItThrowsExpectedCfnErrorForKendraDescribeIndexException(
+        AwsServiceException kendraServiceException,
+        Class<? extends RuntimeException> expectedCfnException
+    ) {
+        final ReadHandler handler = new ReadHandler(faqArnBuilder);
         final ResourceModel model = ResourceModel
                 .builder()
-                .indexId(indexId)
-                .id(id)
+                .indexId("indexId")
+                .id("id")
                 .build();
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
@@ -153,11 +177,9 @@ public class ReadHandlerTest extends AbstractTestBase {
                 .build();
 
         when(proxyClient.client().describeFaq(any(DescribeFaqRequest.class)))
-                .thenThrow(ResourceNotFoundException.builder().build());
+                .thenThrow(kendraServiceException);
 
-        assertThrows(CfnNotFoundException.class, () -> {
-            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
-        });
-
+        assertThrows(expectedCfnException, () -> handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger));
+        verify(proxyClient.client(), times(1)).describeFaq(any(DescribeFaqRequest.class));
     }
 }

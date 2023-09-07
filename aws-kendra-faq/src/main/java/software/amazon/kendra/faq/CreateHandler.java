@@ -2,17 +2,25 @@ package software.amazon.kendra.faq;
 
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.KendraClient;
+import software.amazon.awssdk.services.kendra.model.AccessDeniedException;
 import software.amazon.awssdk.services.kendra.model.ConflictException;
 import software.amazon.awssdk.services.kendra.model.CreateFaqRequest;
 import software.amazon.awssdk.services.kendra.model.CreateFaqResponse;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqResponse;
 import software.amazon.awssdk.services.kendra.model.FaqStatus;
+import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.kendra.model.ServiceQuotaExceededException;
+import software.amazon.awssdk.services.kendra.model.ThrottlingException;
 import software.amazon.awssdk.services.kendra.model.ValidationException;
+import software.amazon.cloudformation.exceptions.CfnAccessDeniedException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
+import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnNotStabilizedException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
+import software.amazon.cloudformation.exceptions.CfnServiceLimitExceededException;
+import software.amazon.cloudformation.exceptions.CfnThrottlingException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -30,7 +38,7 @@ public class CreateHandler extends BaseHandlerStd {
 
     private Logger logger;
 
-    private FaqArnBuilder faqArnBuilder;
+    private final FaqArnBuilder faqArnBuilder;
 
     public CreateHandler() {
         super();
@@ -101,7 +109,7 @@ public class CreateHandler extends BaseHandlerStd {
     /**
      * Implement client invocation of the create request through the proxyClient, which is already initialised with
      * caller credentials, correct region and retry settings
-     * @param awsRequest the aws service request to create a resource
+     * @param createFaqRequest the aws service request to create a resource
      * @param proxyClient the aws service client to make the call
      * @return awsResponse create resource response
      */
@@ -115,6 +123,14 @@ public class CreateHandler extends BaseHandlerStd {
             throw new CfnInvalidRequestException(e.getMessage(), e);
         } catch (ConflictException e) {
             throw new CfnResourceConflictException(e);
+        } catch (ResourceNotFoundException e) {
+            throw new CfnNotFoundException(e);
+        } catch (ServiceQuotaExceededException e) {
+            throw new CfnServiceLimitExceededException(ResourceModel.TYPE_NAME, e.getMessage(), e.getCause());
+        } catch (AccessDeniedException e) {
+            throw new CfnAccessDeniedException(CREATE_FAQ, e);
+        } catch (ThrottlingException e) {
+            throw new CfnThrottlingException(CREATE_FAQ, e);
         } catch (final AwsServiceException e) {
             /*
              * While the handler contract states that the handler must always return a progress event,

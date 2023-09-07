@@ -3,14 +3,20 @@ package software.amazon.kendra.faq;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 
 import software.amazon.awssdk.services.kendra.KendraClient;
+import software.amazon.awssdk.services.kendra.model.AccessDeniedException;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqResponse;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.kendra.model.ResourceInUseException;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.kendra.model.ThrottlingException;
+import software.amazon.awssdk.services.kendra.model.ValidationException;
+import software.amazon.cloudformation.exceptions.CfnAccessDeniedException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
+import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
+import software.amazon.cloudformation.exceptions.CfnThrottlingException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -64,7 +70,7 @@ public class ReadHandler extends BaseHandlerStd {
     /**
      * Implement client invocation of the read request through the proxyClient, which is already initialised with
      * caller credentials, correct region and retry settings
-     * @param awsRequest the aws service request to describe a resource
+     * @param describeFaqRequest the aws service request to describe a resource
      * @param proxyClient the aws service client to make the call
      * @return describe resource response
      */
@@ -77,6 +83,12 @@ public class ReadHandler extends BaseHandlerStd {
                     describeFaqRequest, proxyClient.client()::describeFaq);
         } catch (ResourceNotFoundException e) {
             throw new CfnNotFoundException(ResourceModel.TYPE_NAME, describeFaqRequest.id(), e);
+        } catch (ValidationException e) {
+            throw new CfnInvalidRequestException(e);
+        } catch (AccessDeniedException e) {
+            throw new CfnAccessDeniedException(DESCRIBE_FAQ, e);
+        } catch (ThrottlingException e) {
+            throw new CfnThrottlingException(DESCRIBE_FAQ, e);
         } catch (final AwsServiceException e) { // ResourceNotFoundException
             /*
              * While the handler contract states that the handler must always return a progress event,

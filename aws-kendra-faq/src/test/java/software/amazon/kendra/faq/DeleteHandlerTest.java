@@ -1,16 +1,26 @@
 package software.amazon.kendra.faq;
 
 import java.time.Duration;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.KendraClient;
+import software.amazon.awssdk.services.kendra.model.AccessDeniedException;
+import software.amazon.awssdk.services.kendra.model.ConflictException;
 import software.amazon.awssdk.services.kendra.model.DeleteFaqRequest;
 import software.amazon.awssdk.services.kendra.model.DeleteFaqResponse;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeFaqResponse;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.kendra.model.ThrottlingException;
+import software.amazon.awssdk.services.kendra.model.ValidationException;
+import software.amazon.cloudformation.exceptions.CfnAccessDeniedException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
+import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
+import software.amazon.cloudformation.exceptions.CfnNotFoundException;
+import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
+import software.amazon.cloudformation.exceptions.CfnThrottlingException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -19,6 +29,9 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -94,16 +107,28 @@ public class DeleteHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(2)).describeFaq(any(DescribeFaqRequest.class));
     }
 
-    @Test
-    public void handleRequest_ServiceError() {
-        final DeleteHandler handler = new DeleteHandler();
+    private static Stream<Arguments> testItThrowsExpectedCfnErrorArguments() {
+        return Stream.of(
+            Arguments.of(AwsServiceException.builder().build(), CfnGeneralServiceException.class),
+            Arguments.of(ResourceNotFoundException.builder().build(), CfnNotFoundException.class),
+            Arguments.of(ConflictException.builder().build(), CfnResourceConflictException.class),
+            Arguments.of(AccessDeniedException.builder().build(), CfnAccessDeniedException.class),
+            Arguments.of(ThrottlingException.builder().build(), CfnThrottlingException.class),
+            Arguments.of(ValidationException.builder().build(), CfnInvalidRequestException.class)
+        );
+    }
 
-        String indexId = "indexId";
-        String id = "id";
+    @ParameterizedTest
+    @MethodSource("testItThrowsExpectedCfnErrorArguments")
+    public void testItThrowsExpectedCfnErrorForDeleteFaqKendraException(
+        AwsServiceException kendraSvcException,
+        Class<? extends RuntimeException> expectedCfnError
+    ) {
+        final DeleteHandler handler = new DeleteHandler();
         final ResourceModel model = ResourceModel
                 .builder()
-                .id(id)
-                .indexId(indexId)
+                .id("id")
+                .indexId("indexId")
                 .build();
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
@@ -111,10 +136,10 @@ public class DeleteHandlerTest extends AbstractTestBase {
                 .build();
 
         when(proxyClient.client().deleteFaq(any(DeleteFaqRequest.class)))
-                .thenThrow(AwsServiceException.builder().build());
+                .thenThrow(kendraSvcException);
 
-        assertThrows(CfnGeneralServiceException.class, () -> {
-            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
-        });
+        assertThrows(expectedCfnError, () -> handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger));
+        verify(proxyClient.client(), times(1)).deleteFaq(any(DeleteFaqRequest.class));
+        verify(proxyClient.client(), times(0)).describeFaq(any(DescribeFaqRequest.class));
     }
 }
