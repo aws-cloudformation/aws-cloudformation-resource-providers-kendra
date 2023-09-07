@@ -2,14 +2,18 @@ package software.amazon.kendra.index;
 
 import software.amazon.awssdk.services.kendra.KendraClient;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.services.kendra.model.AccessDeniedException;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.kendra.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.kendra.model.ResourceInUseException;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.kendra.model.ThrottlingException;
+import software.amazon.cloudformation.exceptions.CfnAccessDeniedException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
+import software.amazon.cloudformation.exceptions.CfnThrottlingException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
@@ -49,10 +53,13 @@ public class ReadHandler extends BaseHandlerStd {
         final DescribeIndexRequest describeIndexRequest = Translator.translateToReadRequest(model);
         DescribeIndexResponse describeIndexResponse;
         try {
-            describeIndexResponse = proxyClient.injectCredentialsAndInvokeV2(
-                    describeIndexRequest, proxyClient.client()::describeIndex);
+            describeIndexResponse = proxyClient.injectCredentialsAndInvokeV2(describeIndexRequest, proxyClient.client()::describeIndex);
         } catch (ResourceNotFoundException e) {
             throw new CfnNotFoundException(ResourceModel.TYPE_NAME, describeIndexRequest.id(), e);
+        } catch (AccessDeniedException e) {
+            throw new CfnAccessDeniedException(DESCRIBE_INDEX, e);
+        } catch (ThrottlingException e) {
+            throw new CfnThrottlingException(DESCRIBE_INDEX, e);
         } catch (final AwsServiceException e) { // ResourceNotFoundException
             /*
              * While the handler contract states that the handler must always return a progress event,

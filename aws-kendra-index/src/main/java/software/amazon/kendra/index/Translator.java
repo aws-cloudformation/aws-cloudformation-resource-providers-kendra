@@ -299,9 +299,9 @@ public class Translator {
       sdkRelevanceBuilder.importance(modelRelevance.getImportance());
       sdkRelevanceBuilder.duration(modelRelevance.getDuration());
       sdkRelevanceBuilder.rankOrder(modelRelevance.getRankOrder());
-      if (modelRelevance.getValueImportanceItems() != null) {
-        List<String> keys = modelRelevance.getValueImportanceItems().stream().map(x -> x.getKey()).collect(Collectors.toList());
-        Set<String> keysDeduplicated = keys.stream().collect(Collectors.toSet());
+      if (modelRelevance.getValueImportanceItems() != null && !modelRelevance.getValueImportanceItems().isEmpty()) {
+        List<String> keys = modelRelevance.getValueImportanceItems().stream().map(ValueImportanceItem::getKey).collect(Collectors.toList());
+        Set<String> keysDeduplicated = new HashSet<>(keys);
         if (keys.size() != keysDeduplicated.size()) {
           throw new TranslatorValidationException("ValueImportanceItems can not contain duplicate keys.");
         }
