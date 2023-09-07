@@ -2,14 +2,20 @@ package software.amazon.kendra.datasource;
 
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.kendra.KendraClient;
+import software.amazon.awssdk.services.kendra.model.AccessDeniedException;
 import software.amazon.awssdk.services.kendra.model.ConflictException;
 import software.amazon.awssdk.services.kendra.model.DeleteDataSourceRequest;
 import software.amazon.awssdk.services.kendra.model.DeleteDataSourceResponse;
 import software.amazon.awssdk.services.kendra.model.DescribeDataSourceRequest;
 import software.amazon.awssdk.services.kendra.model.ResourceNotFoundException;
+import software.amazon.awssdk.services.kendra.model.ThrottlingException;
+import software.amazon.awssdk.services.kendra.model.ValidationException;
+import software.amazon.cloudformation.exceptions.CfnAccessDeniedException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
+import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
 import software.amazon.cloudformation.exceptions.CfnNotFoundException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
+import software.amazon.cloudformation.exceptions.CfnThrottlingException;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Delay;
 import software.amazon.cloudformation.proxy.Logger;
@@ -35,7 +41,7 @@ public class DeleteHandler extends BaseHandlerStd {
 
     private Logger logger;
 
-    private Delay delay;
+    private final Delay delay;
 
     public DeleteHandler() {
         super();
@@ -105,6 +111,12 @@ public class DeleteHandler extends BaseHandlerStd {
             throw new CfnNotFoundException(ResourceModel.TYPE_NAME, deleteDataSourceRequest.id(), e);
         } catch (ConflictException e) {
             throw new CfnResourceConflictException(e);
+        } catch (AccessDeniedException e) {
+            throw new CfnAccessDeniedException(DELETE_DATASOURCE, e);
+        } catch (ValidationException e) {
+            throw new CfnInvalidRequestException(e);
+        } catch (ThrottlingException e) {
+            throw new CfnThrottlingException(DELETE_DATASOURCE, e);
         } catch (final AwsServiceException e) {
             /*
              * While the handler contract states that the handler must always return a progress event,
