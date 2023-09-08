@@ -142,7 +142,25 @@ public class TranslatorTest {
         assertThat(createDataSourceRequest.indexId()).isEqualTo(indexId);
         assertThat(createDataSourceRequest.tags().size()).isEqualTo(1);
         assertThat(createDataSourceRequest.tags().get(0).key()).isEqualTo("key");
+        assertThat(createDataSourceRequest.languageCode()).isNull();
         assertThat(createDataSourceRequest.tags().get(0).value()).isEqualTo("value");
+    }
+
+    @Test
+    void testTranslateToCreateRequest_WithLanguageCode() {
+        String indexId = "indexId";
+        ResourceModel resourceModel = ResourceModel
+            .builder()
+            .indexId(indexId)
+            .tags(Arrays.asList(Tag.builder().key("key").value("value").build()))
+            .languageCode("de")
+            .build();
+        CreateDataSourceRequest createDataSourceRequest = Translator.translateToCreateRequest(resourceModel);
+        assertThat(createDataSourceRequest.indexId()).isEqualTo(indexId);
+        assertThat(createDataSourceRequest.tags().size()).isEqualTo(1);
+        assertThat(createDataSourceRequest.tags().get(0).key()).isEqualTo("key");
+        assertThat(createDataSourceRequest.tags().get(0).value()).isEqualTo("value");
+        assertThat(createDataSourceRequest.languageCode()).isEqualTo("de");
     }
 
     @Test
@@ -153,6 +171,7 @@ public class TranslatorTest {
                 .builder()
                 .id(id)
                 .indexId(indexId)
+                .languageCode("de")
                 .description("description")
                 .build();
         UpdateDataSourceRequest updateDataSourceRequest = Translator.translateToUpdateRequest(resourceModel);
@@ -162,6 +181,7 @@ public class TranslatorTest {
         assertThat(updateDataSourceRequest.name()).isEqualTo(null);
         assertThat(updateDataSourceRequest.roleArn()).isEqualTo(null);
         assertThat(updateDataSourceRequest.schedule()).isEqualTo(null);
+        assertThat(updateDataSourceRequest.languageCode()).isEqualTo("de");
         assertThat(updateDataSourceRequest.configuration())
                 .isEqualTo(null);
     }
@@ -182,6 +202,7 @@ public class TranslatorTest {
         assertThat(updateDataSourceRequest.name()).isEqualTo(null);
         assertThat(updateDataSourceRequest.roleArn()).isEqualTo(null);
         assertThat(updateDataSourceRequest.schedule()).isEqualTo(null);
+        assertThat(updateDataSourceRequest.languageCode()).isNull();
         assertThat(updateDataSourceRequest.configuration())
                 .isEqualTo(null);
     }

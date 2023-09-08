@@ -58,6 +58,7 @@ public class Translator {
             .description(model.getDescription())
             .schedule(model.getSchedule())
             .roleArn(model.getRoleArn())
+            .languageCode(model.getLanguageCode())
             .customDocumentEnrichmentConfiguration(CustomDocumentEnrichmentConfigurationConverter
                     .toSdkCustomDocumentEnrichmentConfiguration(model.getCustomDocumentEnrichmentConfiguration()));
     if (model.getTags() != null && !model.getTags().isEmpty()) {
@@ -99,6 +100,7 @@ public class Translator {
             .roleArn(describeDataSourceResponse.roleArn())
             .schedule(describeDataSourceResponse.schedule())
             .type(describeDataSourceResponse.typeAsString())
+            .languageCode(describeDataSourceResponse.languageCode())
             .dataSourceConfiguration(toModelDataSourceConfiguration(describeDataSourceResponse.configuration(),
                     describeDataSourceResponse.typeAsString()))
             .customDocumentEnrichmentConfiguration(CustomDocumentEnrichmentConfigurationConverter
@@ -139,6 +141,7 @@ public class Translator {
             .indexId(model.getIndexId())
             .roleArn(roleArn)
             .name(name)
+            .languageCode(model.getLanguageCode())
             .description(description)
             .configuration(dataSourceConfiguration)
             .schedule(schedule)
