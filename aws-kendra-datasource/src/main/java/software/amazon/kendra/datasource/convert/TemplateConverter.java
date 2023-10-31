@@ -1,5 +1,9 @@
 package software.amazon.kendra.datasource.convert;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import software.amazon.awssdk.core.document.Document;
@@ -18,7 +22,7 @@ public class TemplateConverter {
             return null;
         }
         return software.amazon.awssdk.services.kendra.model.TemplateConfiguration.builder()
-                .template(builder.fromJson(model.getTemplate(), Document.class))
+                .template(builder.fromJson(builder.toJson(model.getTemplate()), Document.class))
                 .build();
     }
 
@@ -29,12 +33,13 @@ public class TemplateConverter {
                 .build();
     }
 
+    @SuppressWarnings("unchecked") 
     private static TemplateConfiguration toModel(software.amazon.awssdk.services.kendra.model.TemplateConfiguration sdk) {
         if (sdk == null) {
             return null;
         }
         return TemplateConfiguration.builder()
-                .template(builder.toJson(sdk.template(), Document.class))
+                .template(builder.fromJson(builder.toJson(sdk.template()), Map.class))
                 .build();
     }
 }
