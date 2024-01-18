@@ -42,6 +42,7 @@ class TranslatorTest {
                 .s3Path(s3Path)
                 .roleArn(roleArn)
                 .tags(Arrays.asList(Tag.builder().key(tagKey).value(tagValue).build()))
+                .languageCode("de")
                 .build();
 
         CreateFaqRequest createFaqRequest = CreateFaqRequest
@@ -56,6 +57,7 @@ class TranslatorTest {
                         .bucket(s3Bucket)
                         .build())
                 .roleArn(roleArn)
+                .languageCode("de")
                 .tags(Arrays.asList(software.amazon.awssdk.services.kendra.model.Tag
                         .builder().key(tagKey).value(tagValue).build()))
                 .build();
