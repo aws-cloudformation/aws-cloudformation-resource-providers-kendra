@@ -2,7 +2,7 @@
     "artifact_type": "RESOURCE",
     "typeName": "AWS::Kendra::FeaturedResultsSet",
     "language": "java",
-    "runtime": "java8",
+    "runtime": "java8.al2",
     "entrypoint": "software.amazon.kendra.featuredresultsset.HandlerWrapper::handleRequest",
     "testEntrypoint": "software.amazon.kendra.featuredresultsset.HandlerWrapper::testEntrypoint",
     "settings": {
@@ -24,5 +24,6 @@
         "codegen_template_path": "guided_aws",
         "protocolVersion": "2.0.0"
     },
+    "logProcessorEnabled": "true",
     "executableEntrypoint": "software.amazon.kendra.featuredresultsset.HandlerWrapperExecutable"
 }
