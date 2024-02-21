@@ -2,7 +2,7 @@
     "artifact_type": "RESOURCE",
     "typeName": "AWS::Kendra::DataSource",
     "language": "java",
-    "runtime": "java8",
+    "runtime": "java8.al2",
     "entrypoint": "software.amazon.kendra.datasource.HandlerWrapper::handleRequest",
     "testEntrypoint": "software.amazon.kendra.datasource.HandlerWrapper::testEntrypoint",
     "settings": {

@@ -2,7 +2,7 @@
     "artifact_type": "RESOURCE",
     "typeName": "AWS::Kendra::Index",
     "language": "java",
-    "runtime": "java8",
+    "runtime": "java8.al2",
     "entrypoint": "software.amazon.kendra.index.HandlerWrapper::handleRequest",
     "testEntrypoint": "software.amazon.kendra.index.HandlerWrapper::testEntrypoint",
     "settings": {
