@@ -75,5 +75,9 @@
     "isCrawlCommunityTopic": "true",
     "isCrawlCommunityPost": "true",
     "isCrawlCommunityPostComment": "true"
-  }
+  },
+  "booleanValue": true,
+  "numberValue": 1.23,
+  "integerValue": 123,
+  "nullValue": null
 }
