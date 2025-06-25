@@ -5,6 +5,7 @@ import software.amazon.awssdk.services.kendra.model.CreateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DeleteIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
 import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
+import software.amazon.awssdk.services.kendra.model.DocumentAttributeValueType;
 import software.amazon.awssdk.services.kendra.model.DocumentMetadataConfiguration;
 import software.amazon.awssdk.services.kendra.model.IndexEdition;
 import software.amazon.awssdk.services.kendra.model.Relevance;
@@ -344,6 +345,10 @@ public class Translator {
     software.amazon.kendra.index.Relevance modelRelevance =
             translateFromSdkRelevance(sdk.relevance());
     if (modelRelevance != null) {
+      // set false for freshness if it's null. Freshness only apply for DATE_VALUE
+      if (modelRelevance.getFreshness() == null && sdk.type() == DocumentAttributeValueType.DATE_VALUE) {
+        modelRelevance.setFreshness(false);
+      }
       model.relevance(modelRelevance);
     }
     software.amazon.kendra.index.Search modelSearch = translateFromSdkSearch(sdk.search());

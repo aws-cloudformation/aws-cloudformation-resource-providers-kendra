@@ -16,5 +16,9 @@
         "protocolVersion": "2.0.0"
     },
     "logProcessorEnabled": "true",
-    "executableEntrypoint": "software.amazon.kendra.datasource.HandlerWrapperExecutable"
+    "executableEntrypoint": "software.amazon.kendra.datasource.HandlerWrapperExecutable",
+    "contractSettings": {
+        "MaxConcurrentTestCase": 10
+    },
+    "canarySettings": {}
 }

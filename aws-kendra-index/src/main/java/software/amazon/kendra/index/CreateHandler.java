@@ -6,9 +6,6 @@ import software.amazon.awssdk.services.kendra.model.ConflictException;
 import software.amazon.awssdk.services.kendra.model.AccessDeniedException;
 import software.amazon.awssdk.services.kendra.model.CreateIndexRequest;
 import software.amazon.awssdk.services.kendra.model.CreateIndexResponse;
-import software.amazon.awssdk.services.kendra.model.DescribeIndexRequest;
-import software.amazon.awssdk.services.kendra.model.DescribeIndexResponse;
-import software.amazon.awssdk.services.kendra.model.IndexStatus;
 import software.amazon.awssdk.services.kendra.model.ServiceQuotaExceededException;
 import software.amazon.awssdk.services.kendra.model.ThrottlingException;
 import software.amazon.awssdk.services.kendra.model.UpdateIndexRequest;
@@ -17,7 +14,6 @@ import software.amazon.awssdk.services.kendra.model.ValidationException;
 import software.amazon.cloudformation.exceptions.CfnAccessDeniedException;
 import software.amazon.cloudformation.exceptions.CfnGeneralServiceException;
 import software.amazon.cloudformation.exceptions.CfnInvalidRequestException;
-import software.amazon.cloudformation.exceptions.CfnNotStabilizedException;
 import software.amazon.cloudformation.exceptions.CfnResourceConflictException;
 import software.amazon.cloudformation.exceptions.CfnServiceLimitExceededException;
 import software.amazon.cloudformation.exceptions.CfnThrottlingException;
@@ -96,7 +92,7 @@ public class CreateHandler extends BaseHandlerStd {
                                 .done(this::setId)
                 )
                 // stabilize
-                .then(progress -> stabilize(proxy, proxyClient, progress, "AWS-Kendra-Index::PostCreateStabilize"))
+                .then(progress -> stabilize(request, proxy, proxyClient, progress, "AWS-Kendra-Index::PostCreateStabilize"))
                 .then(progress ->
                         // If your resource is provisioned through multiple API calls, you will need to apply each subsequent update
                         // STEP 3.0 [initialize a proxy context]
@@ -106,7 +102,7 @@ public class CreateHandler extends BaseHandlerStd {
                                 .progress()
                 )
                 // stabilize again because VCU changes can cause the index to enter UPDATING state
-                .then(progress -> stabilize(proxy, proxyClient, progress, "AWS-Kendra-Index::PostCreateUpdateStabilize"))
+                .then(progress -> stabilize(request, proxy, proxyClient, progress, "AWS-Kendra-Index::PostCreateUpdateStabilize"))
                 .then(progress -> new ReadHandler(indexArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
     }
 
@@ -205,31 +201,17 @@ public class CreateHandler extends BaseHandlerStd {
     }
 
     private ProgressEvent<ResourceModel, CallbackContext> stabilize(
+            final ResourceHandlerRequest<ResourceModel> resourceHandlerRequest,
             final AmazonWebServicesClientProxy proxy,
             final ProxyClient<KendraClient> proxyClient,
             final ProgressEvent<ResourceModel, CallbackContext> progress,
-            String callGraph) {
-        return proxy.initiate(callGraph, proxyClient, progress.getResourceModel(),
-                progress.getCallbackContext())
+            final String callGraph) {
+        return proxy.initiate(callGraph, proxyClient, progress.getResourceModel(), progress.getCallbackContext())
                 .translateToServiceRequest(Function.identity())
                 .backoffDelay(delay)
                 .makeServiceCall(EMPTY_CALL)
-                .stabilize((request, response, proxyInvocation, model, callbackContext) ->
-                        isStabilized(proxyInvocation, model)).progress();
-    }
-
-    private boolean isStabilized(final ProxyClient<KendraClient> proxyClient, final ResourceModel model) {
-        DescribeIndexRequest describeIndexRequest = DescribeIndexRequest.builder()
-                .id(model.getId())
-                .build();
-        DescribeIndexResponse describeIndexResponse = proxyClient.injectCredentialsAndInvokeV2(describeIndexRequest,
-                proxyClient.client()::describeIndex);
-        IndexStatus indexStatus = describeIndexResponse.status();
-        if (indexStatus.equals(IndexStatus.FAILED)) {
-            throw new CfnNotStabilizedException(ResourceModel.TYPE_NAME, model.getId());
-        }
-        boolean stabilized = indexStatus.equals(IndexStatus.ACTIVE);
-        logger.log(String.format("%s [%s] create has stabilized: %s", ResourceModel.TYPE_NAME, model.getPrimaryIdentifier(), stabilized));
-        return stabilized;
+                .stabilize((request, response, proxyInvocation, model, callbackContext) -> isCreatingOrUpdatingStable(
+                    CREATE_INDEX, resourceHandlerRequest, proxyClient, request, logger
+                )).progress();
     }
 }

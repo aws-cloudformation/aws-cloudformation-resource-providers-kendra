@@ -58,6 +58,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 
+import com.google.common.collect.ImmutableList;
+
 @ExtendWith(MockitoExtension.class)
 public class CreateHandlerTest extends AbstractTestBase {
 
@@ -337,6 +339,43 @@ public class CreateHandlerTest extends AbstractTestBase {
     }
 
     @Test
+    public void handleRequest_CreateIndexFailedAsynchronouslyWithMessage() {
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder, testDelay);
+
+        String name = "testName";
+        String roleArn = "testRoleArn";
+        String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
+        final ResourceModel model = ResourceModel
+            .builder()
+            .name(name)
+            .roleArn(roleArn)
+            .edition(indexEdition)
+            .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+            .desiredResourceState(model)
+            .build();
+
+        String id = "testId";
+        when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
+            .thenReturn(CreateIndexResponse.builder().id(id).build());
+        when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
+            .thenReturn(DescribeIndexResponse.builder()
+                .id(id)
+                .name(name)
+                .roleArn(roleArn)
+                .edition(indexEdition)
+                .errorMessage("Err, there is a problem with this config.")
+                .status(IndexStatus.FAILED.toString())
+                .build());
+
+        Exception exception = assertThrows(CfnNotStabilizedException.class, () -> {
+            handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger);
+        });
+        assertThat(exception).hasMessage("Err, there is a problem with this config.");
+    }
+
+    @Test
     public void handleRequest_FailWith_ConflictException() {
         final CreateHandler handler = new CreateHandler(testIndexArnBuilder, testDelay);
 
@@ -541,6 +580,47 @@ public class CreateHandlerTest extends AbstractTestBase {
         verify(proxyClient.client(), times(1)).describeIndex(any(DescribeIndexRequest.class));
         verify(proxyClient.client(), times(0)).listTagsForResource(any(ListTagsForResourceRequest.class));
         verify(proxyClient.client(), times(1)).updateIndex(any(UpdateIndexRequest.class));
+    }
+
+    @Test
+    public void handleRequest_PostCreateUpdateIndexThrowsTranslatorValidatorError() {
+        final CreateHandler handler = new CreateHandler(testIndexArnBuilder, testDelay);
+
+        String roleArn = "testRoleArn";
+        String indexEdition = IndexEdition.ENTERPRISE_EDITION.toString();
+        final ResourceModel model = ResourceModel
+            .builder()
+            .roleArn(roleArn)
+            .edition(indexEdition)
+            .documentMetadataConfigurations(ImmutableList.of(DocumentMetadataConfiguration.builder()
+                    .relevance(Relevance.builder()
+                        .valueImportanceItems(ImmutableList.of(
+                            ValueImportanceItem.builder()
+                                .key("dup1")
+                                .build(),
+                            ValueImportanceItem.builder()
+                                .key("dup1")
+                                .build()
+                        ))
+                    .build())
+                .build()))
+            .build();
+
+        final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
+            .desiredResourceState(model)
+            .build();
+        String id = "testId";
+        when(proxyClient.client().createIndex(any(CreateIndexRequest.class)))
+            .thenReturn(CreateIndexResponse.builder().id(id).build());
+        when(proxyClient.client().describeIndex(any(DescribeIndexRequest.class)))
+            .thenReturn(DescribeIndexResponse.builder()
+                .id(id)
+                .roleArn(roleArn)
+                .edition(indexEdition)
+                .status(IndexStatus.ACTIVE.toString())
+                .build());
+        assertThatThrownBy(() -> handler.handleRequest(proxy, request, new CallbackContext(), proxyClient, logger))
+            .isInstanceOf(CfnInvalidRequestException.class);
     }
 
     @Test
