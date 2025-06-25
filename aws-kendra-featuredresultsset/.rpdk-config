@@ -25,5 +25,7 @@
         "protocolVersion": "2.0.0"
     },
     "logProcessorEnabled": "true",
-    "executableEntrypoint": "software.amazon.kendra.featuredresultsset.HandlerWrapperExecutable"
+    "executableEntrypoint": "software.amazon.kendra.featuredresultsset.HandlerWrapperExecutable",
+    "contractSettings": {},
+    "canarySettings": {}
 }

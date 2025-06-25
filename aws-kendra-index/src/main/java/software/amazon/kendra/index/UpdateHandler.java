@@ -96,8 +96,11 @@ public class UpdateHandler extends BaseHandlerStd {
                                 .translateToServiceRequest(resourceModel -> translateToUpdateRequest(model, request.getPreviousResourceState()))
                                 .backoffDelay(delay)
                                 .makeServiceCall(this::updateIndex)
-                                .stabilize(this::stabilize)
-                                .progress())
+                                .stabilize((updateReq, updateRep, client, resourceModel, ctx) -> isCreatingOrUpdatingStable(
+                                    UPDATE_INDEX, request, proxyClient, resourceModel, logger)
+                                )
+                                .progress()
+                )
                 .then(progress -> updateTags(proxyClient, progress, request))
                 .then(progress -> new ReadHandler(indexArnBuilder).handleRequest(proxy, request, callbackContext, proxyClient, logger));
     }
@@ -120,24 +123,6 @@ public class UpdateHandler extends BaseHandlerStd {
             throw new CfnInvalidRequestException(e.getMessage(), e);
         }
     }
-
-    private boolean stabilize(
-            final UpdateIndexRequest updateIndexRequest,
-            final UpdateIndexResponse updateIndexResponse,
-            final ProxyClient<KendraClient> proxyClient,
-            final ResourceModel model,
-            final CallbackContext callbackContext) {
-        DescribeIndexRequest describeIndexRequest = DescribeIndexRequest.builder()
-                .id(model.getId())
-                .build();
-        DescribeIndexResponse describeIndexResponse = proxyClient.injectCredentialsAndInvokeV2(describeIndexRequest,
-                proxyClient.client()::describeIndex);
-        IndexStatus indexStatus = describeIndexResponse.status();
-        boolean stabilized = indexStatus.equals(IndexStatus.ACTIVE);
-        logger.log(String.format("%s [%s] update has stabilized: %s", ResourceModel.TYPE_NAME, model.getPrimaryIdentifier(), stabilized));
-        return stabilized;
-    }
-
     /**
      * Implement client invocation of the update request through the proxyClient, which is already initialised with
      * caller credentials, correct region and retry settings
