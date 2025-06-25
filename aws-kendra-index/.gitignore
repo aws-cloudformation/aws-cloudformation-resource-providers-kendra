@@ -22,3 +22,5 @@ rpdk.log
 # local testing file(s)
 overrides.json
 sam-tests/
+
+docs/
